@@ -1,3 +1,6 @@
+"""Generates the example results on the logistic map example
+"""
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision.transforms
@@ -69,6 +72,7 @@ class MaCo(torch.nn.Module):
 
         loss_hist = self.train_loss_history.copy()
         for epoch in tqdm(range(n_epochs), leave=False):
+            losses = []
             for i, batch in enumerate(loader):
                 q, target = batch
 
@@ -80,7 +84,9 @@ class MaCo(torch.nn.Module):
 
                 loss.backward()
                 self.optimizer.step()
-            loss_hist.append(loss.item())
+
+                losses.append(loss.item())
+            loss_hist.append(np.mean(losses))
         self.train_loss_history = loss_hist.copy()
         return loss_hist
 
@@ -163,7 +169,7 @@ def main():
     testset_size = 10
     validset_size = 10
 
-    n_epochs = 200
+    n_epochs = 4000
     batch_size = 2000
 
     # Load in data & preprocessing to pytorch
@@ -173,6 +179,7 @@ def main():
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs, ch_kwargs=coach_kwargs, device=device) for i in range(n_models)]
 
+    # Train models
     train_losses = []
     test_loss = []
     for i in tqdm(range(n_models)):
@@ -180,11 +187,20 @@ def main():
         test_loss += [models[i].test_loop(test_loader)]
     train_losses = np.array(train_losses).T
 
+    # Pick the best model on the test set
     ind_best_model = np.argmin(test_loss)
     best_model = models[ind_best_model]
 
+    # compute reconstruction on the validation set
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(valid_loader)
 
+    # Compute correlation for all models on validation set
+    r_reconst = []
+    r_predict = []
+    for model in tqdm(models):
+        preds = model.valid_loop(valid_loader)
+        r_predict += [np.corrcoef(preds[1], valid_loader[1][:, 0])[0, 1] ]
+        r_reconst += [np.corrcoef(preds[2], z_valid)[0, 1]]
 
     # Save out results
     res_dict = {'cc_pred': z_pred,
@@ -200,15 +216,12 @@ def main():
 
     df.to_csv('./resdata/mappercoach_res.csv')
     np.save('./resdata/learning_curves.npy', train_losses)
-
-
+    np.save('./resdata/test_loss.npy', test_loss)
+    torch.save(best_model, './resdata/best_model.pth')
+    with open('./resdata/models.pkl', 'wb') as f:
+        pickle.dump(models, f)
+    pd.DataFrame({'r_predict':r_predict, 'r_reconst':r_reconst}).to_csv('./resdata/r_values.csv')
     print(np.corrcoef(z_valid, z_pred))
-
-    plt.figure()
-    plt.bar(range(len(test_loss)), test_loss)
-
-
-    plt.show()
 
 if __name__ == "__main__":
     main()
