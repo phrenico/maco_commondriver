@@ -10,6 +10,7 @@ from sklearn.cluster import KMeans
 
 plt.style.use('./figure_twocol_config.mplstyle')
 
+print("Generate Figure 6. (learnforcast.eps)")
 # Load data
 df = pd.read_csv('./resdata/mappercoach_res.csv')
 x_pred = df['x_pred'].values
@@ -27,13 +28,13 @@ ind_best_model = np.argmin(test_loss)
 
 # Compute correlations
 r = np.corrcoef(x_valid, x_pred, rowvar=False)[0, 1]
-print(r**2)
+# print(r**2)
 
 # cluster the endpoints of learning curves into 2 clusters
 nc = 2
 km = KMeans(n_clusters=nc, random_state=2)
 clusts = km.fit_predict(learnings[-1:, :].T)
-print(np.sum(clusts==0), np.sum(clusts==1))
+# print(np.sum(clusts==0), np.sum(clusts==1))
 
 #visualize reasults
 fig, axs = plt.subplots(1, 2)
@@ -94,3 +95,4 @@ ax3.set_ylabel('test loss')
 
 fig.savefig("./resfigure/learnforcast.eps", dpi=600)
 # plt.show()
+print('[OK]')

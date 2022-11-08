@@ -8,6 +8,9 @@ from scipy.stats import rankdata
 from scipy.stats import norm
 plt.style.use('./figure_onecol_config.mplstyle')
 
+
+
+print("Generate Figure 8. (mapper-maco.eps)")
 # Load Data
 rdf = pd.read_csv('./resdata/r_values.csv', index_col=0)
 rs = rdf.values
@@ -24,11 +27,11 @@ gm_model = GaussianMixture(n_components=nclust, random_state=0).fit(rsq[:, :1])
 gmres = gm_model.predict(rsq[:, :1])
 gmeans = gm_model.means_
 gcovs = gm_model.covariances_
-print(gmeans)
-print(gcovs)
+# print(gmeans)
+# print(gcovs)
 
 meta_r = np.corrcoef(rsq[gmres==1].T)
-print(meta_r)
+# print(meta_r)
 
 
 # Plot the coeficient of determinations of prediction and reconstruction against each other
@@ -54,8 +57,8 @@ for i in range(nclust):
 means = np.array(means)
 stdevs = np.array(stdevs)
 
-print('means', means)
-print('stdevs', stdevs)
+# print('means', means)
+# print('stdevs', stdevs)
 
 m = np.array([[axin_xlim[0], means[1, 0], means[1, 0]], [means[1, 1], means[1, 1], axin_ylim[0]]]).T
 
@@ -109,3 +112,4 @@ ax.indicate_inset_zoom(axin, edgecolor="black")
 plt.savefig("./resfigure/mapper-maco.eps")
 
 # plt.show()
+print('[OK]')

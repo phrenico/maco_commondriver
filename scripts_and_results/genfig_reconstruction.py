@@ -10,6 +10,8 @@ from sklearn.preprocessing import scale, minmax_scale
 
 plt.style.use('./figure_twocol_config.mplstyle')
 
+
+print("Generate Figure 7. (reconstruction.eps)")
 # Load data
 df = pd.read_csv('./resdata/mappercoach_res.csv')
 x_pred = df['x_pred'].values
@@ -22,7 +24,7 @@ learnings = np.load('./resdata/learning_curves.npy')
 
 # compute correlation
 rec_perform = np.corrcoef(cc_val[:], cc_pred[:])
-print(rec_perform)
+# print(rec_perform)
 
 cp = scale(cc_pred)
 c = scale(cc_val)
@@ -69,3 +71,4 @@ axs2[1].text(-0.22, 1.02, "B",
 fig2.savefig("./resfigure/reconstruction.eps")
 # fig2.savefig("./resfigure/reconstruction.png")
 # plt.show()
+print('[OK]')

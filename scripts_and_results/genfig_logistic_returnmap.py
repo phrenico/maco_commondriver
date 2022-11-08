@@ -30,6 +30,7 @@ def g(y, z, r=3.99, beta=0.2):
     '''
     return r * y *(1 - y - beta * z)
 
+print("Generate Figure 4. (logmap_returnmap.eps)")
 
 # 1. Compute returnmap for different values for z
 # 1.1. Define values of y and z to compute the returnmap on
@@ -82,5 +83,6 @@ ax0.set_xticks([0, 1])
 # fig.tight_layout(pad=0, w_pad=1, rect=[0, 0, 1, 1])
 
 fig.savefig('./resfigure/logmap_returnmap.eps')
-fig.savefig('./resfigure/logmap_returnmap.png')
+# fig.savefig('./resfigure/logmap_returnmap.png')
 # plt.show()
+print('[OK]')
