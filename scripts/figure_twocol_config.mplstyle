@@ -1,4 +1,4 @@
-figure.figsize : 6.69, 4.01
+figure.figsize : 6.69, 3.01
 figure.dpi: 600
 figure.autolayout: True
 

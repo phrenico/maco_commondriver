@@ -24,8 +24,6 @@ from scipy.stats import rankdata
 from functools import partial
 
 
-# @todo: fix the device to GPU-compatible test it
-# @todo: fix the parameter settings
 
 def get_mapper(n_in, n_h1, n_h2, n_out):
     mapper = Sequential(Linear(n_in, n_h1),
