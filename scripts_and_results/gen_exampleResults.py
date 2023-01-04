@@ -23,85 +23,11 @@ from scipy.signal import correlate, correlation_lags
 from scipy.stats import rankdata
 from functools import partial
 
+from src.network.maco import MaCo
 
-
-def get_mapper(n_in, n_h1, n_h2, n_out):
-    mapper = Sequential(Linear(n_in, n_h1),
-                        ReLU(),
-                        Linear(n_h1, n_h2),
-                        ReLU(),
-                        Linear(n_h2, n_out))
-    return mapper
-
-
-def get_coach(n_in, n_h1, n_out):
-    coach = Sequential(Linear(n_in, n_h1),
-                       ReLU(),
-                       Linear(n_h1, n_out))
-    return coach
-
-
-class MaCo(torch.nn.Module):
-    def __init__(self, Ex, Ey, Ez, mh_kwargs, ch_kwargs, device):
-        super().__init__()
-        self.mapper = get_mapper(n_in=Ey, n_out=Ez, **mh_kwargs)
-        self.coach_x = get_coach(Ex + Ez, n_out=1, **ch_kwargs)
-
-        self.Ex = Ex
-        self.Ey = Ey
-        self.Ez = Ez
-        self.mh_params = mh_kwargs
-        self.ch_params = ch_kwargs
-        self.train_loss_history = []
-        self.criterion = MSELoss()
-        self.device = device
-
-    def forward(self, q):
-        z = self.mapper.forward(q[:, self.Ex:self.Ex + self.Ey])
-        hz = relu(z)
-
-        mx = torch.cat((hz, q[:, :self.Ex]), axis=1)
-
-        pred = self.coach_x.forward(mx)
-        return pred, z, hz
-
-    def train_loop(self, loader, n_epochs, lr=1e-2):
-        self.optimizer = optim.Adam(self.parameters(), lr=lr)
-
-        loss_hist = self.train_loss_history.copy()
-        for epoch in tqdm(range(n_epochs), leave=False):
-            losses = []
-            for i, batch in enumerate(loader):
-                q, target = batch
-
-                self.optimizer.zero_grad()
-
-                pred, z, hz = self.forward(q.to(self.device))
-
-                loss = self.criterion(target.to(self.device), pred)
-
-                loss.backward()
-                self.optimizer.step()
-
-                losses.append(loss.item())
-            loss_hist.append(np.mean(losses))
-        self.train_loss_history = loss_hist.copy()
-        return loss_hist
-
-    def test_loop(self, loader):
-        q, target = loader
-        pred, z, hz = self.forward(q)
-        loss = self.criterion(target, pred).item()
-        return loss
-
-    def valid_loop(self, loader):
-        q, target = loader
-        pred, z, hz = self.forward(q)
-        loss = self.criterion(target, pred).item()
-        return loss, pred.squeeze().detach().numpy(), z.squeeze().detach().numpy(), hz.squeeze().detach().numpy()
 
 def load_data(batch_size, trainset_size, testset_size, validset_size):
-    data = pd.read_csv('../data/sampledata.csv', index_col=0).values
+    data = pd.read_csv('../data/logistic_1d_data.csv', index_col=0).values
     transform = transforms.Compose([transforms.ToTensor(),
                                     transforms.Normalize((0.5), (0.3)),
                                     torch.Tensor.float,
@@ -212,14 +138,15 @@ def main():
 
     df = pd.DataFrame(res_dict)
 
-    df.to_csv('./resdata/mappercoach_res.csv')
-    np.save('./resdata/learning_curves.npy', train_losses)
-    np.save('./resdata/test_loss.npy', test_loss)
-    torch.save(best_model, './resdata/best_model.pth')
-    with open('./resdata/models.pkl', 'wb') as f:
-        pickle.dump(models, f)
-    pd.DataFrame({'r_predict':r_predict, 'r_reconst':r_reconst}).to_csv('./resdata/r_values.csv')
-    print(np.corrcoef(z_valid, z_pred))
+    # # Save out the Results (uncomment to rewrite the current results)
+    # df.to_csv('./resdata/mappercoach_res.csv')
+    # np.save('./resdata/learning_curves.npy', train_losses)
+    # np.save('./resdata/test_loss.npy', test_loss)
+    # torch.save(best_model, './resdata/best_model.pth')
+    # with open('./resdata/models.pkl', 'wb') as f:
+    #     pickle.dump(models, f)
+    # pd.DataFrame({'r_predict':r_predict, 'r_reconst':r_reconst}).to_csv('./resdata/r_values.csv')
+    # print(np.corrcoef(z_valid, z_pred))
 
 if __name__ == "__main__":
     main()
