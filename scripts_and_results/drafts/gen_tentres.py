@@ -1,11 +1,20 @@
 """Generates the example results on the logistic map example
 """
-
+import pickle
 import numpy as np
+import matplotlib.pyplot as plt
+import torchvision.transforms
+
+from mpl_toolkits.mplot3d import Axes3D
 import pandas as pd
 
 import torch
+from torch.nn import Module, Sequential, Linear, ReLU, MSELoss, PReLU
+from torch import Tensor
 import torchvision.transforms as transforms
+from torch.nn.functional import relu
+import torch.optim as optim
+from torch.utils.data import random_split
 
 from tqdm import tqdm
 
@@ -15,10 +24,13 @@ from scipy.stats import rankdata
 from functools import partial
 
 from cdriver.network.maco import MaCo
+from cdriver.visuals.respics import learnforcast, pred_rec, reconstruction
+from scipy.stats import norm
 
 
-def load_data(batch_size, trainset_size, testset_size, validset_size):
-    data = pd.read_csv('../data/logistic_1d_data.csv', index_col=0).values
+
+def load_data(batch_size, trainset_size, testset_size, validset_size, data_fn):
+    data = pd.read_csv(data_fn, index_col=0).values
     transform = transforms.Compose([transforms.ToTensor(),
                                     transforms.Normalize((0.5), (0.3)),
                                     torch.Tensor.float,
@@ -67,7 +79,6 @@ def split_sets(data, trainset_size, testset_size, validset_size):
 
     return list(zip(*splitteds))
 
-
 def main():
     # Parameters
     dx = 1
@@ -78,7 +89,7 @@ def main():
     coach_kwargs = dict(n_h1=nh)
     device= torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    n_models = 50  # number of models to train
+    n_models = 10  # number of models to train
 
     trainset_size = 80
     testset_size = 10
@@ -86,10 +97,12 @@ def main():
 
     n_epochs = 4000
     batch_size = 2000
+    data_fn = '../../data/tent_1d_data.csv'
 
     # Load in data & preprocessing to pytorch
     train_loader, test_loader, valid_loader, z_valid = load_data(batch_size, trainset_size,
-                                                                 testset_size, validset_size)
+                                                                 testset_size, validset_size,
+                                                                 data_fn)
 
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs, ch_kwargs=coach_kwargs, device=device) for i in range(n_models)]
@@ -128,16 +141,26 @@ def main():
                 }
 
     df = pd.DataFrame(res_dict)
+    rdf = pd.DataFrame({'r_predict':r_predict, 'r_reconst':r_reconst})
 
-    # # Save out the Results (uncomment to rewrite the current results)
-    # df.to_csv('./resdata/mappercoach_res.csv')
-    # np.save('./resdata/learning_curves.npy', train_losses)
-    # np.save('./resdata/test_loss.npy', test_loss)
-    # torch.save(best_model, './resdata/best_model.pth')
-    # with open('./resdata/models.pkl', 'wb') as f:
-    #     pickle.dump(models, f)
-    # pd.DataFrame({'r_predict':r_predict, 'r_reconst':r_reconst}).to_csv('./resdata/r_values.csv')
-    # print(np.corrcoef(z_valid, z_pred))
+    # Save out the Results (uncomment to rewrite the current results)
+    save_path = './tentmap_res/'
+    df.to_csv(save_path+'mappercoach_res.csv')
+    np.save(save_path+'/learning_curves.npy', train_losses)
+    np.save(save_path+'test_loss.npy', test_loss)
+    torch.save(best_model, save_path+'best_model.pth')
+    with open(save_path+'/models.pkl', 'wb') as f:
+        pickle.dump(models, f)
+    rdf.to_csv(save_path+'r_values.csv')
+    print(np.corrcoef(z_valid, z_pred))
+
+    fig1 = learnforcast(df, train_losses, test_loss)
+    fig2 = reconstruction(df)
+    fig3 = pred_rec(rdf)
+    figs = [fig1, fig2, fig3]
+    [figs[i].savefig(save_path+'fig{}'.format(i+1), dpi=300) for i in range(len(figs))]
+
+    plt.show()
 
 if __name__ == "__main__":
     main()

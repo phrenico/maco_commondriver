@@ -5,8 +5,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import scale, minmax_scale
+from sklearn.preprocessing import minmax_scale
 from sklearn.cluster import KMeans
+from matplotlib.lines import Line2D
 
 plt.style.use('./figure_twocol_config.mplstyle')
 
@@ -66,7 +67,7 @@ ax2.set_xlim(0,1)
 ax2.set_ylim(0,1)
 
 
-from matplotlib.lines import Line2D
+
 custom_lines = [Line2D([0], [0], color=clust_cols[1], lw=2),
                 Line2D([0], [0], color=clust_cols[0], lw=2)]
 ax1.legend(custom_lines, ['cluster 1', 'cluster 2'], loc='lower left')

@@ -1,5 +1,5 @@
 import numpy as np
-from common import gen_ts, vec_reflect
+from .common import gen_ts, vec_reflect
 from pandas import DataFrame
 
 def tents(x, A):
