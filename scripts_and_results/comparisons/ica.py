@@ -52,7 +52,7 @@ if __name__=="__main__":
         maxcs.append(m)
 
     # Save results
-    df = save_results(fname='./ica_res.csv', r=maxcs, N=N, method='ica', dataset='logmap_fixed')
+    df = save_results(fname='./ica_res.csv', r=maxcs, N=N, method='ICA', dataset='logmap_fixed')
 
     #3. Plot results
     plt.figure()

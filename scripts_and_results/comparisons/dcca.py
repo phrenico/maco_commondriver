@@ -1,7 +1,7 @@
 """It's not running, use Google Colab in stead"""
 import numpy as np
 
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 from mvlearn.embed import DCCA
 import torch
@@ -17,7 +17,7 @@ torch.symeig = myfun
 if __name__ == "__main__":
     # 1. Generate data
     N = 50  # number of realizations
-    n = 20_00  # Length of time series
+    n = 20_000  # Length of time series
     rint = (3.8, 4.)  # interval to chose from the value of r parameter
     A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
     A = np.array([[1., 0., 0.],
@@ -67,6 +67,4 @@ if __name__ == "__main__":
         maxcs3.append(get_maxes(tau, c3)[1])
 
     # save out results
-    dcca_df = pd.DataFrame(np.array([range(N), maxcs3, N * ['dcca'], N * ['logistic_fixed']]).T,
-                           columns=['data_id', 'r', 'method', 'dataset'])
-    dcca_df.to_csv('./dcca_res.csv')
+    df = save_results(fname='./dcca_res.csv', r=maxcs3, N=N, method='DCCA', dataset='logmap_fixed')

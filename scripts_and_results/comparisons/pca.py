@@ -33,7 +33,7 @@ if __name__=="__main__":
     #2. Run PCA
     d_embed = 3
     maxcs = []
-    for i in range(N):
+    for i in tqdm(range(N)):
         X = time_delay_embedding(dataset[i][:, 1], delay=1, dimension=d_embed)
         Y = time_delay_embedding(dataset[i][:, 2], delay=1, dimension=d_embed)
         z = dataset[i][d_embed-1:, 0]
@@ -48,7 +48,7 @@ if __name__=="__main__":
         maxcs.append(get_maxes(*comp_ccorr(z_test, zpred[:, 0]))[1])
 
     # Save results
-    df = save_results(fname='./pca_res.csv', r=maxcs, N=N, method='pca', dataset='logmap_fixed')
+    df = save_results(fname='./pca_res.csv', r=maxcs, N=N, method='PCA', dataset='logmap_fixed')
 
     #3. Plot results
     plt.figure()

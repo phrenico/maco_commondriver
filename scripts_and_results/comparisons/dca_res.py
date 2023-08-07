@@ -1,14 +1,16 @@
+'''Run experiments with SFA
+
+'''
 import numpy as np
-
-from sklearn.cross_decomposition import CCA
-
-from data_generators import LogmapExpRunner, time_delay_embedding, comp_ccorr, get_maxes, save_results, train_test_split
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-import pandas as pd
+import dca
+# from dca import DynamicalComponentsAnalysis as
+DCA = dca.DynamicalComponentsAnalysis
+from data_generators import LogmapExpRunner, comp_ccorr, get_maxes, train_test_split, save_results, time_delay_embedding
 
-if __name__=="__main__":
+if __name__ == "__main__":
     # 1. Generate data
     N = 50  # number of realizations
     n = 20_000  # Length of time series
@@ -23,12 +25,8 @@ if __name__=="__main__":
                tqdm(range(N))]
     params = [LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=2, A=A, seed=i)[1] for i in range(N)]
 
-
     d_embed = 3
-
     maxcs = []
-    maxcs2 = []
-    maxcs3 = []
     for i in tqdm(range(N)):
         data = dataset[i]
 
@@ -37,22 +35,21 @@ if __name__=="__main__":
         Y = time_delay_embedding(data[:, 2], dimension=d_embed)
 
         X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
+        D_train = np.concatenate([X_train, Y_train], axis=1)
+        D_test = np.concatenate([X_test, Y_test], axis=1)
 
-        cca = CCA(n_components=1)
-        cca.fit(X_train, Y_train)
+        # 2. Run SFA
+        dca_model = DCA(d=1, T=5, n_init=10)
+        dca_model.fit(D_train)
+        zpred = dca_model.transform(D_test).squeeze()
 
-        zpred, zpred2 = cca.transform(X_test, Y_test)
-
-        tau, c = comp_ccorr(zpred[:, 0], z_test)
-        tau, c2 = comp_ccorr(zpred2[:, 0], z_test)
-        tau, c3 = comp_ccorr((zpred[:, 0] + zpred2[:, 0]) / 2, z_test)
-
+        tau, c = comp_ccorr(zpred, z_test)
         maxcs.append(get_maxes(tau, c)[1])
-        maxcs2.append(get_maxes(tau, c2)[1])
-        maxcs3.append(get_maxes(tau, c3)[1])
 
-# Save results
-df = save_results(fname='./cca_res.csv', r=maxcs3, N=N, method='CCA', dataset='logmap_fixed')
+    # Save results
+    df = save_results(fname='./dca_res.csv', r=maxcs, N=N, method='DCA', dataset='logmap_fixed')
 
-plt.hist(maxcs3)
-plt.show()
+    # 3. Plot results
+    plt.figure()
+    plt.hist(maxcs)
+    plt.show()
