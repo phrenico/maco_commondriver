@@ -56,36 +56,31 @@ class MaCo(torch.nn.Module):
         :return: preprocessed data
         """
         # print(type(x), type(y))
-        d_embed_x = self.Ex  # incomplete embedding for the variable to be predicted
+        d_embed_x = self.Ex + 1  # embedding for the variable to be predicted, the additional dim is for the target
         d_embed_y = self.Ey  # embedding for the other variable
         tau = self.preprocess_params['tau']  # embedding delay
-        predict_step_ahead = self.preprocess_params['step_ahead'] # number of steps ahead to be predicted
 
         # Crop to ensure the same length of the time series (and also causality)
-        target_crop = ( max(d_embed_x, d_embed_y) - 1 ) * tau + predict_step_ahead
         input_crop = (d_embed_y - d_embed_x) * tau
 
         # Define transforms
-        common_transform = transforms.Compose([transforms.Normalize((0), (1)),
+        common_transform = transforms.Compose([transforms.Normalize((0.5), (.3)),
                                                torch.Tensor.float,
                                                partial(torch.squeeze, axis=0)])
 
         y_transform = transforms.Compose([common_transform,
                                           TimeDelayEmbeddingTransform(d_embed_y, tau),
-                                          partial(cropper, location='first', n=-input_crop),
-                                          partial(cropper, location='last', n=predict_step_ahead)])
+                                          partial(cropper, location='first', n=-input_crop)])
 
-        x_transform = transforms.Compose([common_transform,
+        xt_transform = transforms.Compose([common_transform,
                                           TimeDelayEmbeddingTransform(d_embed_x, tau),
-                                          partial(cropper, location='first', n=input_crop-1),
-                                          partial(cropper, location='last', n=predict_step_ahead+1)])
-
-        target_transform = transforms.Compose([common_transform,
-                                               partial(cropper, location='first', n=target_crop)])
+                                          partial(cropper, location='first', n=input_crop)])
 
         y_transformed = y_transform(y)
-        x_transformed = x_transform(x)
-        target_transformed = target_transform(x)
+        xt_transformed = xt_transform(x)
+        x_transformed = xt_transformed[:, :-1]
+        target_transformed = xt_transformed[:, -1:]
+
         # print("shapes after tansforms:", x_transformed.shape, target_transformed.shape, y_transformed.shape)
         return x_transformed, target_transformed, y_transformed
 

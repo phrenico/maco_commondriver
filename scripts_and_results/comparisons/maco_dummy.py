@@ -98,7 +98,7 @@ params = [LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=2
 
 # 2. Apply MaCo to the datasets
 # define MaCo model
-n_epochs = 100
+n_epochs = 300
 n_models = 10
 dx = 1
 dy = 2
@@ -106,7 +106,7 @@ dz = 1
 nh = 20  # number of hidden units
 mapper_kwargs = dict(n_h1=nh, n_h2=nh)
 coach_kwargs = dict(n_h1=nh)
-preprocess_kwargs = dict(tau=1, step_ahead=1)
+preprocess_kwargs = dict(tau=1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 maxcs = []
@@ -115,7 +115,7 @@ for i in tqdm(range(N)):
 
     # print("original data shape:", data.shape)
 
-    train_loader, test_loader, _, z_test = get_loaders(data, batch_size=200, trainset_size=50,
+    train_loader, test_loader, _, z_test = get_loaders(data, batch_size=1000, trainset_size=50,
                                                        testset_size=50, validset_size=0)
 
 

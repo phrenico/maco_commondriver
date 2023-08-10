@@ -46,3 +46,40 @@ class TestTimeDelayEmbeddingTransform(TestCase):
         print(y_transformed)
         print(x_transformed)
         print(target_transformed)
+
+    def test_call2(self):
+        d_x = 1
+        d_embed_x = d_x + 1  # incomplete embedding for the variable to be predicted
+        d_embed_y = 2  # embedding for the other variable
+        tau = 1  # embedding delay
+        predict_step_ahead = 0  # number of steps ahead to be predicted
+        target_crop = (max(d_embed_x, d_embed_y)-1) * tau + predict_step_ahead  # number of samples to be cropped from the beginning of the time series
+        input_crop = (d_embed_y - d_embed_x) * tau
+
+        N = 5
+        x = np.arange(N).reshape([-1, 1]).astype(float)
+        y = np.arange(N).reshape([-1, 1]).astype(float)
+        common_transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0), (1)),
+                                        torch.Tensor.float,
+                                        partial(torch.squeeze, axis=0)])
+
+        y_transform = transforms.Compose([common_transform,
+                                          TimeDelayEmbeddingTransform(d_embed_y, tau),
+                                          partial(cropper, location='first', n=-input_crop)])
+
+        xt_transform = transforms.Compose([common_transform,
+                                          TimeDelayEmbeddingTransform(d_embed_x, tau),
+                                          partial(cropper, location='first', n=input_crop)])
+
+        y_transformed = y_transform(y)
+        transformed = xt_transform(x)
+        x_transformed = transformed[:, :-1]
+        target_transformed = transformed[:, -1:]
+
+
+
+        print(y_transformed.shape, x_transformed.shape, target_transformed.shape)
+        print(y_transformed)
+        print(x_transformed)
+        print(target_transformed)

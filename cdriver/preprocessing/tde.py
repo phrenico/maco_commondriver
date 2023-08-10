@@ -47,7 +47,7 @@ class TimeDelayEmbeddingTransform:
         :param x: Input time series tensor of shape (sequence_length,)
         :return: Embedded time series tensor of shape (sequence_length - (embedding_dim - 1) * delay, embedding_dim)
         """
-        seq_len = x.size(0)
+        seq_len = x.shape[0]
         embedded_seq_len = seq_len - (self.embedding_dim - 1) * self.delay
 
         embedded_series = torch.zeros(embedded_seq_len, self.embedding_dim)
