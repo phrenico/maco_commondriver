@@ -43,7 +43,7 @@ if __name__=="__main__":
 
         D = np.concatenate([X_train, Y_train], axis=1)
 
-        n_components = 3
+        n_components = 2
         model = FastICA(n_components=n_components).fit(D)
         zpred = model.transform(np.concatenate([X_test, Y_test], axis=1))
 

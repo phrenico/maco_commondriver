@@ -36,7 +36,7 @@ class MaCo(torch.nn.Module):
     def __init__(self, Ex, Ey, Ez, mh_kwargs, ch_kwargs, preprocess_kwargs, device, c=0):
         super().__init__()
         self.mapper = get_mapper(n_in=Ey, n_out=Ez, **mh_kwargs)
-        self.coach_x = get_coach(Ex + Ez, n_out=1, **ch_kwargs)
+        self.coach_x = get_coach(Ex + Ez, **ch_kwargs)
 
         self.preprocess_params = preprocess_kwargs
         self.Ex = Ex
@@ -87,6 +87,7 @@ class MaCo(torch.nn.Module):
     def forward(self, x, y):
         X, target, Y = self.preprocess(x, y)
 
+        # print("shape of Y in forward mapper:", Y.shape)
         z = self.mapper.forward(Y)
         hz = relu(z)
 

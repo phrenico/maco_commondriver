@@ -81,6 +81,7 @@ def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_si
     return train_loader, test_loader, valid_loader, z_test
 
 
+
 # 1. Generate random Logistic datasets
 N = 50  # number of realizations
 n = 20_000  # Length of time series
@@ -105,7 +106,7 @@ dy = 2
 dz = 1
 nh = 20  # number of hidden units
 mapper_kwargs = dict(n_h1=nh, n_h2=nh)
-coach_kwargs = dict(n_h1=nh)
+coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -126,6 +127,8 @@ for i in tqdm(range(N)):
                    ch_kwargs=coach_kwargs,
                    preprocess_kwargs=preprocess_kwargs,
                    device=device) for i in range(n_models)]
+
+
 
     # Train models
     train_losses = []

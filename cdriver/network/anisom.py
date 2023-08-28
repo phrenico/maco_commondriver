@@ -45,7 +45,7 @@ class AniSOM(nn.Module):
         return d
 
 
-    def fit(self, x, y, epochs=1):
+    def fit(self, x, y, epochs=1, disable_tqdm=False):
         X = x
         Y = y
         N = x.shape[0]
@@ -55,7 +55,7 @@ class AniSOM(nn.Module):
         G = self.grid
 
         steps = 0
-        pbar = tqdm(total=total)
+        pbar = tqdm(total=total, disable=disable_tqdm)
         for epoch in range(epochs):
             for s in range(N):
                 # compute the actual values of the learning rate
@@ -83,16 +83,6 @@ class AniSOM(nn.Module):
                     ia = torch.where(d2 == torch.min(d2))[0][0]
 
                     w = torch.exp( - (i_vals - ia) ** 2 / sigma1 - (j_vals - j_star) ** 2 / sigma2 )
-                    # if steps==0 and k==0:
-                    #     print(sigma1, sigma2)
-                    #     plt.matshow(w)
-                    #     plt.show()
-                    #     print("d2 shape", d2.shape, ia, j_star, w.shape, G.shape)
-                    #
-                    # elif steps==(total-1) and k==0:
-                    #     print(sigma1, sigma2)
-                    #     plt.matshow(w)
-                    #     plt.show()
 
                     G += eps * w.view(self.sizes + [1]).expand([-1, -1, self.space_dim]) * ( X[inds_ts[k]].view([1, 1, self.space_dim]).expand(self.sizes + [-1]) - G)
 
@@ -113,8 +103,8 @@ class AniSOM(nn.Module):
             return ij_argmin
 
         activations = self.forward(X, squeeze=False)
-        print("The shape of activations is:", activations.shape)
+        # print("The shape of activations is:", activations.shape)
         a = activations.shape[0]
-        print(a)
+        # print(a)
         ij_argmin = torch.cat([get_coords(activations[o]) for o in range(a)], axis=0)
         return ij_argmin

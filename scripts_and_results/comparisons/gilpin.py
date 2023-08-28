@@ -32,7 +32,7 @@ for i in tqdm(range(N)):
   X_train, _, z_train, X_test, __, z_test = train_test_split(X, X, y, train_split)
 
 
-  model = RecurrenceManifold(d_embed=3, )
+  model = RecurrenceManifold(d_embed=3)
 
   y_recon = model.fit_predict(X_train)
   # model.fit(X_train)

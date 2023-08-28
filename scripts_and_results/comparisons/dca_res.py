@@ -1,4 +1,4 @@
-'''Run experiments with SFA
+'''Run experiments with DCA
 
 '''
 import numpy as np
@@ -38,13 +38,17 @@ if __name__ == "__main__":
         D_train = np.concatenate([X_train, Y_train], axis=1)
         D_test = np.concatenate([X_test, Y_test], axis=1)
 
-        # 2. Run SFA
-        dca_model = DCA(d=1, T=5, n_init=10)
+        # 2. Run DCA
+        n_components = 1
+        dca_model = DCA(d=n_components, T=5, n_init=10)
         dca_model.fit(D_train)
-        zpred = dca_model.transform(D_test).squeeze()
+        zpred = dca_model.transform(D_test) #.squeeze()
 
-        tau, c = comp_ccorr(zpred, z_test)
-        maxcs.append(get_maxes(tau, c)[1])
+        m = max([get_maxes(*comp_ccorr(z_test, zpred[:, j]))[1] for j in range(n_components)])
+        maxcs.append(m)
+
+        # tau, c = comp_ccorr(zpred, z_test)
+        # maxcs.append(get_maxes(tau, c)[1])
 
     # Save results
     df = save_results(fname='./dca_res.csv', r=maxcs, N=N, method='DCA', dataset='logmap_fixed')
