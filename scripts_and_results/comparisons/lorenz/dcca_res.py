@@ -5,12 +5,10 @@ from sklearn.preprocessing import scale
 import sys
 sys.path.append('../')
 
-from data_generators import time_delay_embedding, comp_ccorr, get_maxes
-from scipy.signal import correlate, correlation_lags
 from mvlearn.embed import DCCA
 
 from torch.utils.data import DataLoader, TensorDataset
-from data_generators import LogmapExpRunner, time_delay_embedding, comp_ccorr, get_maxes, save_results, train_test_split
+from data_generators import comp_ccorr, get_maxes, save_results, train_test_split
 import torch
 from tqdm import tqdm
 
@@ -22,6 +20,8 @@ torch.symeig = myfun
 
 plt.ion()
 plt.figure(figsize=(10, 10))
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.show()
 plt.xlim(-1, 100)
 plt.ylim(0, 1)
@@ -66,6 +66,9 @@ for n_iter in tqdm(range(N)):
 df = save_results(fname='./dcca_res.csv', r=maxcs, N=N, method='DCCA', dataset='lorenz')
 
 plt.ioff()
+plt.figure()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()

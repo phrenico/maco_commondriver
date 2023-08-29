@@ -7,39 +7,49 @@ from data_generators import LogmapExpRunner, comp_ccorr, get_maxes, train_test_s
 from shrec.models import RecurrenceManifold
 from sklearn.preprocessing import scale
 from scipy.signal import correlate, correlation_lags
-# import torch
-
-data_path = '../../../data/lorenz.npz'
-data = np.load(data_path)
 
 
-T = 1000_000
-ds = 200
-X = data['v'][:T:ds, 3:]
-x = data['v'][:T:ds, 1]
-x2 = data['v'][:T:ds, 4]
+import matplotlib
 
+matplotlib.use('TkAgg')
+
+
+plt.ion()
+plt.figure(figsize=(10, 10))
+plt.show()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (0, 0))
+plt.xlim(-1, 100)
+plt.ylim(0, 1)
+
+N = 100
 train_split = 0.5
-X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, x, train_split)
+maxcs = []
+for n_iter in range(N):
+    data_path = '../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
+    data = np.load(data_path)
 
-model = RecurrenceManifold(d_embed=1)
-z = model.fit_predict(X_train)
+    X = data['v'][:, 3:]
+    z = data['v'][:, 1]
+    T = X.shape[0]
 
+    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split)
 
-lags = correlation_lags(T//ds*train_split, T//ds*train_split, 'full')
-# c = 1/T * correlate(scale(x), scale(z), 'full')
-c = comp_ccorr(scale(z_train), scale(z))[1]
-# c2 = 1/T * correlate(scale(x2), scale(z), 'full')
-# c3 = 1/T * correlate(scale(x), scale(x2), 'full')
-dt = 1e-3 * ds
+    d_embed = 1
+    model = RecurrenceManifold(d_embed=d_embed)
+    z_pred = model.fit_predict(X_test)
 
+    maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
+    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
+    plt.draw()
+    plt.pause(0.05)
+
+df = save_results(fname='./shrec_res.csv', r=maxcs, N=N, method='ShRec', dataset='lorenz')
+
+plt.ioff()
 plt.figure()
-plt.plot(dt*lags, c, label='hcc, z', ls='-', lw=3.)
-# plt.plot(dt*lags, c2, label='x2, z')
-# plt.plot(dt*lags, c3, label='hcc, x2')
-
-plt.axvline(0, color='k', ls='--')
-plt.xlim(-10, 10)
-# plt.ylim(0.25, 0.55)
-plt.legend()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (1000, 0))
+plt.hist(maxcs)
+plt.xlim(0, 1)
 plt.show()

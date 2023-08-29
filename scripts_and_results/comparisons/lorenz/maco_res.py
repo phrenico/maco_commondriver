@@ -71,6 +71,14 @@ def get_loaders(X, Y, z, batch_size, trainset_size=50, testset_size=50, validset
     valid_loader = common_transform(x_valid), common_transform(y_valid)
     return train_loader, test_loader, valid_loader, z_test
 
+def typer(x, dtype=torch.float32):
+    """Set the type of a tensor.
+
+    :param x: tensor
+    :param dtype: data type
+    :return: tensor with the desired data type
+    """
+    return x.type(dtype)
 def preprocess(X, Y):
     """Preprocess data.
 
@@ -80,11 +88,11 @@ def preprocess(X, Y):
     """
     # print("Y shape in preprocessing", Y.shape)
 
-    common_transform = transforms.Compose([scale, transforms.ToTensor(), torch.squeeze, ])
+    common_transform = transforms.Compose([scale, transforms.ToTensor(), torch.squeeze, typer])
 
-    X_target = common_transform(X[1:]).type(torch.float32)
-    X_basic = common_transform(X[:-1]).type(torch.float32)
-    Y_basic = common_transform(Y[:-1]).type(torch.float32)
+    X_target = common_transform(X[1:])
+    X_basic = common_transform(X[:-1])
+    Y_basic = common_transform(Y[:-1])
     # print("Y shape after preprocessing", Y_basic.shape, Y_basic.dtype)
     return X_basic, X_target, Y_basic
 
@@ -92,7 +100,7 @@ def preprocess(X, Y):
 
 # apply MaCo
 n_epochs = 100
-n_models = 5
+n_models = 20
 dx = 3
 dy = 3
 dz = 1
@@ -106,6 +114,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 plt.ion()
 plt.figure(figsize=(10, 10))
 plt.show()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
@@ -160,6 +170,10 @@ for n_iter in tqdm(range(N)):
 
 df = save_results(fname='./maco_res.csv', r=maxcs, N=N, method='MaCo', dataset='lorenz')
 
+plt.ioff()
+plt.figure()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()

@@ -24,15 +24,15 @@ def dfds(u, t, sigma1, rho1, beta1, sigma2, rho2, beta2, sigma3, rho3, beta3, ka
     x, y, z, x2, y2, z2, x3, y3, z3 = u
     kappa12, kappa21, kappa13, kappa31, kappa23, kappa32 = kappa[0, 1], kappa[1, 0], kappa[0, 2], kappa[2, 0], kappa[1, 2], kappa[2, 1]
 
-    dx = sigma1 * ((y - x) + kappa12 * (y2 - x)) + kappa13 * (y3 - x)
+    dx = sigma1 * ((y - x) + kappa12 * (y2 - x) + kappa12 * (y2 - x) + kappa13 * (y3 - x))
     dy = x * (rho1 - z) - y
     dz = x * y - beta1 * z
 
-    dx2 = sigma2 * ((y2 - x2) + kappa21 * (y - x2)) + kappa23 * (y3 - x2)
+    dx2 = sigma2 * ((y2 - x2) + kappa21 * (y - x2) + kappa23 * (y3 - x2))
     dy2 = x2 * ((rho2 + 0.1) - z2) - y2
     dz2 = x2 * y2 - (beta2 + 0.03) * z2
 
-    dx3 = sigma3 * ((y3 - x3) + kappa31 * (y - x3)) + kappa32 * (y2 - x3)
+    dx3 = sigma3 * ((y3 - x3) + kappa31 * (y - x3) + kappa32 * (y2 - x3))
     dy3 = x3 * ((rho3 + 0.1) - z3) - y3
     dz3 = x3 * y3 - (beta3 + 0.03) * z3
 
@@ -42,7 +42,7 @@ if __name__=="__main__":
     # Data Generation
     np.random.seed(312)
     dt = 1e-3
-    t = np.arange(0, 1000, dt)
+    t = np.arange(0, 2000, dt)
     sigma = 10
     rho = 27
     beta = 8 / 3

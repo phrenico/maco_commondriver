@@ -4,34 +4,26 @@ import pandas as pd
 import seaborn as sns
 
 pca_res = pd.read_csv('./pca_res.csv', index_col=0)
-# ica_res = pd.read_csv('./ica_res.csv', index_col=0)
-# cca_res = pd.read_csv('./cca_res.csv', index_col=0)
+ica_res = pd.read_csv('./ica_res.csv', index_col=0)
+cca_res = pd.read_csv('./cca_res.csv', index_col=0)
 dcca_res = pd.read_csv('./dcca_res.csv', index_col=0)
 # gilpin_res = pd.read_csv('./shrec_res.csv', index_col=0)
-# sfa_res = pd.read_csv('./sfa_res.csv', index_col=0)
-# dca_res = pd.read_csv('./dca_res.csv', index_col=0)
-
-# random_res = pd.read_csv('./random_res.csv', index_col=0)
-
-# som_res = pd.read_csv('./SOM_res.csv', index_col=0)
-# anisom_res = pd.read_csv('./anisom_res.csv', index_col=0)
+sfa_res = pd.read_csv('./sfa_res.csv', index_col=0)
+dca_res = pd.read_csv('./dca_res.csv', index_col=0)
+random_res = pd.read_csv('./random_res.csv', index_col=0)
 maco_res = pd.read_csv('./maco_res.csv', index_col=0)
-# dummy_maco_res = pd.read_csv('./dummy_maco_res.csv', index_col=0)
-# dummy_maco_res['method'] = "MaCo"
+
 
 # Create dataframe
 df = pd.concat([pca_res,
-                # ica_res,
-                # cca_res,
+                ica_res,
+                cca_res,
                 dcca_res,
                 # gilpin_res,
-                # som_res,
-                # sfa_res,
-                # dca_res,
-                # random_res,
+                sfa_res,
+                dca_res,
+                random_res,
                 maco_res,
-                # dummy_maco_res,
-                # anisom_res
                 ],
                ignore_index=False)
 

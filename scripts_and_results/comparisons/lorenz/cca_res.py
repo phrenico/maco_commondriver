@@ -7,45 +7,53 @@ from sklearn.preprocessing import scale
 import sys
 sys.path.append('../')
 
-from data_generators import time_delay_embedding, comp_ccorr, get_maxes
+from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, save_results
 from scipy.signal import correlate, correlation_lags
+from tqdm import tqdm
 
-data_path = '../../../data/lorenz.npz'
-data = np.load(data_path)
+# import matplotlib
+#
+# matplotlib.use('sgg')
 
+plt.ion()
+plt.figure(figsize=(10, 10))
+plt.show()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (0, 0))
 
-T = 1000_000
-ds = 200
-X = data['v'][:T:ds, 3:6]
-Y = data['v'][:T:ds, 6:]
-x = data['v'][:T:ds, 1]
-x2 = data['v'][:T:ds, 4]
+plt.xlim(-1, 100)
+plt.ylim(0, 1)
+N = 100
+train_split = 0.5
+maxcs = []
+for n_iter in tqdm(range(N)):
+    data_path = '../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
+    data = np.load(data_path)
 
-cca = CCA(n_components=1, max_iter=1000)
-cca.fit(X, Y)
+    X = data['v'][:, 3:6]
+    Y = data['v'][:, 6:]
+    z = data['v'][:, 1]
 
-zpred, zpred2 = cca.transform(X, Y)
+    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
 
-# plt.plot(scale(zpred))
-# plt.plot(scale(x[:T]))
-# plt.plot(scale(x2[:T]))
+    cca = CCA(n_components=1, max_iter=500)
+    cca.fit(X_train, Y_train)
 
-z = zpred[:, 0]
+    zpred, zpred2 = cca.transform(X_test, Y_test)
 
-lags = correlation_lags(T//ds, T//ds, 'full')
-c = 1/T * correlate(scale(x), scale(z), 'full')
-c = comp_ccorr(scale(x), scale(z))[1]
-c2 = 1/T * correlate(scale(x2), scale(z), 'full')
-c3 = 1/T * correlate(scale(x), scale(x2), 'full')
-dt = 1e-3 * ds
+    z_pred = (zpred[:, 0] + zpred2[:, 0]) / 2
+    maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
+    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
+    plt.draw()
+    plt.pause(0.05)
+
+df = save_results(fname='./cca_res.csv', r=maxcs, N=N, method='CCA', dataset='lorenz')
+
+plt.ioff()
 plt.figure()
-plt.plot(dt*lags, c, label='hcc, z', ls='-', lw=3.)
-plt.plot(dt*lags, c2, label='x2, z')
-plt.plot(dt*lags, c3, label='hcc, x2')
-
-plt.axvline(0, color='k', ls='--')
-plt.xlim(-10, 10)
-# plt.ylim(0.25, 0.55)
-plt.legend()
+mngr = plt.get_current_fig_manager()
+mngr.window.wm_geometry("+%d+%d" % (1000, 0))
+plt.hist(maxcs)
+plt.xlim(0, 1)
 plt.show()

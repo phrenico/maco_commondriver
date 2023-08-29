@@ -1,7 +1,9 @@
 '''Helper functions'''
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import scale
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def comp_ccorr(y, y_recon):
   """Computes crosscorrelation
@@ -104,3 +106,31 @@ def train_test_split(X, Y, z, train_size=0.8):
     X_train, Y_train, z_train = X[:int(train_size*N)], Y[:int(train_size*N)], z[:int(train_size*N)]
     X_test, Y_test, z_test = X[int(train_size*N):], Y[int(train_size*N):], z[int(train_size*N):]
     return X_train, Y_train, z_train, X_test, Y_test, z_test
+
+def train_valid_test_split(X, Y, z, train_size=0.8, valid_size=0.1):
+    """Splits data into train and test sets
+    """
+    N = len(X)
+    X_train, Y_train, z_train = (X[:int(train_size * N)],
+                                 Y[:int(train_size * N)],
+                                 z[:int(train_size * N)])
+    X_valid, Y_valid, z_valid = (X[int(train_size * N):int((train_size + valid_size) * N)],
+                                 Y[int(train_size * N):int((train_size + valid_size) * N)],
+                                 z[int(train_size * N):int((train_size + valid_size) * N)])
+    X_test, Y_test, z_test = (X[int((train_size + valid_size) * N):],
+                              Y[int((train_size + valid_size) * N):],
+                              z[int((train_size + valid_size) * N):])
+    return X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test
+
+def shuffle_phase(x):
+    """shuffles the phase of the signal in Fourier domain
+
+    :param x: signal
+    :param sf: sampling rate
+    :return: fourier-shuffled signal
+    """
+    X = np.fft.fft(x)
+    phase = np.pi * ( 2 * np.random.rand(len(X)) - 1)
+    X_shuffled = np.abs(X) * np.exp(1j * phase)
+    x_shuffled = np.fft.ifft(X_shuffled)
+    return np.real(x_shuffled)
