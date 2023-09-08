@@ -18,7 +18,7 @@ def get_maxes(tau, c):
   """
   return tau[np.argmax(np.abs(c))], max(np.abs(c))
 
-class Logmap:
+class LogMap:
   def __init__(self, r, A, x0):
     self.r = r
     self.A = A
@@ -68,7 +68,7 @@ class LogmapExpRunner:
 
   def gen_experiment(self, n, A=None, r=None, x0=None, seed=None):
     r, A, x0 = self.sample_params(r=r, A=A, x0=x0, seed=seed)
-    data = Logmap(r=r, A=A, x0=x0).gen_dataset(n)
+    data = LogMap(r=r, A=A, x0=x0).gen_dataset(n)
     self.data = data
     return data, {'r':r, 'A': A, 'x0': x0}
 
