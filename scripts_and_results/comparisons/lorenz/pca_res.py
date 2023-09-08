@@ -21,7 +21,7 @@ plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
 N = 100
-train_split = 0.5
+train_split = 0.9
 maxcs = []
 for n_iter in range(N):
     data_path = '../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
@@ -33,7 +33,7 @@ for n_iter in range(N):
 
     X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split)
 
-    n_components = 6
+    n_components = 5
     pca =  PCA(n_components=n_components).fit(X_train)
     zpred = pca.transform(X_test)
 

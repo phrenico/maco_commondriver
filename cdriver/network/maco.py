@@ -135,9 +135,10 @@ class MaCo(torch.nn.Module):
         return loss_hist
 
     def test_loop(self, loader):
-        x, y = loader
-        pred, z, hz, target = self.forward(x, y)
-        loss = self.criterion(target, pred).item()
+        with torch.no_grad():
+            x, y = loader
+            pred, z, hz, target = self.forward(x, y)
+            loss = self.criterion(target, pred).item()
         return loss
 
     def valid_loop(self, loader):

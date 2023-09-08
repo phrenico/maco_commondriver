@@ -7,7 +7,7 @@ pca_res = pd.read_csv('./pca_res.csv', index_col=0)
 ica_res = pd.read_csv('./ica_res.csv', index_col=0)
 cca_res = pd.read_csv('./cca_res.csv', index_col=0)
 dcca_res = pd.read_csv('./dcca_res.csv', index_col=0)
-# gilpin_res = pd.read_csv('./shrec_res.csv', index_col=0)
+gilpin_res = pd.read_csv('./shrec_res.csv', index_col=0)
 sfa_res = pd.read_csv('./sfa_res.csv', index_col=0)
 dca_res = pd.read_csv('./dca_res.csv', index_col=0)
 random_res = pd.read_csv('./random_res.csv', index_col=0)
@@ -19,7 +19,7 @@ df = pd.concat([pca_res,
                 ica_res,
                 cca_res,
                 dcca_res,
-                # gilpin_res,
+                gilpin_res,
                 sfa_res,
                 dca_res,
                 random_res,
@@ -47,7 +47,7 @@ sns.swarmplot(data=df2, color=".25", size=3, ax=ax)
 
 ax.grid(True)
 
-ax.set_ylabel('Correlation coefficient', size=fs)
+ax.set_ylabel('Coef. of determination', size=fs)
 ax.set_xlabel('Method', size=fs)
 ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right', fontsize=ticksize)
 ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=ticksize)

@@ -24,7 +24,8 @@ def dfds(u, t, sigma1, rho1, beta1, sigma2, rho2, beta2, sigma3, rho3, beta3, ka
     x, y, z, x2, y2, z2, x3, y3, z3 = u
     kappa12, kappa21, kappa13, kappa31, kappa23, kappa32 = kappa[0, 1], kappa[1, 0], kappa[0, 2], kappa[2, 0], kappa[1, 2], kappa[2, 1]
 
-    dx = sigma1 * ((y - x) + kappa12 * (y2 - x) + kappa12 * (y2 - x) + kappa13 * (y3 - x))
+    # ERROR , kapp12 is duplicated!!!!!
+    dx = sigma1 * ((y - x) + kappa12 * (y2 - x) + kappa13 * (y3 - x))
     dy = x * (rho1 - z) - y
     dz = x * y - beta1 * z
 
@@ -67,6 +68,10 @@ if __name__=="__main__":
         v0 = (10 * np.random.rand(9)).tolist()
 
         v = odeint(dfds, v0, t, (params))
+        
+        if i == 0:
+            np.save('../../data/lorenz/lorenz_{}_long.npz'.format(i), v)
+            exit()
 
         #save data
         ds = 200

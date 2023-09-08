@@ -45,7 +45,7 @@ for n_iter in tqdm(range(N)):
     layers2 = layers1.copy()
 
 
-    train_split = 0.5
+    train_split = 0.9
     X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
 
     dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,

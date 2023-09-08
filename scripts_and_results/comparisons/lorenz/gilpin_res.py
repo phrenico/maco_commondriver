@@ -35,7 +35,7 @@ for n_iter in range(N):
 
     X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split)
 
-    d_embed = 1
+    d_embed = 3
     model = RecurrenceManifold(d_embed=d_embed)
     z_pred = model.fit_predict(X_test)
 

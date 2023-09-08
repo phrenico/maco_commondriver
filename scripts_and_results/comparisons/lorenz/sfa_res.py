@@ -23,7 +23,7 @@ plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
 N = 100
-train_split = 0.5
+train_split = 0.9
 maxcs = []
 for n_iter in range(N):
     data_path = '../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
@@ -37,7 +37,7 @@ for n_iter in range(N):
 
 
     # 2. Run SFA
-    n_components = 6
+    n_components = 3
     sfa = sksfa.SFA(n_components=n_components)
     sfa.fit(X_train)
     z_pred = sfa.transform(X_test).squeeze()

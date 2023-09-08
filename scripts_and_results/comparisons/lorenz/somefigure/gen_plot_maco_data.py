@@ -127,11 +127,11 @@ mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
-N = 100
+N = 1
 train_split = 0.9
 maxcs = []
 for n_iter in tqdm(range(N)):
-    data_path = '../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
+    data_path = '../../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
     data = np.load(data_path)
 
 
@@ -140,6 +140,8 @@ for n_iter in tqdm(range(N)):
     X = data['v'][:, 3:6]
     Y = data['v'][:, 6:]
     z = data['v'][:, 1]
+
+
 
 
     train_loader, test_loader, _, z_test = get_loaders(X, Y, z, batch_size=1000, trainset_size=90,
@@ -172,16 +174,9 @@ for n_iter in tqdm(range(N)):
 
 
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
-    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-    plt.draw()
-    plt.pause(0.05)
 
-df = save_results(fname='./maco_res.csv', r=maxcs, N=N, method='MaCo', dataset='lorenz')
+    res_dict = dict(c=maxcs, train_losses=train_losses, test_loss=test_loss,
+                    z_pred=z_pred, z_test=z_test, X = X, Y = Y, z=z)
+    np.savez('results_{}.npz'.format(n_iter), **res_dict)
 
-plt.ioff()
-plt.figure()
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (1000, 0))
-plt.hist(maxcs)
-plt.xlim(0, 1)
-plt.show()
+
