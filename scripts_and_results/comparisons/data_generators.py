@@ -108,7 +108,8 @@ def train_test_split(X, Y, z, train_size=0.8):
     return X_train, Y_train, z_train, X_test, Y_test, z_test
 
 def train_valid_test_split(X, Y, z, train_size=0.8, valid_size=0.1):
-    """Splits data into train and test sets
+    """
+    Splits data into train, validation and test sets
     """
     N = len(X)
     X_train, Y_train, z_train = (X[:int(train_size * N)],

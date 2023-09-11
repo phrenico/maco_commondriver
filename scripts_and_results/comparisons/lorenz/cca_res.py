@@ -7,7 +7,7 @@ from sklearn.preprocessing import scale
 import sys
 sys.path.append('../')
 
-from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, save_results
+from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, save_results, train_valid_test_split
 from scipy.signal import correlate, correlation_lags
 from tqdm import tqdm
 
