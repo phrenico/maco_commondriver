@@ -32,7 +32,7 @@ if __name__ == "__main__":
                tqdm(range(N))]
 
     save_data = False
-    save_path = './dataset/'
+    save_path = '../dataset/'
     if save_data:
         _ = [pd.DataFrame(i).to_csv(save_path + 'logmap_{}.csv'.format(j)) for j, i in enumerate(dataset)]
         exit()

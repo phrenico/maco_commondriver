@@ -38,14 +38,14 @@ class TentMapExpRunner:
     self.baseA = baseA
     self.a_interval = a_interval
 
-  def sample_params(self, A=None, a=None, x0=None, seed=None):
+  def sample_params(self, A=None, a=None, x0=None, min_c_strenght=0.1, seed=None):
     np.random.seed(seed)
     aint = self.a_interval
     if a is None:
       a = aint[0] + (aint[1]-aint[0]) * np.random.rand(self.nvars)
 
     if A is None:
-      A = self.baseA * ( 0.9 * np.random.rand(self.nvars**2).reshape([self.nvars, self.nvars]) + 0.1 )
+      A = self.baseA * ( (1 - min_c_strenght) * np.random.rand(self.nvars**2).reshape([self.nvars, self.nvars]) + min_c_strenght )
     np.fill_diagonal(A, 1)
 
     if x0 is None:
@@ -55,8 +55,8 @@ class TentMapExpRunner:
     self.x0 = x0
     return a, A, x0
 
-  def gen_experiment(self, n, A=None, a=None, x0=None, seed=None):
-    a, A, x0 = self.sample_params(a=a, A=A, x0=x0, seed=seed)
+  def gen_experiment(self, n, A=None, a=None, x0=None, min_c_strength=0.1, seed=None):
+    a, A, x0 = self.sample_params(a=a, A=A, x0=x0, min_c_strenght=min_c_strength, seed=seed)
     data = TentMap(alpha=a, A=A, x0=x0).gen_dataset(n)
     self.data = data
     return data, {'a': a, 'A': A, 'x0': x0}

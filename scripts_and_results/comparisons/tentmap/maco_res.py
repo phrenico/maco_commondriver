@@ -5,6 +5,9 @@
 3. Save the results
 4. Plot the results
 '''
+import sys
+sys.path.append('../../../')
+
 import numpy as np
 from tqdm import tqdm
 
@@ -18,6 +21,8 @@ from sklearn.preprocessing import scale
 from functools import partial
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
+
+
 
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):
