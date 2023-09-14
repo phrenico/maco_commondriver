@@ -56,7 +56,7 @@ class LogmapExpRunner:
       r = rint[0] + (rint[1]-rint[0]) * np.random.rand(self.nvars)
 
     if A is None:
-      A = self.baseA * 0.5 * np.random.rand(self.nvars**2).reshape([self.nvars, self.nvars])
+      A = self.baseA * (0.4 * np.random.rand(self.nvars**2).reshape([self.nvars, self.nvars]) + 0.1)
     np.fill_diagonal(A, 1)
 
     if x0 is None:

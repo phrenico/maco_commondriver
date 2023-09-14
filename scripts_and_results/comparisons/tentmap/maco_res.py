@@ -106,7 +106,7 @@ N = 50  # number of realizations
 n = 20_000  # Length of time series
 train_split = 0.8
 valid_split = 0.1
-d_embed = 2
+d_embed = 3
 
 aint = (2, 10.)  # interval to chose from the value of r parameter
 A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
@@ -144,7 +144,6 @@ for n_iter in tqdm(range(N)):
                    ch_kwargs=coach_kwargs,
                    preprocess_kwargs=preprocess_kwargs,
                    device=device) for i in range(n_models)]
-
 
 
     # Train models

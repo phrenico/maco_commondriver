@@ -3,8 +3,10 @@ from matplotlib import pyplot as plt
 from scipy.integrate import odeint
 from collections import OrderedDict
 from tqdm import tqdm
+from types import SimpleNamespace
 
-def dfds(u, t, sigma1, rho1, beta1, sigma2, rho2, beta2, sigma3, rho3, beta3, kappa):
+
+def dfds(u, t, paradict):
     """Derivative of 3 coupled Lorenz system
 
     :param u: state
@@ -22,20 +24,32 @@ def dfds(u, t, sigma1, rho1, beta1, sigma2, rho2, beta2, sigma3, rho3, beta3, ka
     :return: derivative of the state
     """
     x, y, z, x2, y2, z2, x3, y3, z3 = u
-    kappa12, kappa21, kappa13, kappa31, kappa23, kappa32 = kappa[0, 1], kappa[1, 0], kappa[0, 2], kappa[2, 0], kappa[1, 2], kappa[2, 1]
+    # print(x, y, z, x2, y2, z2, x3, y3, z3)
+    # print(x.shape, y.shape, z.shape, x2.shape, y2.shape, z2.shape, x3.shape, y3.shape, z3.shape)
+    p = SimpleNamespace(**paradict)
+    sigma1, rho1, beta1 = p.sigma1, p.rho1, p.beta1
+    sigma2, rho2, beta2 = p.sigma2, p.rho2, p.beta2
+    sigma3, rho3, beta3 = p.sigma3, p.rho3, p.beta3
+    kappa12, kappa21, kappa13, kappa31, kappa23, kappa32 = p.kappa[0, 1], p.kappa[1, 0], p.kappa[0, 2], p.kappa[2, 0], p.kappa[1, 2], p.kappa[2, 1]
+
 
     # ERROR , kapp12 is duplicated!!!!!
-    dx = sigma1 * ((y - x) + kappa12 * (y2 - x) + kappa13 * (y3 - x))
+    dx = sigma1 * ( (y - x) + kappa12 * (y2 - x) + kappa13 * (y3 - x) )
     dy = x * (rho1 - z) - y
     dz = x * y - beta1 * z
 
-    dx2 = sigma2 * ((y2 - x2) + kappa21 * (y - x2) + kappa23 * (y3 - x2))
-    dy2 = x2 * ((rho2 + 0.1) - z2) - y2
-    dz2 = x2 * y2 - (beta2 + 0.03) * z2
+    dx2 = sigma2 * ( (y2 - x2) + kappa21 * (y - x2) + kappa23 * (y3 - x2) )
+    dy2 = x2 * (rho2 - z2) - y2
+    dz2 = x2 * y2 - beta2 * z2
 
     dx3 = sigma3 * ((y3 - x3) + kappa31 * (y - x3) + kappa32 * (y2 - x3))
-    dy3 = x3 * ((rho3 + 0.1) - z3) - y3
-    dz3 = x3 * y3 - (beta3 + 0.03) * z3
+    dy3 = x3 * (rho3 - z3) - y3
+    dz3 = x3 * y3 - beta3 * z3
+
+    # print(dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3)
+
+    # print(sigma1, rho1, beta1, sigma2, rho2, beta2, sigma3, rho3, beta3, kappa12, kappa21, kappa13, kappa31, kappa23, kappa32)
+    # print(dx.shape, dy.shape, dz.shape, dx2.shape, dy2.shape, dz2.shape, dx3.shape, dy3.shape, dz3.shape)
 
     return [dx, dy, dz, dx2, dy2, dz2, dx3, dy3, dz3]
 
@@ -56,18 +70,18 @@ if __name__=="__main__":
         kappa[2, 0] = alpha + (1-alpha) * np.random.rand(1)[0]
 
         param_dict = OrderedDict(sigma1=sigma, rho1=rho, beta1=beta,
-                                 sigma2=sigma+np.random.normal(0, 2, 1),
-                                 rho2=rho+np.random.normal(0, 2, 1),
-                                 beta2=beta+np.random.normal(0, 0.2, 1),
-                                 sigma3=sigma+np.random.normal(0, 2, 1),
-                                 rho3=rho+np.random.normal(0, 2, 1),
-                                 beta3=beta+np.random.normal(0, 0.2, 1),
+                                 sigma2=sigma+np.random.normal(0, 2, 1)[0],
+                                 rho2=rho+np.random.normal(0, 2, 1)[0],
+                                 beta2=beta+np.random.normal(0, 0.2, 1)[0],
+                                 sigma3=sigma+np.random.normal(0, 2, 1)[0],
+                                 rho3=rho+np.random.normal(0, 2, 1)[0],
+                                 beta3=beta+np.random.normal(0, 0.2, 1)[0],
                                  kappa=kappa)
         params = tuple(param_dict.values())
 
         v0 = (10 * np.random.rand(9)).tolist()
 
-        v = odeint(dfds, v0, t, (params))
+        v = odeint(dfds, v0, t, (param_dict, ))
         
         if i == 0:
             np.save('../../data/lorenz/lorenz_{}_long.npz'.format(i), v)

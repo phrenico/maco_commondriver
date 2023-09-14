@@ -1,12 +1,16 @@
-'''Apply MaCo to the random Logistic datasets with the new version with preprocessing
-0. Import packages
-1. Generate random Logistic datasets
-2. Apply MaCo to the datasets
-3. Save the results
-4. Plot the results
+'''Script to test the effect of dataset size on the MACO algorithm
+We Generate N=15 instances of coupled Logistic map systems, then we apply the algorithm on time series of different lengths.
+steps are:
+1. Generate N=15 instances of coupled Logistic map systems
+2. Create chunked time series of different lengths
+3. Train the MACO algorithm on each of the variable length time series
+4. Plot results in the function of length of time series
 '''
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
+import seaborn as sns
+
 import sys
 sys.path.append("../../../")
 
@@ -82,26 +86,22 @@ def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_si
     valid_loader = transforms.ToTensor()(x_valid), transforms.ToTensor()(y_valid)
     return train_loader, test_loader, valid_loader, z_test
 
-
-
 # 1. Generate random Logistic datasets
-N = 50  # number of realizations
-n = 20_000  # Length of time series
+N = 15  # number of realizations
+Ls = list(range(100, 1_000, 200)) + list(range(1_000, 3_001, 1_000))
+n = max(Ls)  # Length of time series
 rint = (3.8, 4.)  # interval to chose from the value of r parameter
 A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-A = np.array([[1., 0., 0.],
-              [0.3, 1., 0.],
-              [0.4, 0., 1.]])
-train_split = 0.5
-
-dataset = [LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=n, A=A, seed=i)[0] for i in
-           tqdm(range(N))]
-params = [LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=2, A=A, seed=i)[1] for i in range(N)]
 
 
-# 2. Apply MaCo to the datasets
-# define MaCo model
-n_epochs = 300
+train_split = 0.8
+valid_split = 0.1
+test_split = 0.1
+
+datasets, params = zip(
+    *[LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=n, seed=i) for i in tqdm(range(N))])
+
+n_epochs = 100
 n_models = 10
 dx = 1
 dy = 2
@@ -112,49 +112,63 @@ coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-maxcs = []
-for n_iter in tqdm(range(N)):
-    data = dataset[n_iter].astype(float)
+maxdict = {}
+for L in tqdm(Ls):
+    maxcs = []
+    for n_iter in tqdm(range(N)):
+        data = datasets[n_iter].astype(float)[:L, :]
 
-    # print("original data shape:", data.shape)
+        # print("original data shape:", data.shape)
 
-    train_loader, test_loader, _, z_test = get_loaders(data, batch_size=1000, trainset_size=50,
-                                                       testset_size=50, validset_size=0)
-
-
-
-
-    models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
-                   mh_kwargs=mapper_kwargs,
-                   ch_kwargs=coach_kwargs,
-                   preprocess_kwargs=preprocess_kwargs,
-                   device=device) for i in range(n_models)]
+        train_loader, test_loader, _, z_test = get_loaders(data, batch_size=500, trainset_size=50,
+                                                           testset_size=50, validset_size=0)
 
 
 
-    # Train models
-    train_losses = []
-    test_loss = []
-    for i in tqdm(range(n_models), disable=True):
-        train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=True)]
-        test_loss += [models[i].test_loop(test_loader)]
-    train_losses = np.array(train_losses).T
 
-    # Pick the best model on the test set
-    ind_best_model = np.argmin(test_loss)
-    best_model = models[ind_best_model]
+        models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
+                       mh_kwargs=mapper_kwargs,
+                       ch_kwargs=coach_kwargs,
+                       preprocess_kwargs=preprocess_kwargs,
+                       device=device) for i in range(n_models)]
 
-    valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
 
-    # print("shape of z_pred: {} and the shape of z_test: {}".format(z_pred.shape, z_test.shape))
-    tau, c = comp_ccorr(z_pred, z_test)
-    maxcs.append(get_maxes(tau, c)[1])
 
-# Save results
-df = save_results(fname='./dummy_maco_res.csv', r=maxcs, N=N, method='dummy_MaCo', dataset='logmap_fixed')
+        # Train models
+        train_losses = []
+        test_loss = []
+        for i in tqdm(range(n_models), disable=True):
+            train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=False)]
+            test_loss += [models[i].test_loop(test_loader)]
+        train_losses = np.array(train_losses).T
 
-# 3. Plot results
-plt.figure()
-plt.hist(maxcs)
+        # Pick the best model on the test set
+        ind_best_model = np.argmin(test_loss)
+        best_model = models[ind_best_model]
+
+        valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
+
+        # print("shape of z_pred: {} and the shape of z_test: {}".format(z_pred.shape, z_test.shape))
+        tau, c = comp_ccorr(z_pred, z_test)
+        maxcs.append(get_maxes(tau, c)[1])
+    maxdict[L] = maxcs.copy()
+
+def create_df(maxdict):
+    """Create a dataframe from a dictionary of lists
+
+    :param maxdict: dictionary of lists
+    :return: dataframe
+    """
+    keys = maxdict.keys()
+    dfs = [pd.DataFrame(np.array([maxdict[key], len(maxdict[key]) * [key] ]).T, columns=['r2', 'L']) for key in keys]
+    df = pd.concat(dfs, axis=0)
+    return df
+
+df = create_df(maxdict)
+df.to_csv('./length_maco_res.csv')
+
+
+sns.lineplot(x='L', y='r2', data=df)
+
+plt.ylim(0, 1)
 plt.show()
-print(maxcs)

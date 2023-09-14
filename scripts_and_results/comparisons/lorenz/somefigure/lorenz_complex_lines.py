@@ -27,11 +27,13 @@ ax2 = fig.add_axes(rect=(0., 0., w, h), projection='3d')
 ax3 = fig.add_axes(rect=(0.4, 0., w, h), projection='3d')
 ax1 = fig.add_axes(rect=(0.2, 0.5, w+0.1, h+0.1), projection='3d', clip_on=False)
 
-im1 = ax1.scatter(*Z.T, c=z, cmap='jet',alpha=1)
-im2 = ax2.scatter(*X.T, c=z, cmap='jet',alpha=1)
-im3 = ax3.scatter(*Y.T, c=z, cmap='jet',alpha=1)
+kwargs = dict(lw=0.2)
 
-ax1.view_init(elev=0, azim=0)
+im1 = ax1.plot(*Z.T, **kwargs)
+im2 = ax2.plot(*X.T, **kwargs)
+im3 = ax3.plot(*Y.T, **kwargs)
+
+
 # ax2.view_init(elev=0, azim=0)
 # ax3.view_init(elev=0, azim=0)
 
@@ -72,8 +74,10 @@ arrow2 = patches.FancyArrowPatch(
 fig.patches.append(arrow1)
 fig.patches.append(arrow2)
 
+plt.savefig('Lorenz_complex_lines_sameview.png', transparent=True)
+ax1.view_init(elev=0, azim=0)
 
-plt.savefig('Lorenz_complex.png', transparent=True)
+plt.savefig('Lorenz_complex_lines.png', transparent=True)
 # plt.close()
 
 # fig2 = plt.figure(figsize=(15, 10))
