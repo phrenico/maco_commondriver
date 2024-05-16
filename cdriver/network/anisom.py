@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 class AniSOM(nn.Module):
     def __init__(self, space_dim, grid_dim, sizes):
-        """Anisotropic Self-Organizing Map BUT IT IS NOT WORKING YET!!!!!!!!!!1
+        """Anisotropic Self-Organizing Map BUT IT IS NOT WORKING YET!!!!!!!!!!1 ?????? What did I mean with that?
 
         :param space_dim: embedding space dimension
         :param grid_dim: 2D is supported

@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import scale
 
 def eval_lin(X, Y):
     regmod = LinearRegression()
@@ -10,3 +11,16 @@ def eval_lin(X, Y):
 
 
     return regmod, regmod2
+
+def comp_ccorr(y, y_recon):
+  """Computes crosscorrelation
+  """
+  T = len(y)
+  c = np.correlate(1/T * scale(y[:T]), scale(y_recon), mode='full')
+  tau = np.arange(-T+1, T)
+  return tau, c
+
+def get_maxes(tau, c):
+  """Gets the argmax and max of |xcorr|
+  """
+  return tau[np.argmax(np.abs(c))], max(np.abs(c))

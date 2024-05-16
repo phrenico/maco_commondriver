@@ -14,10 +14,10 @@ dca_res = pd.read_csv('dca_res.csv', index_col=0)
 random_res = pd.read_csv('random_res.csv', index_col=0)
 
 # som_res = pd.read_csv('./SOM_res.csv', index_col=0)
-anisom_res = pd.read_csv('../anisom_res.csv', index_col=0)
+anisom_res = pd.read_csv('anisom_res.csv', index_col=0)
 maco_res = pd.read_csv('maco_res.csv', index_col=0)
-dummy_maco_res = pd.read_csv('dummy_maco_res.csv', index_col=0)
-dummy_maco_res['method'] = "MaCo"
+# dummy_maco_res = pd.read_csv('dummy_maco_res.csv', index_col=0)
+# dummy_maco_res['method'] = "MaCo"
 
 # Create dataframe
 df = pd.concat([pca_res,
@@ -29,8 +29,8 @@ df = pd.concat([pca_res,
                 sfa_res,
                 dca_res,
                 random_res,
-                # maco_res,
-                dummy_maco_res,
+                maco_res,
+                # dummy_maco_res,
                 anisom_res],
                ignore_index=False)
 

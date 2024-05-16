@@ -1,23 +1,45 @@
 import numpy as np
-import torch
+try:
+    import torch
+except:
+    print('torch not imported, this may lead to errors')
 
 
-def time_delay_embedding(data, delay, dimension):
+# def time_delay_embedding(data, delay, dimension):
+#     """
+#     Creates a time delay embedding of a time series data with a specified delay and dimension.
+#
+#     Parameters:
+#         data (1D array): The time series data
+#         delay (int): The delay to use in the embedding
+#         dimension (int): The dimension of the embedding
+#
+#     Returns:
+#         (2D array): The time delay embedding
+#     """
+#     embedding = np.zeros((len(data) - (dimension - 1) * delay, dimension))
+#     for i in range(dimension):
+#         embedding[:, i] = data[i * delay: i * delay + embedding.shape[0]]
+#     return embedding
+
+def time_delay_embedding(series, delay=1, dimension=3):
     """
-    Creates a time delay embedding of a time series data with a specified delay and dimension.
+    Perform time delay embedding of a time series.
 
     Parameters:
-        data (1D array): The time series data
-        delay (int): The delay to use in the embedding
-        dimension (int): The dimension of the embedding
+        series (numpy.ndarray): 1-dimensional array representing the time series data.
+        delay (int): The time delay between consecutive samples.
+        dimension (int): The number of dimensions (embedding dimension).
 
     Returns:
-        (2D array): The time delay embedding
+        numpy.ndarray: The embedded time series with shape (N, dimension), where N is the number
+                       of embedded points.
     """
-    embedding = np.zeros((len(data) - (dimension - 1) * delay, dimension))
-    for i in range(dimension):
-        embedding[:, i] = data[i * delay: i * delay + embedding.shape[0]]
-    return embedding
+    num_samples = len(series) - (dimension - 1) * delay
+    embedded_series = np.zeros((num_samples, dimension))
+    for i in range(num_samples):
+        embedded_series[i] = series[i:i + dimension * delay:delay]
+    return embedded_series
 
 
 def cropper(x, n, location):

@@ -22,7 +22,9 @@ if __name__ == "__main__":
     N = 50  # number of realizations
     n = 20_000  # Length of time series
     rint = (3.8, 4.)  # interval to chose from the value of r parameter
-    A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
+    A0 = np.array([[0, 0, 0],
+                   [1, 0, 0],
+                   [1, 0, 0]])  # basic connection structure
     A = np.array([[1., 0., 0.],
                   [0.3, 1., 0.],
                   [0.4, 0., 1.]])
