@@ -9,13 +9,18 @@ import sys
 sys.path.append('../')
 sys.path.append('../../../')
 
-from data_generators import  comp_ccorr, get_maxes, train_valid_test_split, save_results, time_delay_embedding
-from cdriver.datagen.tent_map import TentMapExpRunner
 from cdriver.network.anisom import AniSOM
-import matplotlib.pyplot as plt
-import pandas as pd
+from cdriver.preprocessing.splitters import train_valid_test_split
+from cdriver.preprocessing.tde import time_delay_embedding
+from cdriver.savers.saver import  save_results
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.datagen.tent_map import gen_tentmapdata
 
-from data_config import N, n, A0, aint
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+from tentmapres_config import train_split, interim_res_path, valid_split
+
+import matplotlib.pyplot as plt
+
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -30,13 +35,12 @@ if __name__ == "__main__":
     mngr = plt.get_current_fig_manager()
     mngr.window.wm_geometry("+%d+%d" % (0, 0))
     plt.show()
-    plt.xlim(-1, 100)
+    plt.xlim(-1, tentmapgen_params['N'])
     plt.ylim(0, 1)
 
     # 1. Generate data
-    dataset = [TentMapExpRunner(nvars=3, baseA=A0, a_interval=aint).gen_experiment(n=n, seed=i)[0] for i in
-               tqdm(range(N))]
-
+    N = tentmapgen_params['N']  # number of realizations
+    dataset, params = gen_tentmapdata(tentmapgen_params)
 
 
     # Define parameters and layers for deep model
@@ -45,9 +49,6 @@ if __name__ == "__main__":
     d_space = d_embed
     sizes = [40, 20]
 
-    # Run the  Reconstructions on the Datasets
-    train_split = 0.8
-    valid_split = 0.1
 
     maxcs = []
     maxcs2 = []
@@ -75,11 +76,15 @@ if __name__ == "__main__":
         maxcs.append(get_maxes(tau, c)[1])
         plt.plot(n_iter, maxcs[-1], 'o', color='blue')
         plt.draw()
-        plt.pause(0.05)
+        plt.pause(0.01)
 
 
     # save out results
-    df = save_results(fname='./anisom_res.csv', r=maxcs, N=N, method='ASOM', dataset='tentmap')
+    df = save_results(fname=interim_res_path / 'anisom_res.csv',
+                      r=maxcs,
+                      N=N,
+                      method='ASOM',
+                      dataset='tentmap')
 
     # 3. Plot results
     plt.ioff()

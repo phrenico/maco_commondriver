@@ -1,13 +1,18 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from sklearn.decomposition import PCA, FastICA
-from sklearn.preprocessing import scale
+from sklearn.decomposition import  FastICA
+
 import sys
 sys.path.append('../')
 
-from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, save_results, train_valid_test_split
-from cdriver.datagen.tent_map import TentMapExpRunner
-from scipy.signal import correlate, correlation_lags
+from cdriver.preprocessing.splitters import train_valid_test_split
+from cdriver.preprocessing.tde import time_delay_embedding
+from cdriver.savers.saver import save_results
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.datagen.tent_map import gen_tentmapdata
+
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+from tentmapres_config import train_split, interim_res_path, valid_split
 import matplotlib
 from tqdm import tqdm
 
@@ -22,19 +27,11 @@ mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
-N = 50
-n = 20_000
-train_split = 0.8
-valid_split = 0.1
+N = tentmapgen_params['N']  # number of realizations
+dataset, params = gen_tentmapdata(tentmapgen_params)
+
+
 d_embed = 3
-
-aint = (2, 10.)  # interval to chose from the value of r parameter
-A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-
-dataset = [TentMapExpRunner(nvars=3, baseA=A0, a_interval=aint).gen_experiment(n=n, seed=i)[0] for i in
-           tqdm(range(N))]
-
-
 
 maxcs = []
 for n_iter in range(N):
@@ -61,7 +58,11 @@ for n_iter in range(N):
     plt.draw()
     plt.pause(0.05)
 
-df = save_results(fname='./ica_res.csv', r=maxcs, N=N, method='ICA', dataset='tentmap')
+df = save_results(fname=interim_res_path / './ica_res.csv',
+                  r=maxcs,
+                  N=N,
+                  method='ICA',
+                  dataset='tentmap')
 
 plt.ioff()
 plt.figure()

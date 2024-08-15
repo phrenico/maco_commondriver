@@ -3,21 +3,27 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA, FastICA
 from sklearn.preprocessing import scale
 import sys
+
 sys.path.append('../')
 
 from mvlearn.embed import DCCA
+from cdriver.preprocessing.splitters import train_valid_test_split
+from cdriver.preprocessing.tde import time_delay_embedding
+from cdriver.savers.saver import save_results
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.datagen.tent_map import gen_tentmapdata
 
-from torch.utils.data import DataLoader, TensorDataset
-from data_generators import comp_ccorr, get_maxes, save_results, train_valid_test_split, time_delay_embedding
-from cdriver.datagen.tent_map import TentMapExpRunner
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+from tentmapres_config import train_split, interim_res_path, valid_split
 import torch
 from tqdm import tqdm
 
+
 def myfun(x, *args, **kwargs):
-  return torch.linalg.eigh(x)
+    return torch.linalg.eigh(x)
+
 
 torch.symeig = myfun
-
 
 plt.ion()
 plt.figure(figsize=(10, 10))
@@ -27,19 +33,10 @@ plt.show()
 plt.xlim(-1, 100)
 plt.ylim(0, 1)
 
-N = 50
-n = 20_000
-train_split = 0.8
-valid_split = 0.1
+N = tentmapgen_params['N']  # number of realizations
+dataset, params = gen_tentmapdata(tentmapgen_params)
+
 d_embed = 2
-
-aint = (2, 10.)  # interval to chose from the value of r parameter
-A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-
-dataset = [TentMapExpRunner(nvars=3, baseA=A0, a_interval=aint).gen_experiment(n=n, seed=i)[0] for i in
-           tqdm(range(N))]
-
-
 maxcs = []
 for n_iter in tqdm(range(N)):
     data = dataset[n_iter]
@@ -48,21 +45,22 @@ for n_iter in tqdm(range(N)):
     X = time_delay_embedding(data[:, 1], dimension=d_embed)
     Y = time_delay_embedding(data[:, 2], dimension=d_embed)
 
-
-
     features1 = d_embed  # Feature sizes
     features2 = d_embed
     layers1 = [20, 20, 1]  # nodes in each hidden layer and the output size
     layers2 = layers1.copy()
 
-
     X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
                                                                                                           train_split,
                                                                                                           valid_split)
 
-    dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,
-                        layer_sizes1=layers1, layer_sizes2=layers2, epoch_num=100,
-                        use_all_singular_values=True)
+    dcca = DCCA(input_size1=features1,
+                input_size2=features2,
+                n_components=1,
+                layer_sizes1=layers1,
+                layer_sizes2=layers2,
+                epoch_num=100,
+                use_all_singular_values=True)
     dcca.fit([X_train, Y_train])
     Xs_transformed = dcca.transform([X_test, Y_test])
 
@@ -75,7 +73,11 @@ for n_iter in tqdm(range(N)):
     plt.draw()
     plt.pause(0.05)
 
-df = save_results(fname='./dcca_res.csv', r=maxcs, N=N, method='DCCA', dataset='tentmap')
+df = save_results(fname=interim_res_path / './dcca_res.csv',
+                  r=maxcs,
+                  N=N,
+                  method='DCCA',
+                  dataset='tentmap')
 
 plt.ioff()
 plt.figure()

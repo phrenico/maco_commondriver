@@ -3,33 +3,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-pca_res = pd.read_csv('./pca_res.csv', index_col=0)
-ica_res = pd.read_csv('./ica_res.csv', index_col=0)
-cca_res = pd.read_csv('./cca_res.csv', index_col=0)
-dcca_res = pd.read_csv('./dcca_res.csv', index_col=0)
-gilpin_res = pd.read_csv('./shrec_res.csv', index_col=0)
-sfa_res = pd.read_csv('./sfa_res.csv', index_col=0)
-dca_res = pd.read_csv('./dca_res.csv', index_col=0)
-random_res = pd.read_csv('./random_res.csv', index_col=0)
-maco_res = pd.read_csv('./maco_res.csv', index_col=0)
-anisom_res = pd.read_csv('./anisom_res.csv', index_col=0)
+from scripts.resgen.tentmaps.tentmapres_config import final_res_path, figure_path
+
 
 
 # Create dataframe
-df = pd.concat([
-    pca_res,
-    ica_res,
-    cca_res,
-    dcca_res,
-    gilpin_res,
-    sfa_res,
-    dca_res,
-    random_res,
-    maco_res,
-    anisom_res
-],
-               ignore_index=False)
-
+df = pd.read_csv(final_res_path / 'tentmaps_res.csv', index_col=0)
 
 
 # Sort by median values in ascending order
@@ -57,6 +36,6 @@ ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick
 
 
 plt.tight_layout()
-plt.savefig('comparisons_tentmap.png', dpi=300)
+plt.savefig(figure_path / 'tentmap_comparisons.png', dpi=300)
 
 # plt.show()

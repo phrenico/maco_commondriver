@@ -12,13 +12,17 @@ import numpy as np
 from tqdm import tqdm
 
 from network.maco import MaCo
-from scripts_and_results.comparisons.data_generators import  comp_ccorr, get_maxes, save_results
+from cdriver.preprocessing.splitters import train_valid_test_split
+from cdriver.preprocessing.tde import time_delay_embedding
+from cdriver.savers.saver import save_results
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.datagen.tent_map import gen_tentmapdata
+
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+from tentmapres_config import train_split, interim_res_path, valid_split
 import torch
 import torchvision.transforms as transforms
-from cdriver.datagen.tent_map import TentMapExpRunner
-from sklearn.preprocessing import scale
 
-from functools import partial
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 
@@ -102,17 +106,9 @@ plt.ylim(0, 1)
 
 
 # 1. Generate random Logistic datasets
-N = 50  # number of realizations
-n = 20_000  # Length of time series
-train_split = 0.8
-valid_split = 0.1
-d_embed = 3
+N = tentmapgen_params["N"]
+dataset, params = gen_tentmapdata(tentmapgen_params)
 
-aint = (2, 10.)  # interval to chose from the value of r parameter
-A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-
-dataset = [TentMapExpRunner(nvars=3, baseA=A0, a_interval=aint).gen_experiment(n=n, seed=i)[0] for i in
-           tqdm(range(N))]
 
 # 2. Apply MaCo to the datasets
 # define MaCo model
@@ -169,7 +165,11 @@ for n_iter in tqdm(range(N)):
     plt.pause(0.05)
 
 # Save results
-df = save_results(fname='./maco_res.csv', r=maxcs, N=N, method='MaCo', dataset='tentmap')
+df = save_results(fname=interim_res_path / './maco_res.csv',
+                  r=maxcs,
+                  N=N,
+                  method='MaCo',
+                  dataset='tentmap')
 
 # 3. Plot results
 plt.ioff()

@@ -1,5 +1,6 @@
 import numpy as np
 from pandas import DataFrame
+from tqdm import tqdm
 
 class TentMap:
   def __init__(self, alpha, A, x0):
@@ -60,6 +61,19 @@ class TentMapExpRunner:
     data = TentMap(alpha=a, A=A, x0=x0).gen_dataset(n)
     self.data = data
     return data, {'a': a, 'A': A, 'x0': x0}
+
+def gen_tentmapdata(tentmapgen_params):
+  N = tentmapgen_params['N']
+  n = tentmapgen_params['n']
+  A0 = tentmapgen_params['A0']
+  aint = tentmapgen_params['aint']
+
+  dataset, params = zip(*[TentMapExpRunner(nvars=3,
+                                   baseA=A0,
+                                   a_interval=aint).gen_experiment(n=n,
+                                                                   seed=i) for i in tqdm(range(N),
+                                                                                         desc='Generating TentMap Data')])
+  return dataset, params
 
 if __name__ == "__main__":
   # Generate time series

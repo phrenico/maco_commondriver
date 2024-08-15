@@ -7,16 +7,23 @@ import matplotlib.pyplot as plt
 import sksfa
 
 from tqdm import tqdm
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, PolynomialFeatures
 
 import sys
+
 sys.path.append('../')
 sys.path.append('../../../')
 sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver/scripts_and_results/comparisons')
 sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 
-from data_generators import LogmapExpRunner, comp_ccorr, get_maxes, train_test_split, save_results, time_delay_embedding
-from cdriver.datagen.tent_map import TentMapExpRunner
+from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.tde import time_delay_embedding
+from cdriver.savers.saver import save_results
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.datagen.tent_map import gen_tentmapdata
+
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+from tentmapres_config import train_split, interim_res_path, valid_split
 
 if __name__ == "__main__":
     plt.ion()
@@ -27,17 +34,8 @@ if __name__ == "__main__":
     plt.xlim(-1, 100)
     plt.ylim(0, 1)
 
-    N = 50
-    n = 20_000
-    train_split = 0.8
-    valid_split = 0.1
-    d_embed = 2
-
-    aint = (2, 10.)  # interval to chose from the value of r parameter
-    A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-
-    dataset = [TentMapExpRunner(nvars=3, baseA=A0, a_interval=aint).gen_experiment(n=n, seed=i)[0] for i in
-               tqdm(range(N))]
+    N = tentmapgen_params['N']  # number of realizations
+    dataset, params = gen_tentmapdata(tentmapgen_params)
 
     d_embed = 3
     maxcs = []
@@ -52,6 +50,11 @@ if __name__ == "__main__":
         D_train = np.concatenate([X_train, Y_train], axis=1)
         D_test = np.concatenate([X_test, Y_test], axis=1)
 
+        # creating polynomial features
+        poly = PolynomialFeatures(degree=2)
+        D_train = poly.fit_transform(D_train)
+        D_test = poly.transform(D_test)
+
         # 2. Run SFA
         sfa = sksfa.SFA(n_components=1)
         sfa.fit(D_train)
@@ -65,7 +68,11 @@ if __name__ == "__main__":
         plt.pause(0.05)
 
     # Save results
-    df = save_results(fname='./sfa_res.csv', r=maxcs, N=N, method='SFA', dataset='tentmap')
+    df = save_results(fname=interim_res_path / './sfa_res.csv',
+                      r=maxcs,
+                      N=N,
+                      method='SFA',
+                      dataset='tentmap')
 
     # 3. Plot results
     plt.figure()
