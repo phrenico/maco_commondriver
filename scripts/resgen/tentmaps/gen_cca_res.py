@@ -13,7 +13,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.tent_map import gen_tentmapdata
 
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
-from tentmapres_config import train_split, interim_res_path, valid_split
+from config_tentmapres import train_split, interim_res_path, valid_split
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm

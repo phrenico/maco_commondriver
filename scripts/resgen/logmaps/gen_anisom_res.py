@@ -11,7 +11,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from logmapres_config import train_split, interim_res_path
+from config_logmapres import train_split, interim_res_path
 
 from tqdm import tqdm
 

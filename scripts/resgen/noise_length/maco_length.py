@@ -14,8 +14,10 @@ import seaborn as sns
 import sys
 sys.path.append("../../../")
 
-from network.maco import MaCo
-from scripts_and_results.comparisons.data_generators import LogmapExpRunner, comp_ccorr, get_maxes, save_results
+from cdrivers.logistic import LogmapExpRunner
+from crdiver.networks import MaCo
+
+
 import torch
 import torchvision.transforms as transforms
 from sklearn.preprocessing import scale

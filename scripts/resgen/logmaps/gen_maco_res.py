@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from logmapres_config import interim_res_path, train_split
+from config_logmapres import interim_res_path, train_split
 
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):

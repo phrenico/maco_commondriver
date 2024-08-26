@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts.resgen.tentmaps.config_tentmapres import interim_res_path, final_res_path
+from scripts.resgen.lorenzs.config_lorenzres import interim_res_path, final_res_path
 
 
 pca_res = pd.read_csv(interim_res_path / 'pca_res.csv', index_col=0)
@@ -13,7 +13,7 @@ dca_res = pd.read_csv(interim_res_path / 'dca_res.csv', index_col=0)
 random_res = pd.read_csv(interim_res_path / 'random_res.csv', index_col=0)
 
 
-anisom_res = pd.read_csv(interim_res_path / 'anisom_res.csv', index_col=0)
+# anisom_res = pd.read_csv(interim_res_path / 'anisom_res.csv', index_col=0)
 maco_res = pd.read_csv(interim_res_path / 'maco_res.csv', index_col=0)
 
 df = pd.concat([pca_res,
@@ -24,10 +24,9 @@ df = pd.concat([pca_res,
                 sfa_res,
                 dca_res,
                 random_res,
-                maco_res,
-                anisom_res],
+                maco_res],
                ignore_index=False)
 
-df.to_csv(final_res_path / 'tentmaps_res.csv')
+df.to_csv(final_res_path / 'lorenzs_res.csv')
 
 print(df.head())

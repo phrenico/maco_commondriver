@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-from scripts.resgen.tentmaps.tentmapres_config import final_res_path, figure_path
+from scripts.resgen.tentmaps.config_tentmapres import final_res_path, figure_path
 
 
 

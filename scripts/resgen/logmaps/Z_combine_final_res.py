@@ -1,5 +1,5 @@
 import pandas as pd
-from scripts.resgen.logmaps.logmapres_config import interim_res_path, final_res_path
+from scripts.resgen.logmaps.config_logmapres import interim_res_path, final_res_path
 
 
 pca_res = pd.read_csv(interim_res_path / 'pca_res.csv', index_col=0)

@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scripts.resgen.logmaps.logmapres_config import final_res_path, figure_path
+from scripts.resgen.logmaps.config_logmapres import final_res_path, figure_path
 
 
 
