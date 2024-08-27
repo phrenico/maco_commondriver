@@ -6,23 +6,37 @@ steps are:
 3. Train the MACO algorithm on each of the variable length time series
 4. Plot results in the function of length of time series
 '''
+from types import SimpleNamespace
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import seaborn as sns
+import os
 
 import sys
 sys.path.append("../../../")
 
-from network.maco import MaCo
-from scripts_and_results.comparisons.data_generators import LogmapExpRunner, comp_ccorr, get_maxes, save_results
+from cdriver.datagen.logmap import LogmapExpRunner
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from cdriver.network.maco import MaCo
+
 import torch
 import torchvision.transforms as transforms
-from sklearn.preprocessing import scale
-
-from functools import partial
 from torch.utils.data import DataLoader, TensorDataset
-import matplotlib.pyplot as plt
+
+from config_noise_length import noise_params, final_res_path
+from types import SimpleNamespace
+
+def create_df(maxdict):
+    """Create a dataframe from a dictionary of lists
+
+    :param maxdict: dictionary of lists
+    :return: dataframe
+    """
+    keys = maxdict.keys()
+    dfs = [pd.DataFrame(np.array([maxdict[key], len(maxdict[key]) * [key] ]).T, columns=['r2', 'L']) for key in keys]
+    df = pd.concat(dfs, axis=0)
+    return df
 
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):
@@ -86,61 +100,51 @@ def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_si
     valid_loader = transforms.ToTensor()(x_valid), transforms.ToTensor()(y_valid)
     return train_loader, test_loader, valid_loader, z_test
 
+p = SimpleNamespace(**noise_params)
+os.makedirs(final_res_path, exist_ok=True)
+
 # 1. Generate random Logistic datasets
-N = 15  # number of realizations
-Ls = 10. ** np.arange(-3, .5, 0.25) # noise levels
-print('Noise levels:', Ls)
-n = 1_000  # Length of time series
-rint = (3.8, 4.)  # interval to chose from the value of r parameter
-A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-
-
-train_split = 0.8
-valid_split = 0.1
-test_split = 0.1
-
 datasets, params = zip(
-    *[LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=n, seed=i) for i in tqdm(range(N))])
+    *[LogmapExpRunner(nvars=p.nvars,
+                      baseA=p.A0,
+                      r_interval=p.rint).gen_experiment(n=p.n,
+                                                        seed=i) for i in tqdm(range(p.N))])
 
-n_epochs = 100
-n_models = 10
-dx = 1
-dy = 2
-dz = 1
-nh = 20  # number of hidden units
-mapper_kwargs = dict(n_h1=nh, n_h2=nh)
-coach_kwargs = dict(n_h1=nh, n_out=1)
-preprocess_kwargs = dict(tau=1)
+
+mapper_kwargs = dict(n_h1=p.nh, n_h2=p.nh)
+coach_kwargs = dict(n_h1=p.nh, n_out=1)
+preprocess_kwargs = dict(tau=p.tau)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 maxdict = {}
-for L in tqdm(Ls, desc='Noise levels'):
+for L in tqdm(p.Ls, desc='Noise levels'):
     maxcs = []
-    for n_iter in tqdm(range(N), desc='instances', leave=False):
+    for n_iter in tqdm(range(p.N), desc='instances', leave=False):
         data = datasets[n_iter].astype(float)
-        data[:, 1:] = data[:, 1:] + np.random.normal(0, L, data[:, 1:].shape)  # add observation noise to the observed time series
+        data[:, 1:] = data[:, 1:] + np.random.normal(loc=0, scale=L, size=data[:, 1:].shape)  # add observation noise to the observed time series
 
-        # print("original data shape:", data.shape)
-
-        train_loader, test_loader, _, z_test = get_loaders(data, batch_size=500, trainset_size=50,
-                                                           testset_size=50, validset_size=0)
-
-
-
-
-        models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
+        train_loader, test_loader, _, z_test = get_loaders(data,
+                                                           batch_size=p.batch_size,
+                                                           trainset_size=p.trainset_size,
+                                                           testset_size=p.testset_size,
+                                                           validset_size=p.validset_size)
+        models = [MaCo(Ex=p.dx, Ey=p.dy, Ez=p.dz,
                        mh_kwargs=mapper_kwargs,
                        ch_kwargs=coach_kwargs,
                        preprocess_kwargs=preprocess_kwargs,
-                       device=device) for i in range(n_models)]
-
-
+                       device=device) for i in range(p.n_models)]
 
         # Train models
         train_losses = []
         test_loss = []
-        for i in tqdm(range(n_models), disable=False, desc='Models', leave=False):
-            train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=False)]
+        for i in tqdm(range(p.n_models),
+                      disable=True,
+                      desc='Models',
+                      leave=False):
+            train_losses += [models[i].train_loop(train_loader,
+                                                  p.n_epochs,
+                                                  lr=p.lr,
+                                                  disable_tqdm=True)]
             test_loss += [models[i].test_loop(test_loader)]
         train_losses = np.array(train_losses).T
 
@@ -155,16 +159,5 @@ for L in tqdm(Ls, desc='Noise levels'):
         maxcs.append(get_maxes(tau, c)[1])
     maxdict[L] = maxcs.copy()
 
-def create_df(maxdict):
-    """Create a dataframe from a dictionary of lists
-
-    :param maxdict: dictionary of lists
-    :return: dataframe
-    """
-    keys = maxdict.keys()
-    dfs = [pd.DataFrame(np.array([maxdict[key], len(maxdict[key]) * [key] ]).T, columns=['r2', 'L']) for key in keys]
-    df = pd.concat(dfs, axis=0)
-    return df
-
 df = create_df(maxdict)
-df.to_csv('./noise_maco_res.csv')
+df.to_csv(final_res_path / './noise_maco_res.csv')
