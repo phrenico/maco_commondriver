@@ -8,19 +8,34 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import minmax_scale
 from sklearn.cluster import KMeans
 from matplotlib.lines import Line2D
+from pathlib import Path
+
+import sys
+sys.path.append('../')
+from config_figgen import fig_path
 
 plt.style.use('./figure_twocol_config.mplstyle')
 
+res_path = Path('../../../results/final/example_logmap')
+
+
 print("Generate Figure 6. (learnforcast.eps)")
 # Load data
-df = pd.read_csv('./resdata/mappercoach_res.csv')
+df = pd.read_csv(res_path / 'mappercoach_res.csv')
 x_pred = df['x_pred'].values
+x_past_valid = df['x_past_valid'].values
 x_valid = df['x_valid'].values
 Y_test= df[["Y_1_valid", "Y_2_valid"]].values
-cc_pred= df['cc_pred'].values
-cc_val = df['cc_valid'].values
-learnings = np.load('./resdata/learning_curves.npy')
-test_loss = np.load('./resdata/test_loss.npy')
+# cc_pred= df['cc_pred'].values
+# cc_val = df['cc_valid'].values
+learnings = np.load(res_path / 'learning_curves.npy')
+test_loss = np.load(res_path / 'test_loss.npy')
+print(df.columns)
+
+# plt.figure()
+# plt.scatter(x_valid, x_pred, alpha=0.2)
+# plt.show()
+# exit()
 
 
 # find best model
@@ -94,6 +109,6 @@ ax3.set_xlabel('models')
 ax3.yaxis.set_label_position("right")
 ax3.set_ylabel('test loss')
 
-fig.savefig("./resfigure/learnforcast.eps", dpi=600)
+fig.savefig(fig_path / "learnforcast.png", dpi=600)
 # plt.show()
 print('[OK]')

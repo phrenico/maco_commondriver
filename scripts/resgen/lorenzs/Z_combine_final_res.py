@@ -1,6 +1,11 @@
 import pandas as pd
+import sys
+sys.path.append('../../../')
+
 from scripts.resgen.lorenzs.config_lorenzres import interim_res_path, final_res_path
 
+print('Starting to combine results from ', interim_res_path)
+print('Loading results from ', interim_res_path)
 
 pca_res = pd.read_csv(interim_res_path / 'pca_res.csv', index_col=0)
 ica_res = pd.read_csv(interim_res_path / 'ica_res.csv', index_col=0)
@@ -14,6 +19,7 @@ random_res = pd.read_csv(interim_res_path / 'random_res.csv', index_col=0)
 
 
 # anisom_res = pd.read_csv(interim_res_path / 'anisom_res.csv', index_col=0)
+print("Combining Lorenz's results")
 maco_res = pd.read_csv(interim_res_path / 'maco_res.csv', index_col=0)
 
 df = pd.concat([pca_res,
@@ -26,7 +32,7 @@ df = pd.concat([pca_res,
                 random_res,
                 maco_res],
                ignore_index=False)
-
+print("Saving combined results to ", final_res_path / 'lorenzs_res.csv')
 df.to_csv(final_res_path / 'lorenzs_res.csv')
 
-print(df.head())
+print('Saved combined results')

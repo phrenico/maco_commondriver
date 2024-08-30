@@ -2,7 +2,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 
 from shrec.models import RecurrenceManifold
 from cdriver.preprocessing.splitters import train_test_split
@@ -46,6 +47,6 @@ df = save_results(fname=interim_res_path / 'shrec_res.csv',
                   method='ShRec',
                   dataset='logmap')
 
-# 3. Plot results
-plt.hist(maxcs)
-plt.show()
+# # 3. Plot results
+# plt.hist(maxcs)
+# plt.show()

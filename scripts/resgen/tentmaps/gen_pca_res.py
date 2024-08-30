@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA, FastICA
 from sklearn.preprocessing import scale
 import sys
 sys.path.append('../')
+sys.path.append('../../../')
 
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -61,10 +62,11 @@ df = save_results(fname=interim_res_path / './pca_res.csv',
                   method='PCA',
                   dataset='tentmap')
 
-plt.ioff()
+# plt.ioff()
 plt.figure()
 mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()
+plt.close()

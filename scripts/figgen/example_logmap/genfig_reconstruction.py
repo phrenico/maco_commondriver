@@ -1,25 +1,31 @@
 """Generates the figure with the hidden variable reconstruction performance
 
 """
-
+import sys
 import pandas as pd
 import numpy as np
 
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import scale, minmax_scale
+from pathlib import Path
+
+sys.path.append('../')
+from config_figgen import fig_path
+
 
 plt.style.use('./figure_twocol_config.mplstyle')
 
+res_path = Path('../../../results/final/example_logmap')
 
 print("Generate Figure 7. (reconstruction.eps)")
 # Load data
-df = pd.read_csv('./resdata/mappercoach_res.csv')
+df = pd.read_csv(res_path / 'mappercoach_res.csv')
 x_pred = df['x_pred'].values
 x_test = df['x_valid'].values
 Y_test= df[["Y_1_valid", "Y_2_valid"]].values
 cc_pred= df['cc_pred'].values
 cc_val = df['cc_valid'].values
-learnings = np.load('./resdata/learning_curves.npy')
+learnings = np.load(res_path / 'learning_curves.npy')
 
 
 # compute correlation
@@ -68,7 +74,7 @@ axs2[1].text(-0.22, 1.02, "B",
 
 # fig2.tight_layout(pad=1, h_pad=0, w_pad=1)
 
-fig2.savefig("./resfigure/reconstruction.eps")
+fig2.savefig(fig_path / "reconstruction.png")
 # fig2.savefig("./resfigure/reconstruction.png")
 # plt.show()
 print('[OK]')

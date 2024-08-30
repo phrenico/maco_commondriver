@@ -2,7 +2,7 @@
 import numpy as np
 
 # Logmaps dataset configuration
-logmapgen_params = dict(N=2,  # number of realizations
+logmapgen_params = dict(N=50,  # number of realizations
                         n=20_000,  # Length of time series
                         rint=(3.8, 4.),  # interval to chose from the value of r parameter
                         A0=np.array([[0, 0, 0],
@@ -13,7 +13,7 @@ logmapgen_params = dict(N=2,  # number of realizations
                                     [0.4, 0., 1.]]))
 
 # Tentmaps generation configuration
-tentmapgen_params = dict(N=2,
+tentmapgen_params = dict(N=50,
                          n=20_000,
                          aint=(2, 10.),  # interval to chose from the value of r parameter
                          A0=np.array([[0, 0, 0],

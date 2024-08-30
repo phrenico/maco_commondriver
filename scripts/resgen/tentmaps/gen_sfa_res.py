@@ -12,9 +12,10 @@ from sklearn.preprocessing import scale, PolynomialFeatures
 import sys
 
 sys.path.append('../')
+# sys.path.append('../../../')
+# sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver/scripts_and_results/comparisons')
+# sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 sys.path.append('../../../')
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver/scripts_and_results/comparisons')
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -74,7 +75,8 @@ if __name__ == "__main__":
                       method='SFA',
                       dataset='tentmap')
 
-    # 3. Plot results
+    # # 3. Plot results
     plt.figure()
     plt.hist(maxcs)
     plt.show()
+    plt.close()

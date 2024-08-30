@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -44,7 +45,7 @@ if __name__ == "__main__":
                       method='Random',
                       dataset='logmap')
 
-    # 3. Plot results
-    plt.figure()
-    plt.hist(maxcs)
-    plt.show()
+    # # 3. Plot results
+    # plt.figure()
+    # plt.hist(maxcs)
+    # plt.show()

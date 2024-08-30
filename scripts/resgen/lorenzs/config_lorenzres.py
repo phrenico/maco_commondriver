@@ -9,5 +9,5 @@ figure_path = project_path / 'figures'
 
 # common  parameters
 data_path_template = '../../../data/lorenz/lorenz_{}.npz'
-N = 3
+N = 50
 train_split = 0.5

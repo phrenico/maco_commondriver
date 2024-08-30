@@ -4,6 +4,7 @@ import sys
 from datagen.control import shuffle_phase
 
 sys.path.append('../')
+sys.path.append('../../../')
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -42,7 +43,8 @@ for n_iter in tqdm(range(N)):
     X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
                                                                                                           train_split,
                                                                                                           valid_split)
-    z_pred = shuffle_phase(z_test)
+    # z_pred = shuffle_phase(z_test)
+    z_pred = np.random.rand(len(z_test))
 
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
@@ -56,10 +58,11 @@ df = save_results(fname=interim_res_path / './random_res.csv',
                   method='Random',
                   dataset='tentmap')
 
-plt.ioff()
+# plt.ioff()
 plt.figure()
 mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()
+plt.close()

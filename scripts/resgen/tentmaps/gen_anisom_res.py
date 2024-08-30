@@ -9,6 +9,7 @@ import sys
 sys.path.append('../')
 sys.path.append('../../../')
 
+
 from cdriver.network.anisom import AniSOM
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -87,7 +88,8 @@ if __name__ == "__main__":
                       dataset='tentmap')
 
     # 3. Plot results
-    plt.ioff()
+    # plt.ioff()
     plt.figure()
     plt.hist(maxcs)
     plt.show()
+    plt.close()

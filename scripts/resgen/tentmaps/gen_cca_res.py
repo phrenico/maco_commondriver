@@ -5,7 +5,8 @@ import sys
 
 from sympy.physics.control.control_plots import matplotlib
 
-sys.path.append('../')
+
+sys.path.append('../../../')
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -74,9 +75,10 @@ df = save_results(fname=interim_res_path / './cca_res.csv',
                   method='CCA',
                   dataset='tentmap')
 
-plt.ioff()
+# plt.ioff()
 plt.figure()
 plt.hist(maxcs)
 plt.hist(maxcs2)
 plt.hist(maxcs3)
 plt.show()
+plt.close()

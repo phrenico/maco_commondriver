@@ -129,6 +129,8 @@ mapper_kwargs = dict(n_h1=nh, n_h2=nh)
 coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+lr = 1e-2
+batch_size = 1000
 
 
 plt.ion()
@@ -153,13 +155,11 @@ for n_iter in tqdm(range(N)):
     z = data['v'][:, 1]
 
 
-    train_loader, test_loader, _, z_test = get_loaders(X, Y, z, batch_size=1000,
+    train_loader, test_loader, _, z_test = get_loaders(X, Y, z,
+                                                       batch_size=batch_size,
                                                        trainset_size=int(100*train_split),
                                                        testset_size=int(100 - 100*train_split),
                                                        validset_size=0)
-
-
-
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs,
                    ch_kwargs=coach_kwargs,
@@ -173,7 +173,10 @@ for n_iter in tqdm(range(N)):
     train_losses = []
     test_loss = []
     for i in tqdm(range(n_models), disable=True):
-        train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=True)]
+        train_losses += [models[i].train_loop(train_loader,
+                                              n_epochs,
+                                              lr=lr,
+                                              disable_tqdm=True)]
         test_loss += [models[i].test_loop(test_loader)]
     train_losses = np.array(train_losses).T
 

@@ -172,8 +172,10 @@ df = save_results(fname=interim_res_path / './maco_res.csv',
                   dataset='tentmap')
 
 # 3. Plot results
-plt.ioff()
+# plt.ioff()
 plt.figure()
 plt.hist(maxcs)
 plt.show()
-print(maxcs)
+# print(maxcs)
+plt.pause(1)
+plt.close()

@@ -6,6 +6,8 @@ import sys
 
 sys.path.append('../')
 sys.path.append('../../../')
+import sys
+sys.path.append('../../../')
 
 from cdriver.preprocessing.splitters import train_valid_test_split
 
@@ -68,7 +70,9 @@ df = save_results(fname=interim_res_path / './shrec_res.csv',
                   dataset='tentmap')
 
 # 3. Plot results
-plt.ioff()
+# plt.ioff()
 plt.figure()
 plt.hist(maxcs)
 plt.show()
+plt.pause(1)
+plt.close()

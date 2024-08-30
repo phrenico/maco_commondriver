@@ -8,7 +8,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from sklearn.decomposition import FastICA
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -54,7 +55,7 @@ if __name__=="__main__":
                       method='ICA',
                       dataset='logmap')
 
-    #3. Plot results
-    plt.figure()
-    plt.hist(maxcs)
-    plt.show()
+    # #3. Plot results
+    # plt.figure()
+    # plt.hist(maxcs)
+    # plt.show()

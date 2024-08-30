@@ -2,7 +2,8 @@
 import numpy as np
 
 from tqdm import tqdm
-
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from mvlearn.embed import DCCA
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.preprocessing.tde import time_delay_embedding

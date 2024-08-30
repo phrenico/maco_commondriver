@@ -2,6 +2,8 @@
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 
 from cdriver.network.anisom import AniSOM
 from cdriver.preprocessing.splitters import train_test_split

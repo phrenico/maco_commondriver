@@ -5,6 +5,7 @@ from sklearn.preprocessing import scale
 import sys
 
 sys.path.append('../')
+sys.path.append('../../../')
 
 from mvlearn.embed import DCCA
 from cdriver.preprocessing.splitters import train_valid_test_split
@@ -79,10 +80,11 @@ df = save_results(fname=interim_res_path / './dcca_res.csv',
                   method='DCCA',
                   dataset='tentmap')
 
-plt.ioff()
+# plt.ioff()
 plt.figure()
 mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()
+plt.close()

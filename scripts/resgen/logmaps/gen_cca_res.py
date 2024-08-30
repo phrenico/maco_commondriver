@@ -1,5 +1,6 @@
 import numpy as np
-
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from sklearn.cross_decomposition import CCA
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -52,5 +53,5 @@ df = save_results(fname=interim_res_path / 'cca_res.csv',
                   method='CCA',
                   dataset='logmap')
 
-plt.hist(maxcs3)
-plt.show()
+# plt.hist(maxcs3)
+# plt.show()

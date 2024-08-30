@@ -1,4 +1,6 @@
 import pandas as pd
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from scripts.resgen.tentmaps.config_tentmapres import interim_res_path, final_res_path
 
 

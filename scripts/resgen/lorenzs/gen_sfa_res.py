@@ -11,7 +11,8 @@ from config_lorenzres import interim_res_path, N, train_split, data_path_templat
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
-from cdriver.datagen.control import shuffle_phase
+
+from sklearn.preprocessing import PolynomialFeatures
 from tqdm import tqdm
 os.makedirs(interim_res_path, exist_ok=True)
 
@@ -35,6 +36,11 @@ for n_iter in tqdm(range(N)):
     T = X.shape[0]
 
     X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split)
+
+    # # Create Polynomial features
+    # poly = PolynomialFeatures(degree=1)
+    # X_train = poly.fit_transform(X_train)
+    # X_test = poly.transform(X_test)
 
     # 2. Run SFA
     n_components = 3

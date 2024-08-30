@@ -2,6 +2,7 @@
 # run all the lorenz  python scriptfiles in the folder
 
 # create a manual progress-bar for the 9 items
+ZERO='[---------] (0/9)'
 ONE='[#--------] (1/9)'
 TWO='[##-------] (2/9)'
 THREE='[###------] (3/9)'
@@ -20,72 +21,162 @@ function pbar {
 
 
 
-# Run the files
 
-## ICA
-#conda activate maco_rev1
-#python gen_ica_res.py
-#conda deactivate
-#
-#pbar $ONE
-#
-## PCA
-#conda activate maco_rev1
-#python gen_pca_res.py
-#conda deactivate
-#
-#pbar $TWO
-#
-## CCA
-#conda activate maco_rev1
-#python gen_cca_res.py
-#conda deactivate
-#
-#pbar $THREE
-#
-## DCA
-#conda activate dca
-#python gen_dca_res.py
-#conda deactivate
-#
-#pbar $FOUR
-#
-## DCCA
-#conda activate dcca_env
-#python gen_dcca_res.py
-#conda deactivate
-#
-#pbar $FIVE
-#
-## Sh-Rec
-#conda activate shrec
-#python gen_shrec_res.py
-#conda deactivate
-#
-#pbar $SIX
-#
-#
-## Random Control
-#conda activate maco_rev1
-#python gen_random_res.py
-#conda deactivate
-#
-#pbar $SEVEN
-#
-## sfa
-#conda activate sfa
-#python gen_sfa_res.py
-#conda deactivate
-#
-#pbar $EIGHT
-#
+
+# Run the files
+pbar $ZERO
+
+# ICA
+conda activate maco_rev1
+python gen_ica_res.py
+conda deactivate
+
+pbar $ONE
+echo "ICA - done."
+echo "PCA - starting..."
+echo "CCA - pending.."
+echo "DCA - pending.."
+echo "DCCA - pending.."
+echo "Sh-Rec - pending.."
+echo "Random - pending.."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+
+# PCA
+conda activate maco_rev1
+python gen_pca_res.py
+conda deactivate
+
+pbar $TWO
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - starting..."
+echo "DCA - pending.."
+echo "DCCA - pending.."
+echo "Sh-Rec - pending.."
+echo "Random - pending.."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+# CCA
+conda activate maco_rev1
+python gen_cca_res.py
+conda deactivate
+
+pbar $THREE
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - starting..."
+echo "DCCA - pending.."
+echo "Sh-Rec - pending.."
+echo "Random - pending.."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+# DCA
+conda activate dca
+python gen_dca_res.py
+conda deactivate
+
+pbar $FOUR
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - starting..."
+echo "Sh-Rec - pending.."
+echo "Random - pending.."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+
+# DCCA
+conda activate dcca_env
+python gen_dcca_res.py
+conda deactivate
+
+pbar $FIVE
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - done."
+echo "Sh-Rec - starting..."
+echo "Random - pending.."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+# Sh-Rec
+conda activate shrec
+python gen_shrec_res.py
+conda deactivate
+
+pbar $SIX
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - done."
+echo "Sh-Rec - done."
+echo "Random - starting..."
+echo "sfa - pending.."
+echo "MaCo - pending.."
+
+
+# Random Control
+conda activate maco_rev1
+python gen_random_res.py
+conda deactivate
+
+pbar $SEVEN
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - done."
+echo "Sh-Rec - done."
+echo "Random - done."
+echo "sfa - starting..."
+echo "MaCo - pending.."
+
+# sfa
+conda activate sfa
+python gen_sfa_res.py
+conda deactivate
+
+pbar $EIGHT
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - done."
+echo "Sh-Rec - done."
+echo "Random - done."
+echo "sfa - done."
+echo "MaCo - starting..."
+
+
 # MaCo
 conda activate maco_rev1
 python gen_maco_res.py
 conda deactivate
 
-#pbar $NINE
+pbar $NINE
+echo "ICA - done."
+echo "PCA - done."
+echo "CCA - done."
+echo "DCA - done."
+echo "DCCA - done."
+echo "Sh-Rec - done."
+echo "Random - done."
+echo "sfa - done."
+echo "MaCo - done."
 
+conda activate maco_rev1
+python Z_combine_final_res.py
+conda deactivate
 
 
 

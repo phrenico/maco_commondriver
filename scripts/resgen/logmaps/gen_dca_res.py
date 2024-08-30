@@ -9,6 +9,8 @@ from tqdm import tqdm
 # # from dca import DynamicalComponentsAnalysis as
 # DCA = dca.DynamicalComponentsAnalysis
 
+import sys
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 from dca import DynamicalComponentsAnalysis as DCA
 
 from cdriver.preprocessing.splitters import train_test_split
@@ -57,7 +59,7 @@ df = save_results(fname=interim_res_path / 'dca_res.csv',
                   method='DCA',
                   dataset='logmap')
 
-# 3. Plot results
-plt.figure()
-plt.hist(maxcs)
-plt.show()
+# # 3. Plot results
+# plt.figure()
+# plt.hist(maxcs)
+# plt.show()

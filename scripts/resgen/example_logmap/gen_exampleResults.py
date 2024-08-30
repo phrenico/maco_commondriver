@@ -101,9 +101,10 @@ def main():
     testset_size = 10
     validset_size = 10
 
-    n_epochs = 1_000
+    n_epochs = 2_000
     batch_size = 1_000
     n = 2_000
+    lr = 1e-2
 
     dataset, params = gen_logmapdata(logmapgen_params)
     data = dataset[0][:n]
@@ -123,7 +124,10 @@ def main():
     train_losses = []
     test_loss = []
     for i in tqdm(range(n_models), disable=False):
-        train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=True)]
+        train_losses += [models[i].train_loop(train_loader,
+                                              n_epochs,
+                                              lr=lr,
+                                              disable_tqdm=True)]
         test_loss += [models[i].test_loop(test_loader)]
     train_losses = np.array(train_losses).T
     test_loss = np.array(test_loss).T
@@ -147,17 +151,17 @@ def main():
         preds = model.valid_loop(test_loader)
         print(preds[1].shape, preds[2].shape, test_loader[1].squeeze().shape)
         # exit()
-        r_predict += [np.corrcoef(preds[1], test_loader[1].squeeze()[:-1])[0, 1] ]
+        r_predict += [np.corrcoef(preds[1], test_loader[0].squeeze()[1:])[0, 1] ]
         r_reconst += [np.corrcoef(preds[2], z_test.squeeze()[:-1])[0, 1]]
 
     # Save out results
     res_dict = {'cc_pred': z_pred,
                 'cc_valid': z_test[:-1],
-                'x_valid': test_loader[1].squeeze().detach().numpy()[1:],
+                'x_valid': test_loader[0].squeeze().detach().numpy()[1:],
                 'x_past_valid': test_loader[0].squeeze()[:-1],
                 'x_pred': x_pred,
-                'Y_1_valid': test_loader[0].squeeze()[:-1],
-                'Y_2_valid': test_loader[0].squeeze()[1:],
+                'Y_1_valid': test_loader[1].squeeze()[:-1],
+                'Y_2_valid': test_loader[1].squeeze()[1:],
                 }
     for label, value in res_dict.items():
         print(label, value.shape)
