@@ -32,7 +32,7 @@ conda deactivate
 
 pbar $THREE
 echo "Running SFA hyperparameter tuning"
-conda activate maco_rev1
+conda activate sfa
 python genres_sfa_htune.py
 conda deactivate
 

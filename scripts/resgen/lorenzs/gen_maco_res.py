@@ -1,6 +1,7 @@
 '''Apply MACO to the Lorenz system and plot the results.
 
 '''
+from jupyterlab.semver import valid
 from numpy.lib.twodim_base import tril_indices
 
 
@@ -18,7 +19,7 @@ matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
-from config_lorenzres import interim_res_path, N, train_split, data_path_template
+from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -157,8 +158,8 @@ for n_iter in tqdm(range(N)):
 
     train_loader, test_loader, _, z_test = get_loaders(X, Y, z,
                                                        batch_size=batch_size,
-                                                       trainset_size=int(100*train_split),
-                                                       testset_size=int(100 - 100*train_split),
+                                                       trainset_size=int(100*(train_split+valid_split)),
+                                                       testset_size=int(100 - 100*(train_split+valid_split)),
                                                        validset_size=0)
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs,
@@ -176,7 +177,7 @@ for n_iter in tqdm(range(N)):
         train_losses += [models[i].train_loop(train_loader,
                                               n_epochs,
                                               lr=lr,
-                                              disable_tqdm=True)]
+                                              disable_tqdm=False)]
         test_loss += [models[i].test_loop(test_loader)]
     train_losses = np.array(train_losses).T
 

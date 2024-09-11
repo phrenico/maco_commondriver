@@ -6,7 +6,7 @@ matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
-from config_lorenzres import interim_res_path, N, train_split, data_path_template
+from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -31,7 +31,7 @@ for n_iter in tqdm(range(N)):
     z = data['v'][:, 1]
     T = X.shape[0]
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split)
+    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, X, z, train_split+valid_split)
 
     n_components = 5
     pca =  PCA(n_components=n_components).fit(X_train)

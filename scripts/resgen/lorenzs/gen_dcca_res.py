@@ -1,3 +1,4 @@
+from jupyterlab.semver import valid
 from mvlearn.embed import DCCA
 import torch
 
@@ -8,7 +9,7 @@ matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
-from config_lorenzres import interim_res_path, N, train_split, data_path_template
+from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.preprocessing.splitters import train_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -45,7 +46,7 @@ for n_iter in tqdm(range(N)):
     layers1 = [20, 20, 1]  # nodes in each hidden layer and the output size
     layers2 = layers1.copy()
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
+    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split+valid_split)
 
     dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,
                         layer_sizes1=layers1, layer_sizes2=layers2, epoch_num=100,
