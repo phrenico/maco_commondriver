@@ -11,3 +11,5 @@ figure_path = project_path / 'figures'
 data_path_template = '../../../data/lorenz/lorenz_{}.npz'
 N = 50
 train_split = 0.5
+valid_split = 0.25
+test_split = 0.25

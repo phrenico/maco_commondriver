@@ -3,10 +3,17 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import sys
+from pathlib import Path
+from tqdm.auto import tqdm
+sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
+from scripts.config import project_path
 
 sys.path.append('../../../')
 sys.path.append('../../')
-from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, train_valid_test_split
+# from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, train_valid_test_split
+from cdriver.preprocessing.splitters import train_test_split, train_valid_test_split
+from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+# from cdriver.preprocessing.tde import time_delay_embedding
 
 color_ICA = 'tab:orange'
 color_PCA = 'tab:blue'
@@ -14,6 +21,11 @@ color_sfa = 'tab:green'
 color_DCA = 'teal'
 
 color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA)
+
+interim_save_path = project_path / 'results/interim/lorenz_htune'
+final_save_path = project_path / 'results/final/lorenz_htune'
+interim_savefig_path = project_path / 'figures/lorenz_htune'
+final_savefig_path = project_path / 'figures'
 
 
 def get_data(fname):
@@ -24,19 +36,20 @@ def get_data(fname):
 
 
 def compute4all(n_components, method):
-    N = 100
-    train_split = 0.8
-    valid_split = 0.1
+    N = 50
+    train_split = 0.5
+    valid_split = 0.25
     maxcs = []
     amaxcs = []
 
-    for n_iter in range(N):
-        data_path = '../../../../../data/lorenz/lorenz_{}.npz'.format(n_iter)
+    for n_iter in tqdm(range(N), desc='Iterations'):
+        data_path = '/home/phrenico/Projects/Codes/maco_commondriver/data/lorenz/lorenz_{}.npz'.format(n_iter)
         X, z = get_data(data_path)
 
         (X_train, Y_train, z_train,
          X_valid, Y_valid, z_valid,
          X_test, Y_test, z_test) = train_valid_test_split(X, X, z, train_split, valid_split)
+
 
         if method.__name__ == "DynamicalComponentsAnalysis":
             model = method(d=n_components, T=5, n_init=10)
@@ -60,14 +73,14 @@ def create_htune_df(coefs, wincomp, n_components, N, method, dataset):
     return df
 
 
-def plot_htune(df, method, fig_axes=None, yaxlabel=True, save=False):
+def plot_htune(df, method, fig_axes=None, yaxlabel=True, save=False, path=Path('./')):
     if fig_axes is None:
         fig, [ax1, ax2] = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
     else:
         fig, ax1, ax2 = fig_axes
 
     sns.boxplot(x='n_components', y='coefs', data=df, color=color_dict[method], ax=ax1)
-    sns.swarmplot(x='n_components', y='coefs', data=df, color=".25", size=3, ax=ax1)
+    sns.swarmplot(x='n_components', y='coefs', data=df, color=".25", size=5, ax=ax1)
     # sns.swarmplot(x='n_components', y='wcomp', data=df, color=".25", size=3, ax=ax2)
     sns.violinplot(x='n_components', y='wcomp', data=df, color=color_dict[method],
                    bw=0.1, ax=ax2, linewidth=0)
@@ -95,5 +108,5 @@ def plot_htune(df, method, fig_axes=None, yaxlabel=True, save=False):
     ax2.grid(True)
     fig.tight_layout()
     if save:
-        plt.savefig('{}_htune.png'.format(method))
+        plt.savefig(path / '{}_htune.png'.format(method))
     return fig

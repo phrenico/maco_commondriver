@@ -3,7 +3,7 @@ from tqdm import tqdm
 import pandas as pd
 import sys
 sys.path.append('../')
-from htune_common import create_htune_df, compute4all, plot_htune
+from htune_config import create_htune_df, compute4all, plot_htune, interim_save_path, interim_savefig_path
 
 
 
@@ -15,8 +15,8 @@ for n_components in tqdm(ns_components):
     dfs.append(df)
 
 df = pd.concat(dfs, ignore_index=False)
-df.to_csv('sfa_htune.csv')
+df.to_csv(interim_save_path / 'sfa_htune.csv')
 
-f = plot_htune(df, 'SFA', save=True)
+f = plot_htune(df, 'SFA', save=True, path=interim_savefig_path)
 # f.show()
 

@@ -1,12 +1,17 @@
 import pandas as pd
-from htune_common import plot_htune
+from htune_config import interim_save_path, final_save_path, final_savefig_path
+
+from htune_config import plot_htune
 import matplotlib.pyplot as plt
 
 
-pca_df = pd.read_csv('./pca_tune/pca_htune.csv', index_col=0)
-ica_df = pd.read_csv('./ica_tune/ica_htune.csv', index_col=0)
-dca_df = pd.read_csv('./dca_tune/dca_htune.csv', index_col=0)
-sfa_df = pd.read_csv('./sfa_tune/sfa_htune.csv', index_col=0)
+pca_df = pd.read_csv(interim_save_path / './pca_htune.csv', index_col=0)
+ica_df = pd.read_csv(interim_save_path / './ica_htune.csv', index_col=0)
+dca_df = pd.read_csv(interim_save_path / './dca_htune.csv', index_col=0)
+sfa_df = pd.read_csv(interim_save_path / './sfa_htune.csv', index_col=0)
+
+df = pd.concat([pca_df, ica_df, dca_df, sfa_df], ignore_index=True, axis=0)
+df.to_csv(final_save_path / 'htune.csv')
 
 fig, ax = plt.subplots(2, 4, figsize=(20, 10), sharex=True, sharey='row')
 plot_htune(pca_df, 'PCA', fig_axes=[fig, ax[0, 0], ax[1, 0]],
@@ -31,4 +36,4 @@ ax[0, 1].text(4, 1, **star_kwargs)
 ax[0, 2].text(4, 1, **star_kwargs)
 ax[0, 3].text(2, 1, **star_kwargs)
 
-fig.savefig('htune.png')
+fig.savefig(final_savefig_path / 'htune.png')
