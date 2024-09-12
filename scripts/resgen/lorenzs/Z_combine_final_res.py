@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 sys.path.append('../../../')
+sys.path.append('./')
 
 from scripts.resgen.lorenzs.config_lorenzres import interim_res_path, final_res_path
 

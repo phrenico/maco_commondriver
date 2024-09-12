@@ -26,6 +26,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.network.maco import MaCo
 from tqdm import tqdm
 os.makedirs(interim_res_path, exist_ok=True)
+from pathlib import Path
 
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):
@@ -97,6 +98,7 @@ def typer(x, dtype=torch.float32):
 def myscaler(x, axis):
     return (x - x.mean(axis=axis, keepdim=True)) / x.std(axis=axis, keepdim=True)
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 def preprocess(X, Y):
     """Preprocess data.
 
@@ -105,9 +107,11 @@ def preprocess(X, Y):
     :return: preprocessed data
     """
     # print("Y shape in preprocessing", Y.shape)
+    global device
 
-    common_transform = transforms.Compose([
-                                           scale, transforms.ToTensor(), torch.Tensor.float,
+    common_transform = transforms.Compose([torch.tensor, 
+                                           torch.Tensor.float,
+                                        #    scale,
                                            partial(torch.squeeze, axis=0)])
 
     X_target = common_transform(X[1:, :1])
@@ -115,12 +119,13 @@ def preprocess(X, Y):
     # Y_basic = common_transform(Y[:-1])
     Y_basic = common_transform(Y[1:])
     # print("Y shape after preprocessing", Y_basic.shape, Y_basic.dtype)
+    
     return X_basic, X_target, Y_basic
 
 
 
 # apply MaCo
-n_epochs = 100
+n_epochs = 200
 n_models = 10
 dx = 3
 dy = 3
@@ -129,9 +134,8 @@ nh = 20  # number of hidden units
 mapper_kwargs = dict(n_h1=nh, n_h2=nh)
 coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 lr = 1e-2
-batch_size = 1000
+batch_size = 1_000
 
 
 plt.ion()
@@ -173,7 +177,7 @@ for n_iter in tqdm(range(N)):
     # Train models
     train_losses = []
     test_loss = []
-    for i in tqdm(range(n_models), disable=True):
+    for i in tqdm(range(n_models), disable=False, leave=False, desc='Training models'):
         train_losses += [models[i].train_loop(train_loader,
                                               n_epochs,
                                               lr=lr,
