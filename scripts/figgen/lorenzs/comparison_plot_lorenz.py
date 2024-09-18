@@ -7,23 +7,24 @@ from pathlib import Path
 
 import sys
 sys.path.append('../')
+sys.path.append('./scripts/figgen')
 
-from config_figgen import fig_path
+from config_figgen import fig_path, lorenzs_path, palette
 
-res_path = Path('../../../results/final/')
+res_path = lorenzs_path
+
+print("load from: ", res_path)
+print("save to: ", fig_path)
 
 
 
 # Create dataframe
 df = pd.read_csv(res_path / 'lorenzs_res.csv')
-
+print(df.columns)
 
 # Sort by median values in ascending order
-grouped = df[['method', 'r']].groupby('method')
-df2 = pd.DataFrame({col:vals['r'] for col,vals in grouped},)
-meds = df2.median().sort_values(ascending=True, inplace=False)
-df2 = df2[meds.index]
-print(meds)
+method_order = df[['method', 'r']].groupby('method').median().sort_values(by='r',
+                                                                  ascending=True).index
 
 
 # Plot
@@ -31,8 +32,11 @@ fs = 20
 ticksize = 16
 
 fig, ax = plt.subplots(figsize=(10, 6))
-sns.boxplot(df2, color="tab:orange", ax=ax)
-sns.swarmplot(data=df2, color=".25", size=3, ax=ax)
+sns.boxplot(data=df, x='method', y='r', hue='method',
+            palette=palette, order=method_order, ax=ax)
+sns.swarmplot(data=df, x='method', y='r',
+              color='.25', alpha=0.5, size=4,
+              order=method_order, ax=ax)
 
 ax.set_ylim(-0.05, 1.05)
 ax.grid(True)

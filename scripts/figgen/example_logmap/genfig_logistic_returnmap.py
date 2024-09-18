@@ -88,7 +88,7 @@ ax0.set_xticks([0, 1])
 
 # fig.tight_layout(pad=0, w_pad=1, rect=[0, 0, 1, 1])
 
-fig.savefig(fig_path / 'logmap_returnmap.png')
+# fig.savefig(fig_path / 'logmap_returnmap.png')
 # fig.savefig('./resfigure/logmap_returnmap.png')
-# plt.show()
+plt.show()
 print('[OK]')

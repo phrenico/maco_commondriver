@@ -1,3 +1,28 @@
+import sys
+sys.path.append('./')
+from scripts.config import project_path
 from pathlib import Path
+import pandas as pd
+import seaborn as sns
 
-fig_path = Path('../../../figures')
+# Define paths
+fig_path = project_path / 'figures'
+
+noise_length_path = project_path / 'results/final/noise_length'
+logmaps_path = project_path / 'results/final/'
+lorenzs_path = project_path / 'results/final/'
+tentmaps_path = project_path / 'results/final/'
+
+# define colors
+df = pd.read_csv(logmaps_path / 'logmaps_res.csv')
+medians = df[['method', 'r']].groupby('method').median().sort_values(by='r', ascending=True)
+methods = medians.index
+palette_cols = sns.color_palette("husl", len(methods))
+palette = dict(zip(methods, palette_cols))
+
+box_color = palette['MaCo']
+swarm_color = '.25'
+swarm_size = 4
+
+fs = 20
+tick_size = 16

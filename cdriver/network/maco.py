@@ -35,6 +35,7 @@ def get_coach(n_in, n_h1, n_out):
 class MaCo(torch.nn.Module):
     def __init__(self, Ex, Ey, Ez, mh_kwargs, ch_kwargs, preprocess_kwargs, device, c=0):
         super().__init__()
+
         self.mapper = get_mapper(n_in=Ey, n_out=Ez, **mh_kwargs)
         self.coach_x = get_coach(Ex + Ez, **ch_kwargs)
 
@@ -48,6 +49,7 @@ class MaCo(torch.nn.Module):
         self.criterion = MSELoss()
         self.device = device
         self.c = c  # regularization parameter for the loss function
+        self.to(device)
 
     def preprocess(self, x, y):
         """Preprocess the input data
@@ -86,6 +88,9 @@ class MaCo(torch.nn.Module):
 
     def forward(self, x, y):
         X, target, Y = self.preprocess(x, y)
+        # print("Device of X in forward mapper:", X.device)
+        # print("Device of Y in forward mapper:", Y.device)
+        # print("Device of target in forward mapper:", target.device)
 
         # print("shape of Y in forward mapper:", Y.shape)
         z = self.mapper.forward(Y)
@@ -137,12 +142,12 @@ class MaCo(torch.nn.Module):
     def test_loop(self, loader):
         with torch.no_grad():
             x, y = loader
-            pred, z, hz, target = self.forward(x, y)
+            pred, z, hz, target = self.forward(x.to(self.device), y.to(self.device))
             loss = self.criterion(target, pred).item()
         return loss
 
     def valid_loop(self, loader):
         x, y = loader
-        pred, z, hz, target = self.forward(x, y)
+        pred, z, hz, target = self.forward(x.to(self.device), y.to(self.device))
         loss = self.criterion(target, pred).item()
-        return loss, pred.squeeze().detach().numpy(), z.squeeze().detach().numpy(), hz.squeeze().detach().numpy()
+        return loss, pred.squeeze().detach().cpu().numpy(), z.squeeze().detach().cpu().numpy(), hz.squeeze().detach().cpu().numpy()
