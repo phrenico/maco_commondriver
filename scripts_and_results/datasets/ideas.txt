@@ -1,3 +1,0 @@
-- kuramoto szimulacio jo lehet
-- 
-

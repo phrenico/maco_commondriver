@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import sys
+sys.path.append('./')
 from scripts.resgen.logmaps.config_logmapres import final_res_path, figure_path
 
 
@@ -36,7 +38,7 @@ ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick
 
 
 plt.tight_layout()
-plt.savefig(figure_path / 'comparison_logmap.png',
+plt.savefig(figure_path / 'misc' /'comparison_logmap.png',
             dpi=300)
 
 # plt.show()

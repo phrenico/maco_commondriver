@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
 from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
-from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.control import shuffle_phase
@@ -32,7 +32,9 @@ for n_iter in tqdm(range(N)):
     Y = data['v'][:, 6:]
     z = data['v'][:, 1]
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split+valid_split)
+    X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
+                                                                                                          train_split,
+                                                                                                          valid_split)
     z_pred = shuffle_phase(z_test)
 
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])

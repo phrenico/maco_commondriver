@@ -15,6 +15,7 @@ import seaborn as sns
 
 import sys
 sys.path.append("../../../")
+sys.path.append("./")
 
 from cdriver.datagen.logmap import LogmapExpRunner
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -92,8 +93,10 @@ def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_si
     return train_loader, test_loader, valid_loader, z_test
 
 p = SimpleNamespace(**length_params)  # read in parameters from the config file
-os.makedirs(final_res_path, exist_ok=True)  # create the results directory if it does not exist
-
+try:
+    os.makedirs(final_res_path, exist_ok=True)  # create the results directory if it does not exist
+except:
+    print("Some problem with path creation occured")
 
 # 1. Generate random Logistic datasets
 datasets, params = zip(
@@ -114,11 +117,11 @@ for L in tqdm(p.Ls):
     for n_iter in tqdm(range(p.N)):
         data = datasets[n_iter].astype(float)[:L, :]
 
-        train_loader, test_loader, _, z_test = get_loaders(data,
-                                                           batch_size=p.batch_size,
-                                                           trainset_size=p.trainset_size,
-                                                           testset_size=p.testset_size,
-                                                           validset_size=p.validset_size)
+        train_loader, test_loader, valid_loader, z_test = get_loaders(data,
+                                                                      batch_size=p.batch_size,
+                                                                      trainset_size=p.trainset_size,
+                                                                      testset_size=p.testset_size,
+                                                                      validset_size=p.validset_size)
         models = [MaCo(Ex=p.dx, Ey=p.dy, Ez=p.dz,
                        mh_kwargs=mapper_kwargs,
                        ch_kwargs=coach_kwargs,
@@ -127,17 +130,17 @@ for L in tqdm(p.Ls):
 
         # Train models
         train_losses = []
-        test_loss = []
+        valid_loss = []
         for i in tqdm(range(p.n_models), disable=True):
             train_losses += [models[i].train_loop(train_loader,
                                                   p.n_epochs,
                                                   lr=p.lr,
                                                   disable_tqdm=True)]
-            test_loss += [models[i].test_loop(test_loader)]
+            valid_loss += [models[i].test_loop(valid_loader)]
         train_losses = np.array(train_losses).T
 
         # Pick the best model on the test set
-        ind_best_model = np.argmin(test_loss)
+        ind_best_model = np.argmin(valid_loss)
         best_model = models[ind_best_model]
 
         valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
@@ -162,7 +165,7 @@ df = create_df(maxdict)
 df.to_csv(final_res_path / './length_maco_res.csv')
 
 
-sns.lineplot(x='L', y='r2', data=df)
+# sns.lineplot(x='L', y='r2', data=df)
 
-plt.ylim(0, 1)
-plt.show()
+# plt.ylim(0, 1)
+# plt.show()

@@ -24,7 +24,7 @@ plt.figure(figsize=(10, 10))
 plt.show()
 mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (0, 0))
-plt.xlim(-1, 100)
+plt.xlim(-1, tentmapgen_params['N'] + 1)
 plt.ylim(0, 1)
 
 N = tentmapgen_params['N']  # number of realizations

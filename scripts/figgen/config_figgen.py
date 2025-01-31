@@ -1,5 +1,7 @@
 import sys
 sys.path.append('./')
+sys.path.append('../../')
+sys.path.append('../../../')
 from scripts.config import project_path
 from pathlib import Path
 import pandas as pd
@@ -14,13 +16,16 @@ lorenzs_path = project_path / 'results/final/'
 tentmaps_path = project_path / 'results/final/'
 
 # define colors
-df = pd.read_csv(logmaps_path / 'logmaps_res.csv')
-medians = df[['method', 'r']].groupby('method').median().sort_values(by='r', ascending=True)
-methods = medians.index
-palette_cols = sns.color_palette("husl", len(methods))
-palette = dict(zip(methods, palette_cols))
+try:
+    df = pd.read_csv(logmaps_path / 'logmaps_res.csv')
+    medians = df[['method', 'r']].groupby('method').median().sort_values(by='r', ascending=True)
+    methods = medians.index
+    palette_cols = sns.color_palette("husl", len(methods))
+    palette = dict(zip(methods, palette_cols))
 
-box_color = palette['MaCo']
+    box_color = palette['MaCo']
+except:
+    print('No logmaps_res.csv found, it can cause problems with the colormap...')
 swarm_color = '.25'
 swarm_size = 4
 

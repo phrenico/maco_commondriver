@@ -46,8 +46,8 @@ def plot_example_res():
     fig, axs = plt.subplots(2, 3, figsize=(12, 8))    
 
     plot_learning_prediction(ax_learn=axs[0, 0],
-                             ax_test_loss=axs[0, 2],
-                             ax_predictions=axs[0, 1])
+                             ax_valid_loss=axs[0, 1],
+                             ax_predictions=axs[0, 2])
     
     plot_coefreconstruct(ax_reconstruct=axs[1, 2])
 
@@ -66,21 +66,19 @@ def plot_example_res():
     move_figure(fig, 0, 0)
     # plt.show()
 
-def plot_learning_prediction(ax_learn, ax_predictions, ax_test_loss):
+def plot_learning_prediction(ax_learn, ax_predictions, ax_valid_loss):
     global res_path
     df = pd.read_csv(res_path / 'mappercoach_res.csv')
     learnings = np.load(res_path / 'learning_curves.npy')
-    test_loss = np.load(res_path / 'test_loss.npy')
+    valid_loss = np.load(res_path / 'valid_loss.npy')
     x_pred = df['x_pred'].values
-    x_past_valid = df['x_past_valid'].values
-    x_valid = df['x_valid'].values
-    Y_test= df[["Y_1_valid", "Y_2_valid"]].values
+    x_test = df['x_test'].values
 
     # find best model
-    ind_best_model = np.argmin(test_loss)
+    ind_best_model = np.argmin(valid_loss)
 
     # Compute correlations
-    r = np.corrcoef(x_valid, x_pred, rowvar=False)[0, 1]
+    r = np.corrcoef(x_test, x_pred, rowvar=False)[0, 1]
 
     # cluster the endpoints of learning curves into 2 clusters
     nc = 2
@@ -95,9 +93,10 @@ def plot_learning_prediction(ax_learn, ax_predictions, ax_test_loss):
     for i in range(nc):
         _ = ax1.plot(learnings[:, i==clusts], color=clust_cols[i])
 
-    ax2.plot(minmax_scale(x_valid), minmax_scale(x_pred), '.', alpha=1., color='#F71616')
+    ax2.plot(minmax_scale(x_test), minmax_scale(x_pred), '.', alpha=1., color='#F71616')
     ax2.plot([0, 1], [0, 1], 'k--',)
 
+    
 
 
     ax1.set_xlabel('# epochs')
@@ -123,28 +122,24 @@ def plot_learning_prediction(ax_learn, ax_predictions, ax_test_loss):
 
     # fig.tight_layout(pad=1, h_pad=0, w_pad=1)
 
-    ax3 = ax_test_loss # plt.axes((0.25, 0.7, 0.2, 0.2))
+    ax3 = ax_valid_loss # plt.axes((0.25, 0.7, 0.2, 0.2))
     barcols = [clust_cols[i] for i in clusts]
-    ax3.bar(range(len(test_loss)), test_loss, color=barcols)
-    ax3.plot(ind_best_model, test_loss[ind_best_model]+0.01, 'k*', ms=3)
+    ax3.bar(range(len(valid_loss)), valid_loss, color=barcols)
+    ax3.plot(ind_best_model, valid_loss[ind_best_model]+0.01, 'k*', ms=3)
     # ax3.set_yticklabels([0, 0.05, 0.1])
     ax3.set_yscale('log')
     ax3.set_xticklabels([])
     ax3.set_xticks([])
     ax3.set_xlabel('models')
     ax3.yaxis.set_label_position("left")
-    ax3.set_ylabel('test loss')
+    ax3.set_ylabel('validation loss')
 
 
 def plot_ts_reconstruct(ax_ts, ax_rec):
     # Load data
     df = pd.read_csv(res_path / 'mappercoach_res.csv')
-    x_pred = df['x_pred'].values
-    x_test = df['x_valid'].values
-    Y_test= df[["Y_1_valid", "Y_2_valid"]].values
     cc_pred= df['cc_pred'].values
-    cc_val = df['cc_valid'].values
-    learnings = np.load(res_path / 'learning_curves.npy')
+    cc_val = df['cc_test'].values
 
 
     # compute correlation
@@ -199,48 +194,33 @@ def plot_coefreconstruct(ax_reconstruct):
 
     meta_r = np.corrcoef(rsq[gmres==1].T)
 
-    axin_xlim = [0.98, 0.999]
+    axin_xlim = [0.955, 0.999]
     axin_ylim = [0.80, 0.99]
 
     ax = ax_reconstruct
 
-    axin = ax.inset_axes([0.45, 0.2, 0.47, 0.47])
+    # axin = ax.inset_axes([0.2, 0.45, 0.47, 0.47])
 
-    cols = ['b', '#F9A448', 'red']
+    cols = ['b', '#F9A448'][::-1]
+    cluster_names = ['1', '2'][::-1]
     means = []
     stdevs = []
     for i in range(nclust):
         v = rsq[gmres==i]
-        ax.plot(v[:, 0], v[:, 1], '.', color=cols[i], ms='5', label='cluster {}'.format(i+1))
-        axin.plot(v[:, 0], v[:, 1], '.', color=cols[i], ms='8')
+        ax.plot(v[:, 0], v[:, 1], '.', color=cols[i], ms='10', label='cluster {}'.format(cluster_names[i]))
+        # axin.plot(v[:, 0], v[:, 1], '.', color=cols[i], ms='8')
         means.append(v.mean(axis=0))
         stdevs.append(v.std(axis=0))
 
-    # means = np.array(means)
-    # stdevs = np.array(stdevs)
-
-    # m = np.array([[axin_xlim[0], means[0, 0], means[0, 0]], [means[0, 1], means[0, 1], axin_ylim[0]]]).T
-
-    # meancol='gray'
-    # axin.plot(axin_xlim[0], means[0, 1],  'o', clip_on=False, color=meancol)
-    # axin.plot(means[0, 0], means[0, 1], 'x', color=meancol)
-    # axin.plot(means[0, 0], axin_ylim[0],  'o', clip_on=False, color=meancol)
-
-    # axin.plot(m[:, 0], m[:, 1], '--', lw=0.5, color=meancol)
-    # axin.text(0.65, -0.15, r'$\mu_p={:.3f}$'.format(means[0, 0]),
-    #         transform=axin.transAxes, color=meancol)
-    # axin.text(-0.05, 0.7, r'$\mu_r={:.3f}$'.format(means[0, 1]),
-    #         transform=axin.transAxes, horizontalalignment='right', color=meancol)
-
-    ax.legend()
+    # ax.legend()
     ax.set_xlabel(r"$r_\mathrm{prediction}^2$")
     ax.set_ylabel(r"$r_\mathrm{reconstruction}^2$")
 
     ax.set_ylim(-.1, 1)
-    ax.set_xlim(0.8, 1)
-    axin.set_xlim(axin_xlim)
-    axin.set_ylim(axin_ylim)
-    ax.indicate_inset_zoom(axin, edgecolor="black")
+    ax.set_xlim(0.65, 1)
+    # axin.set_xlim(axin_xlim)
+    # axin.set_ylim(axin_ylim)
+    # ax.indicate_inset_zoom(axin, edgecolor="black")
 
 
 def main():

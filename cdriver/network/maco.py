@@ -49,6 +49,8 @@ class MaCo(torch.nn.Module):
         self.criterion = MSELoss()
         self.device = device
         self.c = c  # regularization parameter for the loss function
+        self.mapper.to(device)
+        self.coach_x.to(device)
         self.to(device)
 
     def preprocess(self, x, y):
@@ -84,9 +86,11 @@ class MaCo(torch.nn.Module):
         target_transformed = xt_transformed[:, -1:]
 
         # print("shapes after tansforms:", x_transformed.shape, target_transformed.shape, y_transformed.shape)
-        return x_transformed, target_transformed, y_transformed
+        return x_transformed.to(self.device), target_transformed.to(self.device), y_transformed.to(self.device)
 
     def forward(self, x, y):
+        # print("Device of x before preprocessing:", x.device)
+        # print("Device of y before preprocessing:", y.device)
         X, target, Y = self.preprocess(x, y)
         # print("Device of X in forward mapper:", X.device)
         # print("Device of Y in forward mapper:", Y.device)
@@ -129,6 +133,7 @@ class MaCo(torch.nn.Module):
 
                 pred, z, hz, target = self.forward(x.to(self.device), y.to(self.device))
 
+                # print(target.is_cuda, pred.is_cuda, z.is_cuda)
                 loss = self.regularized_loss(target, z, pred)
 
                 loss.backward()

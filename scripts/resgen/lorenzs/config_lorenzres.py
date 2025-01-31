@@ -13,6 +13,6 @@ figure_path = project_path / 'figures'
 # common  parameters
 data_path_template = str(project_path) + '/data/lorenz/lorenz_{}.npz'
 N = 50
-train_split = 0.5
-valid_split = 0.25
-test_split = 0.25
+train_split = 1. / 3
+valid_split = 1. / 3
+test_split = 1. / 3

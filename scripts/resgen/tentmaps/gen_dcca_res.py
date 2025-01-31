@@ -19,19 +19,23 @@ from config_tentmapres import train_split, interim_res_path, valid_split
 import torch
 from tqdm import tqdm
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 
 def myfun(x, *args, **kwargs):
     return torch.linalg.eigh(x)
 
 
 torch.symeig = myfun
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 plt.ion()
 plt.figure(figsize=(10, 10))
 mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.show()
-plt.xlim(-1, 100)
+plt.xlim(-1, tentmapgen_params['N'] + 1)
 plt.ylim(0, 1)
 
 N = tentmapgen_params['N']  # number of realizations
@@ -61,7 +65,7 @@ for n_iter in tqdm(range(N)):
                 layer_sizes1=layers1,
                 layer_sizes2=layers2,
                 epoch_num=100,
-                use_all_singular_values=True)
+                use_all_singular_values=True, device=device)
     dcca.fit([X_train, Y_train])
     Xs_transformed = dcca.transform([X_test, Y_test])
 

@@ -101,7 +101,7 @@ mngr = plt.get_current_fig_manager()
 mngr.window.wm_geometry("+%d+%d" % (0, 0))
 plt.show()
 
-plt.xlim(-1, 100)
+plt.xlim(-1, tentmapgen_params['N'] + 1)
 plt.ylim(0, 1)
 
 
@@ -129,8 +129,10 @@ for n_iter in tqdm(range(N)):
 
     # print("original data shape:", data.shape)
 
-    train_loader, test_loader, _, z_test = get_loaders(data, batch_size=1000, trainset_size=train_split*100,
-                                                       testset_size= 100 - (train_split+valid_split) * 100, validset_size=valid_split*100)
+    train_loader, test_loader, valid_loader, z_test = get_loaders(data, batch_size=1000,
+                                                                  trainset_size=train_split*100,
+                                                                  testset_size= 100 - (train_split+valid_split) * 100,
+                                                                  validset_size=valid_split*100)
 
 
 
@@ -144,14 +146,14 @@ for n_iter in tqdm(range(N)):
 
     # Train models
     train_losses = []
-    test_loss = []
+    valid_loss = []
     for i in tqdm(range(n_models), disable=True):
         train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=True)]
-        test_loss += [models[i].test_loop(test_loader)]
+        valid_loss += [models[i].test_loop(valid_loader)]
     train_losses = np.array(train_losses).T
 
     # Pick the best model on the test set
-    ind_best_model = np.argmin(test_loss)
+    ind_best_model = np.argmin(valid_loss)
     best_model = models[ind_best_model]
 
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)

@@ -1,9 +1,21 @@
 """ Data Generation parameter configurations"""
 import numpy as np
 
+# Example Logistic map dataset configuration
+logmapexamplegen_params = dict(N=1,  # number of realizations
+                               n=10_000,  # Length of time series
+                               rint=(3.8, 4.),  # interval to chose from the value of r parameter
+                               A0=np.array([[0, 0, 0],
+                                            [1, 0, 0],
+                                            [1, 0, 0]]), # basic connection structure
+                               A=np.array([[1., 0., 0.],
+                                           [0.3, 1., 0.],
+                                           [0.4, 0., 1.]])
+                                )
+
 # Logmaps dataset configuration
 logmapgen_params = dict(N=50,  # number of realizations
-                        n=20_000,  # Length of time series
+                        n=15_000,  # Length of time series
                         rint=(3.8, 4.),  # interval to chose from the value of r parameter
                         A0=np.array([[0, 0, 0],
                                      [1, 0, 0],
@@ -14,8 +26,8 @@ logmapgen_params = dict(N=50,  # number of realizations
 
 # Tentmaps generation configuration
 tentmapgen_params = dict(N=50,
-                         n=20_000,
-                         aint=(2, 10.),  # interval to chose from the value of r parameter
+                         n=15_000,
+                         aint=(2, 10.),  # interval to chose from the value of alpha parameter
                          A0=np.array([[0, 0, 0],
                                       [1, 0, 0],
                                       [1, 0, 0]]))  # basic connection structure

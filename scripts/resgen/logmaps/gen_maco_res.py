@@ -10,7 +10,8 @@ import os
 import numpy as np
 from tqdm import tqdm
 import sys
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
+sys.path.append('./')
+sys.path.append('../../../')
 
 from cdriver.network.maco import MaCo
 from cdriver.savers.saver import  save_results
@@ -25,7 +26,7 @@ import matplotlib.pyplot as plt
 
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from config_logmapres import interim_res_path, train_split
+from config_logmapres import interim_res_path, train_split, valid_split, test_split
 
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):
@@ -99,6 +100,8 @@ dataset, params = gen_logmapdata(logmapgen_params)
 # define MaCo model
 n_epochs = 300
 n_models = 10
+bs = 1_000
+lr = 1e-2
 dx = 1
 dy = 2
 dz = 1
@@ -107,6 +110,7 @@ mapper_kwargs = dict(n_h1=nh, n_h2=nh)
 coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print("device: ", device)
 
 maxcs = []
 for n_iter in tqdm(range(N)):
@@ -114,8 +118,10 @@ for n_iter in tqdm(range(N)):
 
     # print("original data shape:", data.shape)
 
-    train_loader, test_loader, _, z_test = get_loaders(data, batch_size=1000, trainset_size=int(train_split*100),
-                                                       testset_size=int(100*(1-train_split)), validset_size=0)
+    train_loader, test_loader, valid_loader, z_test = get_loaders(data, batch_size=bs,
+                                                                  trainset_size=int(train_split*100),
+                                                                  testset_size=int(100*test_split),
+                                                                  validset_size=int(valid_split*100))
 
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs,
@@ -126,14 +132,14 @@ for n_iter in tqdm(range(N)):
 
     # Train models
     train_losses = []
-    test_loss = []
+    valid_loss = []
     for i in tqdm(range(n_models), disable=True):
-        train_losses += [models[i].train_loop(train_loader, n_epochs, lr=1e-2, disable_tqdm=True)]
-        test_loss += [models[i].test_loop(test_loader)]
+        train_losses += [models[i].train_loop(train_loader, n_epochs, lr=lr, disable_tqdm=True)]
+        valid_loss += [models[i].test_loop(valid_loader)]
     train_losses = np.array(train_losses).T
 
     # Pick the best model on the test set
-    ind_best_model = np.argmin(test_loss)
+    ind_best_model = np.argmin(valid_loss)
     best_model = models[ind_best_model]
 
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)

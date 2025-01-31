@@ -94,7 +94,7 @@ echo "MaCo - pending.."
 
 # DCCA
 conda activate dcca_env
-python gen_dcca_res.py
+python3 gen_dcca_res.py
 conda deactivate
 
 pbar $FIVE
@@ -143,7 +143,7 @@ echo "MaCo - pending.."
 
 # sfa
 conda activate sfa
-python gen_sfa_res.py
+python3 gen_sfa_res.py
 conda deactivate
 
 pbar $EIGHT

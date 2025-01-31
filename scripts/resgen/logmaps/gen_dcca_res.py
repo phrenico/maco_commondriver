@@ -1,19 +1,25 @@
 """It's not running, use Google Colab in stead"""
+import torch
+# set default device to cpu
+# cpu
+torch.device('cpu')
+
 import numpy as np
 
 from tqdm import tqdm
 import sys
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
+sys.path.append('./')
+sys.path.append('../../../')
 from mvlearn.embed import DCCA
-from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from config_logmapres import train_split, interim_res_path
-import torch
+from config_logmapres import train_split, interim_res_path, valid_split
+
 
 import sys
 
@@ -28,6 +34,7 @@ def myfun(x, *args, **kwargs):
 
 torch.symeig = myfun  # redefine function to make it work with dcca
 
+device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 
 # 1. Generate data
 N = logmapgen_params['N']  # number of realizations
@@ -51,11 +58,13 @@ for i in tqdm(range(N)):
     X = time_delay_embedding(data[:, 1], dimension=d_embed)
     Y = time_delay_embedding(data[:, 2], dimension=d_embed)
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
+    X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
+                                                                                                          train_split,
+                                                                                                          valid_split)
 
     dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,
                 layer_sizes1=layers1, layer_sizes2=layers2, epoch_num=500,
-                use_all_singular_values=True)
+                use_all_singular_values=True, device=device)
     dcca.fit([X_train, Y_train])
     Xs_transformed = dcca.transform([X_test, Y_test])
 

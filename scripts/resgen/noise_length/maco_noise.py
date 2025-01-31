@@ -111,6 +111,9 @@ datasets, params = zip(
                                                         seed=i) for i in tqdm(range(p.N))])
 
 
+print("Data sigma: ",np.mean([i.std() for i in datasets]))
+exit()
+
 mapper_kwargs = dict(n_h1=p.nh, n_h2=p.nh)
 coach_kwargs = dict(n_h1=p.nh, n_out=1)
 preprocess_kwargs = dict(tau=p.tau)
@@ -123,7 +126,7 @@ for L in tqdm(p.Ls, desc='Noise levels'):
         data = datasets[n_iter].astype(float)
         data[:, 1:] = data[:, 1:] + np.random.normal(loc=0, scale=L, size=data[:, 1:].shape)  # add observation noise to the observed time series
 
-        train_loader, test_loader, _, z_test = get_loaders(data,
+        train_loader, test_loader, valid_loader, z_test = get_loaders(data,
                                                            batch_size=p.batch_size,
                                                            trainset_size=p.trainset_size,
                                                            testset_size=p.testset_size,
@@ -136,7 +139,7 @@ for L in tqdm(p.Ls, desc='Noise levels'):
 
         # Train models
         train_losses = []
-        test_loss = []
+        valid_loss = []
         for i in tqdm(range(p.n_models),
                       disable=True,
                       desc='Models',
@@ -145,11 +148,11 @@ for L in tqdm(p.Ls, desc='Noise levels'):
                                                   p.n_epochs,
                                                   lr=p.lr,
                                                   disable_tqdm=True)]
-            test_loss += [models[i].test_loop(test_loader)]
+            valid_loss += [models[i].test_loop(valid_loader)]
         train_losses = np.array(train_losses).T
 
         # Pick the best model on the test set
-        ind_best_model = np.argmin(test_loss)
+        ind_best_model = np.argmin(valid_loss)
         best_model = models[ind_best_model]
 
         valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)

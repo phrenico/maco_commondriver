@@ -17,7 +17,7 @@ sys.path.append('../')
 # sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
 sys.path.append('../../../')
 
-from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -26,13 +26,16 @@ from cdriver.datagen.tent_map import gen_tentmapdata
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
 from config_tentmapres import train_split, interim_res_path, valid_split
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 if __name__ == "__main__":
     plt.ion()
     plt.figure(figsize=(10, 10))
     plt.show()
     mngr = plt.get_current_fig_manager()
     mngr.window.wm_geometry("+%d+%d" % (0, 0))
-    plt.xlim(-1, 100)
+    plt.xlim(-1, tentmapgen_params['N'] + 1)
     plt.ylim(0, 1)
 
     N = tentmapgen_params['N']  # number of realizations
@@ -47,7 +50,9 @@ if __name__ == "__main__":
         X = time_delay_embedding(data[:, 1], dimension=d_embed)
         Y = time_delay_embedding(data[:, 2], dimension=d_embed)
 
-        X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
+        X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z, 
+                                                                                                              train_split,
+                                                                                                              valid_split)
         D_train = np.concatenate([X_train, Y_train], axis=1)
         D_test = np.concatenate([X_test, Y_test], axis=1)
 
@@ -69,7 +74,7 @@ if __name__ == "__main__":
         plt.pause(0.05)
 
     # Save results
-    df = save_results(fname=interim_res_path / './sfa_res.csv',
+    df = save_results(fname=interim_res_path / 'sfa_res.csv',
                       r=maxcs,
                       N=N,
                       method='SFA',

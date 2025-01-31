@@ -5,7 +5,9 @@ import os
 import numpy as np
 from tqdm import tqdm
 import sys
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
+sys.path.append('../')
+sys.path.append('../../../')
+sys.path.append('./')
 
 from cdriver.network.maco import MaCo
 from cdriver.savers.saver import  save_results
@@ -21,7 +23,7 @@ import pandas as pd
 from pathlib import Path
 import pickle
 
-from scripts.datagen_scripts.datagen_config import logmapgen_params
+from scripts.datagen_scripts.datagen_config import logmapexamplegen_params
 # from config_logmapres import interim_res_path, train_split
 
 def split_sets(x, y, z, trainset_size, testset_size, validset_size):
@@ -85,6 +87,8 @@ def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_si
 
 
 def main():
+    respath = Path('/home/zsiga/Projects/Codes/maco_commondriver/results/final/example_logmap')
+
     # Parameters
     dx = 1
     dy = 2
@@ -93,7 +97,7 @@ def main():
     mapper_kwargs = dict(n_h1=nh, n_h2=nh)
     coach_kwargs = dict(n_h1=nh, n_out=1)
     preprocess_kwargs = dict(tau=1)
-    device= torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device= "cpu"  # torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     n_models = 10  # number of models to train
 
@@ -103,13 +107,14 @@ def main():
 
     n_epochs = 2_000
     batch_size = 1_000
-    n = 2_000
     lr = 1e-2
 
-    dataset, params = gen_logmapdata(logmapgen_params)
-    data = dataset[0][:n]
+    dataset, params = gen_logmapdata(logmapexamplegen_params)
+    data = dataset[0]
+    # save
+    np.savez(respath / 'data_params.npz', params=params[0], dataset=data)
 
-    train_loader, test_loader, _, z_test = get_loaders(data,
+    train_loader, test_loader, valid_loader, z_test = get_loaders(data,
                                                        batch_size=batch_size,
                                                        trainset_size=trainset_size,
                                                        testset_size=testset_size,
@@ -122,21 +127,23 @@ def main():
 
     # Train models
     train_losses = []
-    test_loss = []
+    valid_loss = []
     for i in tqdm(range(n_models), disable=False):
         train_losses += [models[i].train_loop(train_loader,
                                               n_epochs,
                                               lr=lr,
                                               disable_tqdm=True)]
-        test_loss += [models[i].test_loop(test_loader)]
+        valid_loss += [models[i].test_loop(valid_loader)]
     train_losses = np.array(train_losses).T
-    test_loss = np.array(test_loss).T
+    valid_loss = np.array(valid_loss).T
 
     # Pick the best model on the test set
-    ind_best_model = np.argmin(test_loss)
+    ind_best_model = np.argmin(valid_loss)
     best_model = models[ind_best_model]
 
-    valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
+    # valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(valid_loader)
+    test_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
+    
 
     # print("shape of z_pred: {} and the shape of z_test: {}".format(z_pred.shape, z_test.shape))
     tau, c = comp_ccorr(z_pred, z_test)
@@ -150,18 +157,17 @@ def main():
     for model in tqdm(models):
         preds = model.valid_loop(test_loader)
         print(preds[1].shape, preds[2].shape, test_loader[1].squeeze().shape)
-        # exit()
         r_predict += [np.corrcoef(preds[1], test_loader[0].squeeze()[1:])[0, 1] ]
         r_reconst += [np.corrcoef(preds[2], z_test.squeeze()[:-1])[0, 1]]
 
     # Save out results
     res_dict = {'cc_pred': z_pred,
-                'cc_valid': z_test[:-1],
-                'x_valid': test_loader[0].squeeze().detach().numpy()[1:],
-                'x_past_valid': test_loader[0].squeeze()[:-1],
+                'cc_test': z_test[:-1],
+                'x_test': test_loader[0].squeeze().detach().numpy()[1:],
+                'x_past_test': test_loader[0].squeeze()[:-1],
                 'x_pred': x_pred,
-                'Y_1_valid': test_loader[1].squeeze()[:-1],
-                'Y_2_valid': test_loader[1].squeeze()[1:],
+                'Y_1_test': test_loader[1].squeeze()[:-1],
+                'Y_2_test': test_loader[1].squeeze()[1:],
                 }
     for label, value in res_dict.items():
         print(label, value.shape)
@@ -169,11 +175,11 @@ def main():
     df = pd.DataFrame(res_dict)
 
     # Save out the Results (uncomment to rewrite the current results)
-    respath = Path('/home/phrenico/Projects/Codes/maco_commondriver/results/final/example_logmap')
+    
     os.makedirs(respath, exist_ok=True)
     df.to_csv(respath / 'mappercoach_res.csv')
     np.save(respath / 'learning_curves.npy', train_losses)
-    np.save(respath / 'test_loss.npy', test_loss)
+    np.save(respath / 'valid_loss.npy', valid_loss)
     torch.save(best_model, respath / 'best_model.pth')
     with open(respath / 'models.pkl', 'wb') as f:
         pickle.dump(models, f)

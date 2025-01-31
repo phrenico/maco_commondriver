@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+import sys
+sys.path.append('./')
+sys.path.append('../../../')
 from scripts.resgen.tentmaps.config_tentmapres import final_res_path, figure_path
 
 
@@ -38,6 +41,6 @@ ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick
 
 
 plt.tight_layout()
-plt.savefig(figure_path / 'comparison_tentmap.png', dpi=300)
+plt.savefig(figure_path / 'misc' / 'comparison_tentmap.png', dpi=300)
 
 # plt.show()

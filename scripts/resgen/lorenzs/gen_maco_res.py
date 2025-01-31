@@ -98,7 +98,7 @@ def typer(x, dtype=torch.float32):
 def myscaler(x, axis):
     return (x - x.mean(axis=axis, keepdim=True)) / x.std(axis=axis, keepdim=True)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 def preprocess(X, Y):
     """Preprocess data.
 
@@ -124,6 +124,7 @@ def preprocess(X, Y):
 
 
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # apply MaCo
 n_epochs = 200
 n_models = 10
@@ -160,11 +161,11 @@ for n_iter in tqdm(range(N)):
     z = data['v'][:, 1]
 
 
-    train_loader, test_loader, _, z_test = get_loaders(X, Y, z,
-                                                       batch_size=batch_size,
-                                                       trainset_size=int(100*(train_split+valid_split)),
-                                                       testset_size=int(100 - 100*(train_split+valid_split)),
-                                                       validset_size=0)
+    train_loader, test_loader, valid_loader, z_test = get_loaders(X, Y, z,
+                                                                  batch_size=batch_size,
+                                                                  trainset_size=int(100*train_split),
+                                                                  testset_size= 100 - (train_split+valid_split) * 100,
+                                                                  validset_size=valid_split*100)
     models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
                    mh_kwargs=mapper_kwargs,
                    ch_kwargs=coach_kwargs,
@@ -176,17 +177,17 @@ for n_iter in tqdm(range(N)):
 
     # Train models
     train_losses = []
-    test_loss = []
+    valid_loss = []
     for i in tqdm(range(n_models), disable=False, leave=False, desc='Training models'):
         train_losses += [models[i].train_loop(train_loader,
                                               n_epochs,
                                               lr=lr,
                                               disable_tqdm=False)]
-        test_loss += [models[i].test_loop(test_loader)]
+        valid_loss += [models[i].test_loop(valid_loader)]
     train_losses = np.array(train_losses).T
 
     # Pick the best model on the test set
-    ind_best_model = np.argmin(test_loss)
+    ind_best_model = np.argmin(valid_loss)
     best_model = models[ind_best_model]
     #
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)

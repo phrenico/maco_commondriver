@@ -22,5 +22,11 @@ def comp_ccorr(y, y_recon):
 
 def get_maxes(tau, c):
   """Gets the argmax and max of |xcorr|
+
+  param list[int] tau: lags
+  param list[float] c: crosscorrelation values
+  returns: lag, max
+  rtype: int, float
   """
-  return tau[np.argmax(np.abs(c))], max(np.abs(c))
+  i = np.argmax(np.abs(c))
+  return tau[i], np.abs(c)[i]

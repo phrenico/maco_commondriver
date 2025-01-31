@@ -7,6 +7,7 @@ from pathlib import Path
 
 import sys
 sys.path.append('../')
+sys.path.append('../../')
 sys.path.append('./scripts/figgen')
 
 from config_figgen import fig_path, lorenzs_path, palette
@@ -49,6 +50,6 @@ ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick
 
 
 plt.tight_layout()
-plt.savefig(fig_path / 'comparisons_lorenz.png', dpi=300)
+plt.savefig(fig_path/ 'misc' / 'comparisons_lorenz.png', dpi=300)
 
 # plt.show()

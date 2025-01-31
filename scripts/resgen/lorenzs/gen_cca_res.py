@@ -4,15 +4,17 @@ from sklearn.cross_decomposition import CCA
 import os
 import numpy as np
 import matplotlib
+# if X is tunneled through ssh then use tkagg if headless use agg
+if os.environ.get('DISPLAY', '') == '':
+    matplotlib.use('Agg')
+else:
+    matplotlib.use('TkAgg')
 
-from scripts.resgen.lorenzs.config_lorenzres import valid_split
-
-matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
 import sys
 sys.path.append('../')
 from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
-from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from tqdm import tqdm
@@ -23,7 +25,11 @@ plt.ion()
 plt.figure(figsize=(10, 10))
 plt.show()
 mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (0, 0))
+# if tkagg backend is used then use wm_geometry else use set_position
+if os.environ.get('DISPLAY', '') == '':
+    pass
+else:
+    mngr.window.wm_geometry("+%d+%d" % (0, 0))
 
 plt.xlim(-1, N)
 plt.ylim(0, 1)
@@ -38,7 +44,9 @@ for n_iter in tqdm(range(N)):
     Y = data['v'][:, 6:]
     z = data['v'][:, 1]
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split+valid_split)
+    X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
+                                                                                                          train_split,
+                                                                                                          valid_split)
 
     cca = CCA(n_components=1, max_iter=500)
     cca.fit(X_train, Y_train)
@@ -61,7 +69,10 @@ df = save_results(fname=interim_res_path / 'cca_res.csv',
 
 plt.figure()
 mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (1000, 0))
+if os.environ.get('DISPLAY', '') == '':
+    pass
+else:
+    mngr.window.wm_geometry("+%d+%d" % (1000, 0))
 plt.hist(maxcs)
 plt.xlim(0, 1)
 plt.show()

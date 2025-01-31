@@ -1,15 +1,16 @@
 import numpy as np
 import sys
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
+sys.path.append('./')
+sys.path.append('../../../')
 from sklearn.cross_decomposition import CCA
-from cdriver.preprocessing.splitters import train_test_split
+from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from config_logmapres import train_split, interim_res_path
+from config_logmapres import train_split, interim_res_path, valid_split
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
@@ -31,7 +32,7 @@ for i in tqdm(range(N)):
     X = time_delay_embedding(data[:, 1], dimension=d_embed)
     Y = time_delay_embedding(data[:, 2], dimension=d_embed)
 
-    X_train, Y_train, z_train, X_test, Y_test, z_test = train_test_split(X, Y, z, train_split)
+    X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z, train_split, valid_split)
 
     cca = CCA(n_components=1)
     cca.fit(X_train, Y_train)

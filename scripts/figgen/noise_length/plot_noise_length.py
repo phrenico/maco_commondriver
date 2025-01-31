@@ -25,7 +25,8 @@ def plot_sub(ax, df, xlabel, ylabel, intlabels=False):
         ax.set_xticklabels(['{:.0f}'.format(L) for L in Ls],
                            rotation=rotation)
     else:
-        ax.set_xticklabels(['{:.3f}'.format(L) for L in Ls],
+        # signal to noise ratio
+        ax.set_xticklabels(['{:.1f}'.format(L) for L in (Ls / 0.283)*100 ],
                            rotation=rotation)
 
     ax.set_ylim(0, 1)
@@ -33,10 +34,10 @@ def plot_sub(ax, df, xlabel, ylabel, intlabels=False):
 
 def plot_noise_length(df_noise, df_length, save_path):
     len_ax_xlabel = r'Length of Time Series'
-    noise_ax_xlabel = r'Noise $\sigma$'
+    noise_ax_xlabel = r'$\sigma_{\mathrm{noise}} / \sigma_{\mathrm{signal}} \times 100$ (%)'
     ylabel = r'$r^2$ Score'
 
-    fig, axs = plt.subplots(1, 2, figsize=(10, 6), sharey=False)
+    fig, axs = plt.subplots(1, 2, figsize=(10, 6), sharey=True)
 
     plot_sub(axs[0], df_length, len_ax_xlabel, ylabel, intlabels=True)
     plot_sub(axs[1], df_noise, noise_ax_xlabel, ylabel)
@@ -58,6 +59,7 @@ def main():
 
     len_df = pd.read_csv(noise_length_path / './length_maco_res.csv')
     noise_df = pd.read_csv(noise_length_path / './noise_maco_res.csv')
+
 
     fig = plot_noise_length(noise_df, len_df, fig_path)
     # plt.show()
