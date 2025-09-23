@@ -10,3 +10,4 @@ figure_path = project_path / 'figures'
 train_split = 1. / 3
 valid_split = 1. / 3
 test_split = 1 - (train_split + valid_split)
+
