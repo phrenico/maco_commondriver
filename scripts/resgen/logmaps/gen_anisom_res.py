@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
         ani = AniSOM(space_dim=d_space, grid_dim=d_grid, sizes=sizes)
 
-        ani.fit(torch.Tensor(X_train), torch.Tensor(Y_train), epochs=1, disable_tqdm=True)
+        ani.fit(torch.Tensor(X_train), torch.Tensor(Y_train), epochs=4, disable_tqdm=True)
         pred = ani.predict(torch.Tensor(X_test))
 
         tau, c = comp_ccorr(pred[:, 1], z_test)
@@ -63,7 +63,8 @@ if __name__ == "__main__":
                       r=maxcs,
                       N=N,
                       method='ASOM',
-                      dataset='logmap')
+                      dataset='logmap',
+                      times=N * ['NaN'])
 
     # 3. Plot results
     plt.figure()

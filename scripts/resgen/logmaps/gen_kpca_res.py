@@ -9,7 +9,7 @@ import numpy as np
 import sys
 sys.path.append('./')
 sys.path.append('../../../')
-from sklearn.decomposition import PCA
+from sklearn.decomposition import KernelPCA
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -18,51 +18,43 @@ from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
 from config_logmapres import train_split, interim_res_path, valid_split
-import matplotlib.pyplot as plt
-import time
+# import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
 if __name__ == "__main__":
 
     # 1. Generate data
-    N = 1 # logmapgen_params['N']  # number of realizations
+    N = logmapgen_params['N']  # number of realizations
     dataset, params = gen_logmapdata(logmapgen_params)
 
-    # 2. Run PCA 
-    
+    print('Generated {} realizations of logistic map data-set with parameters: {}'.format(N, params))
+    print("Training-Data length will be: {}".format(int(logmapgen_params['n'] * train_split)))
+
+    # 2. Run PCA
     d_embed = 3
     maxcs = []
-    ts = []
     for i in tqdm(range(N)):
-        t0 = time.time()
         X = time_delay_embedding(dataset[i][:, 1], delay=1, dimension=d_embed)
         Y = time_delay_embedding(dataset[i][:, 2], delay=1, dimension=d_embed)
         z = dataset[i][d_embed - 1:, 0]
 
-        X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
-                                                                                                              train_split,
-                                                                                                              valid_split)
+        X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z, train_split, valid_split)
 
         D = np.concatenate([X_train, Y_train], axis=1)
 
-        model = PCA(n_components=1).fit(D)
-        zpred = model.transform(np.concatenate([X_test, Y_test],
-                                               axis=1))
+        model = KernelPCA(n_components=1, kernel='rbf').fit(D)
+        zpred = model.transform(np.concatenate([X_test, Y_test], axis=1))
 
         maxcs.append(get_maxes(*comp_ccorr(z_test, zpred[:, 0]))[1])
-        t1 = time.time()
-        ts.append(t1-t0)
-
 
     # Save results
-    df = save_results(fname='./pca_res.csv',  # fname=interim_res_path / 'pca_res.csv',
+    df = save_results(fname=interim_res_path / 'kpca_res_{}.csv'.format(int(logmapgen_params['n'] * train_split)),
                       r=maxcs,
-                      times=ts,
                       N=N,
-                      method='PCA',
-                      dataset='logmap')
-    
+                      method='KPCA',
+                      dataset='logmap',
+                      times= N * ['NaN'])  # times can be None if not measured
 
     # # 3. Plot results
     # plt.figure()

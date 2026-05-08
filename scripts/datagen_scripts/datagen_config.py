@@ -15,7 +15,8 @@ logmapexamplegen_params = dict(N=1,  # number of realizations
 
 # Logmaps dataset configuration
 logmapgen_params = dict(N=50,  # number of realizations
-                        n=15_000,  # Length of time series
+                        # n=15_000,  # Length of time series
+                        n=int(3*16_000),  # Length of time series
                         rint=(3.8, 4.),  # interval to chose from the value of r parameter
                         A0=np.array([[0, 0, 0],
                                      [1, 0, 0],
@@ -26,11 +27,12 @@ logmapgen_params = dict(N=50,  # number of realizations
 
 # Tentmaps generation configuration
 tentmapgen_params = dict(N=50,
-                         n=15_000,
-                         aint=(2, 10.),  # interval to chose from the value of alpha parameter
-                         A0=np.array([[0, 0, 0],
-                                      [1, 0, 0],
-                                      [1, 0, 0]]))  # basic connection structure
+                        #  n=15_000,
+                        n=int(3*16_000),  # Length of time series
+                        aint=(2, 10.),  # interval to chose from the value of alpha parameter
+                        A0=np.array([[0, 0, 0],
+                                     [1, 0, 0],
+                                     [1, 0, 0]]))  # basic connection structure
 
 # Lorenz dataset configuration
 dt = 1e-3

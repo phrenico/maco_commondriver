@@ -6,6 +6,8 @@ from scripts.resgen.tentmaps.config_tentmapres import interim_res_path, final_re
 
 
 pca_res = pd.read_csv(interim_res_path / 'pca_res.csv', index_col=0)
+cols = pca_res.columns
+kpca_res = pd.read_csv(interim_res_path / 'kpca_res.csv', index_col=0)[cols]
 ica_res = pd.read_csv(interim_res_path / 'ica_res.csv', index_col=0)
 cca_res = pd.read_csv(interim_res_path / 'cca_res.csv', index_col=0)
 dcca_res = pd.read_csv(interim_res_path / 'dcca_res.csv', index_col=0)
@@ -20,6 +22,7 @@ anisom_res = pd.read_csv(interim_res_path / 'anisom_res.csv', index_col=0)
 maco_res = pd.read_csv(interim_res_path / 'maco_res.csv', index_col=0)
 
 df = pd.concat([pca_res,
+                kpca_res,
                 ica_res,
                 cca_res,
                 dcca_res,
