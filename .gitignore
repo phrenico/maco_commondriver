@@ -288,3 +288,10 @@ cython_debug/
 #.idea/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,jupyternotebooks
+
+### Generated experiment outputs ###
+# Ignore all generated result data and figures by default.
+# Curated paper artefacts that should be version-controlled must be
+# committed explicitly (git add -f <file>).
+scripts_and_results/resdata/
+scripts_and_results/resfigure/

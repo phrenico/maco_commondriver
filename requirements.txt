@@ -1,3 +1,7 @@
+# Exact-pin lockfile for fully reproducible environments.
+# Canonical dependency declarations live in pyproject.toml [project.dependencies].
+# To create a fresh environment matching the original paper results, run:
+#   pip install -r requirements.txt
 matplotlib==3.3.4
 numpy==1.20.1
 pandas==1.2.4

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maco-commondriver"
+version = "0.1.0"
+description = "MaCo (Mapper-Coach) model for common-driver identification in coupled dynamical systems"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+
+# Single source of truth for runtime dependencies (replaces requirements.txt).
+# Use minimum-version constraints here; pin exact versions in requirements.txt
+# for fully reproducible environment snapshots.
+dependencies = [
+    "matplotlib>=3.3.4",
+    "numpy>=1.20.1",
+    "pandas>=1.2.4",
+    "scikit-learn>=1.1.3",
+    "scipy>=1.6.2",
+    "torch>=1.11.0",
+    "torchvision>=0.12.0",
+    "tqdm>=4.63.1",
+]
+
+[project.scripts]
+# Canonical public entry-point; replaces the Z_run_all.sh wrappers.
+cdriver-run = "cdriver.run_family:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cdriver*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
