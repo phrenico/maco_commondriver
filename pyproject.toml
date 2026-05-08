@@ -8,7 +8,7 @@ version = "0.0.1"
 description = "Scripts for hidden common cause reconstruction"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.14,<3.15"
+requires-python = ">=3.9"
 authors = [
     { name = "Zsigmond Benko", email = "benko.zsigmond@gmail.com" },
 ]
@@ -19,7 +19,16 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Scientific/Engineering :: Mathematics",
 ]
-dynamic = ["dependencies"]
+dependencies = [
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "torch",
+    "torchvision",
+    "tqdm",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -27,10 +36,7 @@ dev = [
 ]
 
 [project.scripts]
-cdriver-run-family = "scripts.resgen.run_family:main"
-
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
+cdriver-run-family = "scripts.experiments.run_family:main"
 
 [tool.setuptools.packages.find]
 include = ["cdriver*", "scripts*"]

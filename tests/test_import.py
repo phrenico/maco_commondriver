@@ -15,6 +15,6 @@ class TestImports(unittest.TestCase):
         self.assertTrue(callable(get_mapper))
 
     def test_import_tent_map_generator(self):
-        from cdriver.datagen.tent_map import gen_tentmap
+        from cdriver.datagen.tent_map import gen_tentmapdata
 
-        self.assertTrue(callable(gen_tentmap))
+        self.assertTrue(callable(gen_tentmapdata))
