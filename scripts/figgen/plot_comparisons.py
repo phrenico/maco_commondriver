@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-from config_figgen import palette, swarm_color, swarm_size, fs, tick_size, logmaps_path, lorenzs_path, tentmaps_path, fig_path
+from scripts.figgen.config_figgen import palette, swarm_color, swarm_size, fs, tick_size, logmaps_path, lorenzs_path, tentmaps_path, fig_path
+from scripts.resgen.experiment_registry import get_family_spec
 import pandas as pd
 
 def plot_sub(ax, df, ax_kwargs={}):
@@ -8,7 +9,7 @@ def plot_sub(ax, df, ax_kwargs={}):
                                                                       ascending=True).index
 
     sns.boxplot(data=df, x='method', y='r', hue='method',
-            palette=palette, order=method_order, ax=ax, legend=True)
+            palette=palette, order=method_order, ax=ax)
     sns.swarmplot(data=df, x='method', y='r',
                 color=swarm_color, alpha=0.5, size=swarm_size,
                 order=method_order, ax=ax)
@@ -23,11 +24,15 @@ def plot_sub(ax, df, ax_kwargs={}):
     ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick_size)
 
 def plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=None):
+    logmap_spec = get_family_spec('logmaps')
+    tentmap_spec = get_family_spec('tentmaps')
+    lorenz_spec = get_family_spec('lorenzs')
+
     fig, axs = plt.subplots(1, 3, figsize=(12, 6), sharey=True)
 
-    plot_sub(axs[0], df_logmap, ax_kwargs={'title': 'Logistic Maps'})
-    plot_sub(axs[1], df_tentmap, ax_kwargs={'title': 'Tent Maps'})
-    plot_sub(axs[2], df_lorenz, ax_kwargs={'title': 'Lorenz Systems'})
+    plot_sub(axs[0], df_logmap, ax_kwargs={'title': logmap_spec.title})
+    plot_sub(axs[1], df_tentmap, ax_kwargs={'title': tentmap_spec.title})
+    plot_sub(axs[2], df_lorenz, ax_kwargs={'title': lorenz_spec.title})
 
     axs[0].set_xlabel('')
     axs[2].set_xlabel('')
@@ -61,10 +66,14 @@ def plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=None):
 
 
 def main():
+    logmap_spec = get_family_spec('logmaps')
+    tentmap_spec = get_family_spec('tentmaps')
+    lorenz_spec = get_family_spec('lorenzs')
+
     #load data
-    df_logmap = pd.read_csv(logmaps_path / 'logmaps_res.csv')
-    df_tentmap = pd.read_csv(tentmaps_path / 'tentmaps_res.csv')
-    df_lorenz = pd.read_csv(lorenzs_path / 'lorenzs_res.csv')
+    df_logmap = pd.read_csv(logmaps_path / logmap_spec.combined_csv)
+    df_tentmap = pd.read_csv(tentmaps_path / tentmap_spec.combined_csv)
+    df_lorenz = pd.read_csv(lorenzs_path / lorenz_spec.combined_csv)
 
     fig = plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=fig_path)
     # plt.show()

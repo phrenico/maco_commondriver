@@ -1,11 +1,7 @@
-import sys
-sys.path.append('./')
-sys.path.append('../../')
-sys.path.append('../../../')
 from scripts.config import project_path
-from pathlib import Path
 import pandas as pd
 import seaborn as sns
+from scripts.resgen.experiment_registry import get_family_spec
 
 # Define paths
 fig_path = project_path / 'figures'
@@ -16,8 +12,10 @@ lorenzs_path = project_path / 'results/final/'
 tentmaps_path = project_path / 'results/final/'
 
 # define colors
+logmap_spec = get_family_spec('logmaps')
+
 try:
-    df = pd.read_csv(logmaps_path / 'logmaps_res.csv')
+    df = pd.read_csv(logmaps_path / logmap_spec.combined_csv)
     medians = df[['method', 'r']].groupby('method').median().sort_values(by='r', ascending=True)
     methods = medians.index
     palette_cols = sns.color_palette("husl", len(methods))

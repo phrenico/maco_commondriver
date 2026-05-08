@@ -5,9 +5,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
-import sys
-sys.path.append('../')
-from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
+from scripts.resgen.lorenzs.config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes

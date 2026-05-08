@@ -5,16 +5,22 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from pathlib import Path
 
-import sys
-sys.path.append('../')
-
-from data_generators import time_delay_embedding
+from cdriver.preprocessing.tde import time_delay_embedding
 
 from cdriver.datagen.tent_map import TentMapExpRunner
 from tqdm import tqdm
 # import data configuration variables
-from data_config import N, n, aint, A0
+from scripts.datagen_scripts.datagen_config import tentmapgen_params
+
+
+N = tentmapgen_params['N']
+n = tentmapgen_params['n']
+aint = tentmapgen_params['aint']
+A0 = tentmapgen_params['A0']
+output_dir = Path(__file__).resolve().parent / 'datacheck_plots'
+output_dir.mkdir(exist_ok=True)
 
 
 datasets, params = zip(
@@ -42,6 +48,6 @@ for i in range(N):
     ax2.scatter(*X[::ds].T, c=Z[::ds, 0])
     ax3.scatter(*Y[::ds].T, c=Z[::ds, 0])
 
-    plt.savefig('./datacheck_plots/tentmap{}.png'.format(i))
+    plt.savefig(output_dir / 'tentmap{}.png'.format(i))
     plt.close()
 # plt.show()

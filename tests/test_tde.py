@@ -1,85 +1,50 @@
-from unittest import TestCase
-from torchvision import transforms
+import unittest
+
 import torch
+
 from cdriver.preprocessing.tde import TimeDelayEmbeddingTransform, cropper
-import numpy as np
-from functools import partial
 
 
-class TestTimeDelayEmbeddingTransform(TestCase):
-    def test_call(self):
-        d_embed_x = 2  # incomplete embedding for the variable to be predicted
-        d_embed_y = 4  # embedding for the other variable
-        tau = 2  # embedding delay
-        predict_step_ahead = 0  # number of steps ahead to be predicted
-        target_crop = (max(d_embed_x, d_embed_y)-1) * tau + predict_step_ahead  # number of samples to be cropped from the beginning of the time series
-        input_crop = (d_embed_y - d_embed_x) * tau
+class TestTimeDelayEmbeddingTransform(unittest.TestCase):
+    def test_incomplete_embedding_alignment(self):
+        x = torch.arange(10, dtype=torch.float32).view(-1, 1)
+        y = torch.arange(10, dtype=torch.float32).view(-1, 1)
 
-        N = 10
-        x = np.arange(N).reshape([-1, 1]).astype(float)
-        y = np.arange(N).reshape([-1, 1]).astype(float)
-        common_transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize((0), (1)),
-                                        torch.Tensor.float,
-                                        partial(torch.squeeze, axis=0)])
+        y_transformed = cropper(TimeDelayEmbeddingTransform(4, 2)(y), n=-4, location='first')
+        y_transformed = cropper(y_transformed, n=0, location='last')
 
-        y_transform = transforms.Compose([common_transform,
-                                          TimeDelayEmbeddingTransform(d_embed_y, tau),
-                                          partial(cropper, location='first', n=-input_crop),
-                                          partial(cropper, location='last', n=predict_step_ahead) ])
+        x_transformed = cropper(TimeDelayEmbeddingTransform(2, 2)(x), n=3, location='first')
+        x_transformed = cropper(x_transformed, n=1, location='last')
 
-        x_transform = transforms.Compose([common_transform,
-                                          TimeDelayEmbeddingTransform(d_embed_x, tau),
-                                          partial(cropper, location='first', n=input_crop-1),
-                                          partial(cropper, location='last', n=predict_step_ahead+1)])
+        target_transformed = cropper(x.squeeze(-1), n=6, location='first')
 
-        target_transform = transforms.Compose([common_transform,
-                                               partial(cropper, location='first', n=target_crop)])
+        expected_y = torch.tensor(
+            [[0.0, 2.0, 4.0, 6.0], [1.0, 3.0, 5.0, 7.0], [2.0, 4.0, 6.0, 8.0], [3.0, 5.0, 7.0, 9.0]]
+        )
+        expected_x = torch.tensor([[3.0, 5.0], [4.0, 6.0], [5.0, 7.0], [6.0, 8.0]])
+        expected_target = torch.tensor([6.0, 7.0, 8.0, 9.0])
 
-        y_transformed = y_transform(y)
-        x_transformed = x_transform(x)
-        target_transformed = target_transform(x)
+        torch.testing.assert_close(y_transformed, expected_y)
+        torch.testing.assert_close(x_transformed, expected_x)
+        torch.testing.assert_close(target_transformed, expected_target)
 
+    def test_predict_step_target_split(self):
+        x = torch.arange(5, dtype=torch.float32).view(-1, 1)
+        y = torch.arange(5, dtype=torch.float32).view(-1, 1)
 
-
-        print(y_transformed.shape, x_transformed.shape, target_transformed.shape)
-        print(y_transformed)
-        print(x_transformed)
-        print(target_transformed)
-
-    def test_call2(self):
-        d_x = 1
-        d_embed_x = d_x + 1  # incomplete embedding for the variable to be predicted
-        d_embed_y = 2  # embedding for the other variable
-        tau = 1  # embedding delay
-        predict_step_ahead = 0  # number of steps ahead to be predicted
-        target_crop = (max(d_embed_x, d_embed_y)-1) * tau + predict_step_ahead  # number of samples to be cropped from the beginning of the time series
-        input_crop = (d_embed_y - d_embed_x) * tau
-
-        N = 5
-        x = np.arange(N).reshape([-1, 1]).astype(float)
-        y = np.arange(N).reshape([-1, 1]).astype(float)
-        common_transform = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize((0), (1)),
-                                        torch.Tensor.float,
-                                        partial(torch.squeeze, axis=0)])
-
-        y_transform = transforms.Compose([common_transform,
-                                          TimeDelayEmbeddingTransform(d_embed_y, tau),
-                                          partial(cropper, location='first', n=-input_crop)])
-
-        xt_transform = transforms.Compose([common_transform,
-                                          TimeDelayEmbeddingTransform(d_embed_x, tau),
-                                          partial(cropper, location='first', n=input_crop)])
-
-        y_transformed = y_transform(y)
-        transformed = xt_transform(x)
+        y_transformed = cropper(TimeDelayEmbeddingTransform(2, 1)(y), n=0, location='first')
+        transformed = cropper(TimeDelayEmbeddingTransform(2, 1)(x), n=0, location='first')
         x_transformed = transformed[:, :-1]
         target_transformed = transformed[:, -1:]
 
+        expected_y = torch.tensor([[0.0, 1.0], [1.0, 2.0], [2.0, 3.0], [3.0, 4.0]])
+        expected_x = torch.tensor([[0.0], [1.0], [2.0], [3.0]])
+        expected_target = torch.tensor([[1.0], [2.0], [3.0], [4.0]])
 
+        torch.testing.assert_close(y_transformed, expected_y)
+        torch.testing.assert_close(x_transformed, expected_x)
+        torch.testing.assert_close(target_transformed, expected_target)
 
-        print(y_transformed.shape, x_transformed.shape, target_transformed.shape)
-        print(y_transformed)
-        print(x_transformed)
-        print(target_transformed)
+    def test_cropper_rejects_invalid_location(self):
+        with self.assertRaises(ValueError):
+            cropper(torch.arange(5, dtype=torch.float32), n=2, location='middle')

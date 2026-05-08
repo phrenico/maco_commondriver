@@ -2,13 +2,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import sys
-sys.path.append('./')
+from scripts.resgen.experiment_registry import get_family_spec
 from scripts.resgen.logmaps.config_logmapres import final_res_path, figure_path
 
+family_spec = get_family_spec('logmaps')
 
 # Create dataframe
-df = pd.read_csv(final_res_path / 'logmaps_res.csv', index_col=0)
+df = pd.read_csv(final_res_path / family_spec.combined_csv, index_col=0)
 
 
 

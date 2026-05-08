@@ -1,15 +1,10 @@
-from pathlib import Path
 import numpy as np
-import os
+
+from scripts.config import project_path
 
 
-# Paths
-# if the hostname is corellia then the project path is the following
-if os.uname().nodename == 'corellia':
-    project_path = Path('/home/zsiga/Projects/Codes/maco_commondriver')
-else:
-    project_path = Path('/home/phrenico/Projects/Codes/maco_commondriver')
-iterim_res_path = project_path / 'results/interim/noise_length'
+interim_res_path = project_path / 'results/interim/noise_length'
+iterim_res_path = interim_res_path
 final_res_path = project_path / 'results/final/noise_length'
 
 ### ----------------- ###

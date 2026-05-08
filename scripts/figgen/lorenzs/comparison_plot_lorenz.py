@@ -2,17 +2,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from pathlib import Path
-
-
-import sys
-sys.path.append('../')
-sys.path.append('../../')
-sys.path.append('./scripts/figgen')
-
-from config_figgen import fig_path, lorenzs_path, palette
+from scripts.figgen.config_figgen import fig_path, lorenzs_path, palette
+from scripts.resgen.experiment_registry import get_family_spec
 
 res_path = lorenzs_path
+family_spec = get_family_spec('lorenzs')
 
 print("load from: ", res_path)
 print("save to: ", fig_path)
@@ -20,7 +14,7 @@ print("save to: ", fig_path)
 
 
 # Create dataframe
-df = pd.read_csv(res_path / 'lorenzs_res.csv')
+df = pd.read_csv(res_path / family_spec.combined_csv)
 print(df.columns)
 
 # Sort by median values in ascending order

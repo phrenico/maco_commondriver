@@ -1,71 +1,42 @@
-from unittest import TestCase
+import unittest
 
-from matplotlib import pyplot as plt
-
-from cdriver.network.anisom import AniSOM
-import torch
 import numpy as np
+import torch
 
-from scripts_and_results.comparisons.data_generators import LogmapExpRunner, comp_ccorr, get_maxes
+from cdriver.datagen.logmap import LogmapExpRunner
+from cdriver.network.anisom import AniSOM
 from cdriver.preprocessing.tde import TimeDelayEmbeddingTransform
-from sklearn.preprocessing import scale
-from mpl_toolkits.mplot3d import Axes3D
-
-class TestAniSOM(TestCase):
-    def test_call(self):
-        d_grid = 2
-        d_space = 3
-        sizes = [20, 10]
-        ani = AniSOM(space_dim=d_space, grid_dim=d_grid, sizes=sizes)
 
 
+class TestAniSOM(unittest.TestCase):
+    def test_fit_and_predict_shapes(self):
+        np.random.seed(0)
+        torch.manual_seed(0)
 
-        # Generate data
-        n = 10000
-        rint = (3.8, 4.)  # interval to chose from the value of r parameter
-        A0 = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])  # basic connection structure
-        A = np.array([[1., 0., 0.],
-                      [0.3, 1., 0.],
-                      [0.4, 0., 1.]])
-        i = 123
-        data = LogmapExpRunner(nvars=3, baseA=A0, r_interval=rint).gen_experiment(n=n, A=A, seed=i)[0]
+        base_a = np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]])
+        coupling = np.array([[1.0, 0.0, 0.0], [0.3, 1.0, 0.0], [0.4, 0.0, 1.0]])
+        runner = LogmapExpRunner(nvars=3, baseA=base_a, r_interval=(3.8, 4.0))
+        data, _ = runner.gen_experiment(n=32, A=coupling, seed=123)
 
-        x = torch.Tensor(data[:, 1:2])
-        y = torch.Tensor(data[:, 2:3])
+        x = torch.tensor(data[:, 1:2], dtype=torch.float32)
+        y = torch.tensor(data[:, 2:3], dtype=torch.float32)
+        embedding = TimeDelayEmbeddingTransform(embedding_dim=3, delay=1)
+        x_embedded = embedding(x)
+        y_embedded = embedding(y)
 
-        tde = TimeDelayEmbeddingTransform(embedding_dim=d_space, delay=1)
-        X = tde(x)
-        Y = tde(y)
-        z = data[:-(d_space - 1), 0]
+        ani = AniSOM(space_dim=3, grid_dim=2, sizes=[6, 4])
+        ani.K = 5
+        ani.fit(x_embedded, y_embedded, epochs=1, disable_tqdm=True)
 
+        activations = ani.forward(x_embedded[:2], squeeze=False)
+        coordinates = ani.predict(x_embedded[:10])
 
-        # print(ani(x).shape, ani(x[0]).shape)
-
-
-        ani.fit(X, Y, epochs=4)
-        x_pred = ani.predict(X)
-
-        # print("shape of X:", X.shape, "shape of predicted coordinates:", x_pred.shape)
-
-        tau, c = comp_ccorr(x_pred[:, 0], z)
-        print(get_maxes(tau, c)[1])
-        tau, c = comp_ccorr(x_pred[:, 1], z)
-        print(get_maxes(tau, c)[1])
-
-
-
-        # plt.plot(ani.epss)
-        # print(ani.epss)
-
-
-        plt.figure()
-        plt.subplot(111, projection='3d')
-        plt.plot(*X.T, '.', alpha=0.2)
-
-        print(ani.grid[0, :, :].shape)
-        [plt.plot( *ani.grid[i, :, :].T, 'b-') for i in range(ani.grid.shape[0]) ]
-        [plt.plot(*ani.grid[:, i, :].T, 'o-') for i in range(ani.grid.shape[1])]
-
-
-
-        plt.show()
+        self.assertEqual(tuple(ani.grid.shape), (6, 4, 3))
+        self.assertEqual(tuple(activations.shape), (2, 6, 4))
+        self.assertEqual(tuple(coordinates.shape), (10, 2))
+        self.assertEqual(len(ani.epss), x_embedded.shape[0])
+        self.assertFalse(torch.isnan(ani.grid).any().item())
+        self.assertTrue(torch.all(coordinates[:, 0] >= 0).item())
+        self.assertTrue(torch.all(coordinates[:, 0] < ani.sizes[0]).item())
+        self.assertTrue(torch.all(coordinates[:, 1] >= 0).item())
+        self.assertTrue(torch.all(coordinates[:, 1] < ani.sizes[1]).item())

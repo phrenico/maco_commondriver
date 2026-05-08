@@ -19,6 +19,9 @@ function pbar {
     echo $1
 }
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+cd "$REPO_ROOT"
+
 
 
 
@@ -28,7 +31,7 @@ pbar $ZERO
 
 # ICA
 conda activate maco_rev1
-python gen_ica_res.py
+python -m scripts.resgen.lorenzs.gen_ica_res
 conda deactivate
 
 pbar $ONE
@@ -45,7 +48,7 @@ echo "MaCo - pending.."
 
 # PCA
 conda activate maco_rev1
-python gen_pca_res.py
+python -m scripts.resgen.lorenzs.gen_pca_res
 conda deactivate
 
 pbar $TWO
@@ -61,7 +64,7 @@ echo "MaCo - pending.."
 
 # CCA
 conda activate maco_rev1
-python gen_cca_res.py
+python -m scripts.resgen.lorenzs.gen_cca_res
 conda deactivate
 
 pbar $THREE
@@ -77,7 +80,7 @@ echo "MaCo - pending.."
 
 # DCA
 conda activate dca
-python gen_dca_res.py
+python -m scripts.resgen.lorenzs.gen_dca_res
 conda deactivate
 
 pbar $FOUR
@@ -94,7 +97,7 @@ echo "MaCo - pending.."
 
 # DCCA
 conda activate dcca_env
-python3 gen_dcca_res.py
+python3 -m scripts.resgen.lorenzs.gen_dcca_res
 conda deactivate
 
 pbar $FIVE
@@ -110,7 +113,7 @@ echo "MaCo - pending.."
 
 # Sh-Rec
 conda activate shrec
-python gen_shrec_res.py
+python -m scripts.resgen.lorenzs.gen_shrec_res
 conda deactivate
 
 pbar $SIX
@@ -127,7 +130,7 @@ echo "MaCo - pending.."
 
 # Random Control
 conda activate maco_rev1
-python gen_random_res.py
+python -m scripts.resgen.lorenzs.gen_random_res
 conda deactivate
 
 pbar $SEVEN
@@ -143,7 +146,7 @@ echo "MaCo - pending.."
 
 # sfa
 conda activate sfa
-python3 gen_sfa_res.py
+python3 -m scripts.resgen.lorenzs.gen_sfa_res
 conda deactivate
 
 pbar $EIGHT
@@ -160,7 +163,7 @@ echo "MaCo - starting..."
 
 # MaCo
 conda activate maco_rev1
-python gen_maco_res.py
+python -m scripts.resgen.lorenzs.gen_maco_res
 conda deactivate
 
 pbar $NINE
@@ -175,7 +178,7 @@ echo "sfa - done."
 echo "MaCo - done."
 
 conda activate maco_rev1
-python Z_combine_final_res.py
+python -m scripts.resgen.lorenzs.Z_combine_final_res
 conda deactivate
 
 

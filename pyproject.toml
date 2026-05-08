@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cdriver"
+version = "0.0.1"
+description = "Scripts for hidden common cause reconstruction"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.14,<3.15"
+authors = [
+    { name = "Zsigmond Benko", email = "benko.zsigmond@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+]
+
+[project.scripts]
+cdriver-run-family = "scripts.resgen.run_family:main"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["cdriver*", "scripts*"]
+namespaces = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

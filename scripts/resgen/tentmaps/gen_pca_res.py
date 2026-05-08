@@ -2,9 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA, FastICA
 from sklearn.preprocessing import scale
-import sys
-sys.path.append('../')
-sys.path.append('../../../')
 
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -13,7 +10,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.tent_map import gen_tentmapdata
 
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
-from config_tentmapres import train_split, interim_res_path, valid_split
+from scripts.resgen.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 import matplotlib
 
 matplotlib.use('TkAgg')

@@ -1,11 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import sys
 from pathlib import Path
-print('\n\n\n\n\n',Path('../').resolve())
-sys.path.append('./scripts/figgen')
-from config_figgen import box_color, swarm_color, fig_path, noise_length_path
+from scripts.figgen.config_figgen import box_color, swarm_color, fig_path, noise_length_path
 
 
 

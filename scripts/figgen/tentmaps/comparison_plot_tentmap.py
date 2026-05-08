@@ -2,16 +2,14 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-
-import sys
-sys.path.append('./')
-sys.path.append('../../../')
+from scripts.resgen.experiment_registry import get_family_spec
 from scripts.resgen.tentmaps.config_tentmapres import final_res_path, figure_path
 
+family_spec = get_family_spec('tentmaps')
 
 
 # Create dataframe
-df = pd.read_csv(final_res_path / 'tentmaps_res.csv', index_col=0)
+df = pd.read_csv(final_res_path / family_spec.combined_csv, index_col=0)
 
 
 # Sort by median values in ascending order

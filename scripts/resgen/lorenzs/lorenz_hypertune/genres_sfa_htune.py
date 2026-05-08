@@ -1,9 +1,7 @@
 from sksfa import SFA
 from tqdm import tqdm
 import pandas as pd
-import sys
-sys.path.append('../')
-from htune_config import create_htune_df, compute4all, plot_htune, interim_save_path, interim_savefig_path
+from scripts.resgen.lorenzs.lorenz_hypertune.htune_config import create_htune_df, compute4all, plot_htune, interim_save_path, interim_savefig_path
 
 
 

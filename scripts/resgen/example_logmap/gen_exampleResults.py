@@ -4,90 +4,25 @@ import os
 
 import numpy as np
 from tqdm import tqdm
-import sys
-sys.path.append('../')
-sys.path.append('../../../')
-sys.path.append('./')
 
 from cdriver.network.maco import MaCo
-from cdriver.savers.saver import  save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
 
 import torch
-import torchvision.transforms as transforms
-
-from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
 
 from pathlib import Path
 import pickle
 
+from scripts.config import project_path
 from scripts.datagen_scripts.datagen_config import logmapexamplegen_params
-# from config_logmapres import interim_res_path, train_split
-
-def split_sets(x, y, z, trainset_size, testset_size, validset_size):
-    """
-
-    :param x: input data
-    :param y: target dataq
-    :param z: hidden variable
-    :param trainset_size: training set size in percentage
-    :param testset_size: test set size in percentage
-    :param validset_size:   validation set size in percentage
-    :return: splitted data into train, test and validation sets
-    """
-    n = x.shape[0]
-    n_trainset = int(trainset_size * n / 100)
-    n_testset = int(testset_size * n / 100)
-    n_validset = int(validset_size * n / 100)
-
-    x_trainset = x[:n_trainset]
-    x_testset = x[n_trainset:n_trainset + n_testset]
-    x_validset = x[n_trainset + n_testset:]
-
-    y_trainset = y[:n_trainset]
-    y_testset = y[n_trainset:n_trainset + n_testset]
-    y_validset = y[n_trainset + n_testset:]
-
-    z_trainset = z[:n_trainset]
-    z_testset = z[n_trainset:n_trainset + n_testset]
-    z_validset = z[n_trainset + n_testset:]
-    return ((x_trainset, y_trainset, z_trainset),
-            (x_testset, y_testset, z_testset),
-            (x_validset, y_validset, z_validset))
-
-def get_loaders(data, batch_size, trainset_size=50, testset_size=50, validset_size=0):
-    """get data loaders for a dataset
-
-    :param data:
-    :param batch_size:
-    :param trainset_size:
-    :param testset_size:
-    :param validset_size:
-    :return:
-    """
-
-
-    x = data[:, 1:2]
-    y = data[:, 2:3]
-    z = data[:-1, 0]  # we only use it in the final evaluation of the learned represenation
-
-    # Split into Traing test and validation sets
-    splitted_data = split_sets(x, y, z, trainset_size, testset_size, validset_size)
-    (x_train, y_train, z_train), (x_test, y_test, z_test), (x_valid, y_valid, z_valid) \
-        = splitted_data
-
-    train_dataset = TensorDataset(transforms.ToTensor()(x_train), transforms.ToTensor()(y_train))
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
-
-    test_loader = transforms.ToTensor()(x_test), transforms.ToTensor()(y_test)
-    valid_loader = transforms.ToTensor()(x_valid), transforms.ToTensor()(y_valid)
-    return train_loader, test_loader, valid_loader, z_test
+from scripts.resgen.maco_utils import build_series_loaders, train_and_select_best_model
 
 
 def main():
-    respath = Path('/home/zsiga/Projects/Codes/maco_commondriver/results/final/example_logmap')
+    respath = project_path / 'results/final/example_logmap'
+    os.makedirs(respath, exist_ok=True)
 
     # Parameters
     dx = 1
@@ -111,35 +46,25 @@ def main():
 
     dataset, params = gen_logmapdata(logmapexamplegen_params)
     data = dataset[0]
-    # save
     np.savez(respath / 'data_params.npz', params=params[0], dataset=data)
 
-    train_loader, test_loader, valid_loader, z_test = get_loaders(data,
-                                                       batch_size=batch_size,
-                                                       trainset_size=trainset_size,
-                                                       testset_size=testset_size,
-                                                       validset_size=validset_size)
-    models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
-                   mh_kwargs=mapper_kwargs,
-                   ch_kwargs=coach_kwargs,
-                   preprocess_kwargs=preprocess_kwargs,
-                   device=device) for i in range(n_models)]
-
-    # Train models
-    train_losses = []
-    valid_loss = []
-    for i in tqdm(range(n_models), disable=False):
-        train_losses += [models[i].train_loop(train_loader,
-                                              n_epochs,
-                                              lr=lr,
-                                              disable_tqdm=True)]
-        valid_loss += [models[i].test_loop(valid_loader)]
-    train_losses = np.array(train_losses).T
-    valid_loss = np.array(valid_loss).T
-
-    # Pick the best model on the test set
-    ind_best_model = np.argmin(valid_loss)
-    best_model = models[ind_best_model]
+    train_loader, test_loader, valid_loader, z_test = build_series_loaders(data,
+                                                                           batch_size=batch_size,
+                                                                           trainset_size=trainset_size,
+                                                                           testset_size=testset_size,
+                                                                           validset_size=validset_size)
+    model_factory = lambda: MaCo(Ex=dx, Ey=dy, Ez=dz,
+                                 mh_kwargs=mapper_kwargs,
+                                 ch_kwargs=coach_kwargs,
+                                 preprocess_kwargs=preprocess_kwargs,
+                                 device=device)
+    models, train_losses, valid_loss, best_model = train_and_select_best_model(model_factory,
+                                                                               train_loader,
+                                                                               valid_loader,
+                                                                               n_models,
+                                                                               n_epochs,
+                                                                               lr,
+                                                                               disable_tqdm=False)
 
     # valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(valid_loader)
     test_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
@@ -174,9 +99,6 @@ def main():
 
     df = pd.DataFrame(res_dict)
 
-    # Save out the Results (uncomment to rewrite the current results)
-    
-    os.makedirs(respath, exist_ok=True)
     df.to_csv(respath / 'mappercoach_res.csv')
     np.save(respath / 'learning_curves.npy', train_losses)
     np.save(respath / 'valid_loss.npy', valid_loss)

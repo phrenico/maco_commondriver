@@ -1,7 +1,6 @@
 import pandas as pd
-from htune_config import interim_save_path, final_save_path, final_savefig_path
-
-from htune_config import plot_htune
+from scripts.resgen.lorenzs.lorenz_hypertune.htune_config import interim_save_path, final_save_path, final_savefig_path
+from scripts.resgen.lorenzs.lorenz_hypertune.htune_config import plot_htune
 import matplotlib.pyplot as plt
 
 

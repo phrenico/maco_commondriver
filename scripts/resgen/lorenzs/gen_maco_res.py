@@ -1,90 +1,22 @@
 '''Apply MACO to the Lorenz system and plot the results.
 
 '''
-from jupyterlab.semver import valid
-from numpy.lib.twodim_base import tril_indices
-
-
 import torch
 import torchvision.transforms as transforms
-from sklearn.preprocessing import scale
 
-
-from torch.utils.data import DataLoader, TensorDataset
 from functools import partial
 import os
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib import pyplot as plt
-import sys
-sys.path.append('../')
-from config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
-from cdriver.preprocessing.splitters import train_test_split
+from scripts.resgen.lorenzs.config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.network.maco import MaCo
+from scripts.resgen.maco_utils import build_loaders, get_default_device, train_and_select_best_model
 from tqdm import tqdm
 os.makedirs(interim_res_path, exist_ok=True)
-from pathlib import Path
-
-
-def split_sets(x, y, z, trainset_size, testset_size, validset_size):
-    """
-
-    :param x: input data
-    :param y: target dataq
-    :param z: hidden variable
-    :param trainset_size: training set size in percentage
-    :param testset_size: test set size in percentage
-    :param validset_size:   validation set size in percentage
-    :return: splitted data into train, test and validation sets
-    """
-    n = x.shape[0]
-    n_trainset = int(trainset_size * n / 100)
-    n_testset = int(testset_size * n / 100)
-    n_validset = int(validset_size * n / 100)
-
-    x_trainset = x[:n_trainset]
-    x_testset = x[n_trainset:n_trainset + n_testset]
-    x_validset = x[n_trainset + n_testset:]
-
-    y_trainset = y[:n_trainset]
-    y_testset = y[n_trainset:n_trainset + n_testset]
-    y_validset = y[n_trainset + n_testset:]
-
-    z_trainset = z[:n_trainset]
-    z_testset = z[n_trainset:n_trainset + n_testset]
-    z_validset = z[n_trainset + n_testset:]
-    return ((x_trainset, y_trainset, z_trainset),
-            (x_testset, y_testset, z_testset),
-            (x_validset, y_validset, z_validset))
-
-def get_loaders(X, Y, z, batch_size, trainset_size=50, testset_size=50, validset_size=0):
-    """get data loaders for a dataset
-
-    :param data:
-    :param batch_size:
-    :param trainset_size:
-    :param testset_size:
-    :param validset_size:
-    :return:
-    """
-
-
-    # Split into Traing test and validation sets
-    splitted_data = split_sets(X, Y, z, trainset_size, testset_size, validset_size)
-    (x_train, y_train, z_train), (x_test, y_test, z_test), (x_valid, y_valid, z_valid) \
-        = splitted_data
-
-    # print("shapes in dataloader:", x_train.shape, y_train.shape, z_train.shape)
-    common_transform = transforms.Compose([transforms.ToTensor(), torch.squeeze, ])
-    train_dataset = TensorDataset(common_transform(x_train), common_transform(y_train))
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
-
-    test_loader = common_transform(x_test), common_transform(y_test)
-    valid_loader = common_transform(x_valid), common_transform(y_valid)
-    return train_loader, test_loader, valid_loader, z_test
 
 def typer(x, dtype=torch.float32):
     """Set the type of a tensor.
@@ -124,7 +56,7 @@ def preprocess(X, Y):
 
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = get_default_device()
 # apply MaCo
 n_epochs = 200
 n_models = 10
@@ -137,6 +69,7 @@ coach_kwargs = dict(n_h1=nh, n_out=1)
 preprocess_kwargs = dict(tau=1)
 lr = 1e-2
 batch_size = 1_000
+loader_transform = transforms.Compose([transforms.ToTensor(), torch.squeeze])
 
 
 plt.ion()
@@ -161,34 +94,30 @@ for n_iter in tqdm(range(N)):
     z = data['v'][:, 1]
 
 
-    train_loader, test_loader, valid_loader, z_test = get_loaders(X, Y, z,
-                                                                  batch_size=batch_size,
-                                                                  trainset_size=int(100*train_split),
-                                                                  testset_size= 100 - (train_split+valid_split) * 100,
-                                                                  validset_size=valid_split*100)
-    models = [MaCo(Ex=dx, Ey=dy, Ez=dz,
-                   mh_kwargs=mapper_kwargs,
-                   ch_kwargs=coach_kwargs,
-                   preprocess_kwargs=preprocess_kwargs,
-                   device=device) for i in range(n_models)]
-    for model in models:
-        model.preprocess = preprocess
-
-
-    # Train models
-    train_losses = []
-    valid_loss = []
-    for i in tqdm(range(n_models), disable=False, leave=False, desc='Training models'):
-        train_losses += [models[i].train_loop(train_loader,
-                                              n_epochs,
-                                              lr=lr,
-                                              disable_tqdm=False)]
-        valid_loss += [models[i].test_loop(valid_loader)]
-    train_losses = np.array(train_losses).T
-
-    # Pick the best model on the test set
-    ind_best_model = np.argmin(valid_loss)
-    best_model = models[ind_best_model]
+    train_loader, test_loader, valid_loader, z_test = build_loaders(X,
+                                                                    Y,
+                                                                    z,
+                                                                    batch_size=batch_size,
+                                                                    trainset_size=int(100 * train_split),
+                                                                    testset_size=100 - (train_split + valid_split) * 100,
+                                                                    validset_size=valid_split * 100,
+                                                                    transform=loader_transform)
+    model_factory = lambda: MaCo(Ex=dx, Ey=dy, Ez=dz,
+                                 mh_kwargs=mapper_kwargs,
+                                 ch_kwargs=coach_kwargs,
+                                 preprocess_kwargs=preprocess_kwargs,
+                                 device=device)
+    configure_model = lambda model: setattr(model, 'preprocess', preprocess)
+    models, train_losses, valid_loss, best_model = train_and_select_best_model(model_factory,
+                                                                               train_loader,
+                                                                               valid_loader,
+                                                                               n_models,
+                                                                               n_epochs,
+                                                                               lr,
+                                                                               disable_tqdm=False,
+                                                                               leave=False,
+                                                                               desc='Training models',
+                                                                               configure_model=configure_model)
     #
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
 

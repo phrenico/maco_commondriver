@@ -2,10 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.decomposition import  FastICA
 
-import sys
-sys.path.append('../')
-sys.path.append('../../../')
-
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -13,7 +9,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.tent_map import gen_tentmapdata
 
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
-from config_tentmapres import train_split, interim_res_path, valid_split
+from scripts.resgen.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 import matplotlib
 from tqdm import tqdm
 

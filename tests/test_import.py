@@ -1,17 +1,20 @@
 import unittest
 
+
 class TestImports(unittest.TestCase):
-    def test_import(self):
+    def test_import_package(self):
         import cdriver
 
-    def test_MaCoimport(self):
-        from cdriver.network.maco import MaCo
+        self.assertIsNotNone(cdriver)
 
-    def test_get_mapper(self):
-        from cdriver.network.maco import get_mapper
+    def test_import_maco_symbols(self):
+        from cdriver.network.maco import MaCo, get_coach, get_mapper
 
-    def test_get_coach(self):
-        from cdriver.network.maco import get_coach
+        self.assertIsNotNone(MaCo)
+        self.assertTrue(callable(get_coach))
+        self.assertTrue(callable(get_mapper))
 
-    def test_tent_map(self):
+    def test_import_tent_map_generator(self):
         from cdriver.datagen.tent_map import gen_tentmap
+
+        self.assertTrue(callable(gen_tentmap))

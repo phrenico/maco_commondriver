@@ -2,14 +2,11 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import sys
 from pathlib import Path
 from tqdm.auto import tqdm
-sys.path.append('/home/phrenico/Projects/Codes/maco_commondriver')
-from scripts.config import project_path
 
-sys.path.append('../../../')
-sys.path.append('../../')
+project_path = Path(__file__).resolve().parents[4]
+
 # from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, train_valid_test_split
 from cdriver.preprocessing.splitters import train_test_split, train_valid_test_split
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
@@ -43,7 +40,7 @@ def compute4all(n_components, method):
     amaxcs = []
 
     for n_iter in tqdm(range(N), desc='Iterations'):
-        data_path = '/home/phrenico/Projects/Codes/maco_commondriver/data/lorenz/lorenz_{}.npz'.format(n_iter)
+        data_path = project_path / 'data/lorenz' / 'lorenz_{}.npz'.format(n_iter)
         X, z = get_data(data_path)
 
         (X_train, Y_train, z_train,

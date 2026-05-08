@@ -2,11 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.decomposition import KernelPCA
 from sklearn.preprocessing import scale
-import sys
-sys.path.append('./')
-sys.path.append('../')
-sys.path.append('../../')
-sys.path.append('../../../')
 
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -15,7 +10,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.tent_map import gen_tentmapdata
 
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
-from config_tentmapres import train_split, interim_res_path, valid_split
+from scripts.resgen.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 import matplotlib
 
 from tqdm.auto import tqdm
@@ -63,7 +58,7 @@ for n_iter in tqdm(range(N)):
     # plt.draw()
     # plt.pause(0.05)
 
-df = save_results(fname=interim_res_path / 'kpca_res_{}.csv'.format(int(tentmapgen_params['n'] * train_split)),
+df = save_results(fname=interim_res_path / 'kpca_res.csv',
                   r=maxcs,
                   N=N,
                   method='KPCA',

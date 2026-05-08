@@ -5,9 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tqdm import tqdm
-import sys
-sys.path.append('./')
-sys.path.append('../../../')
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
@@ -16,7 +13,7 @@ from cdriver.datagen.logmap import gen_logmapdata
 
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from config_logmapres import train_split, interim_res_path, valid_split
+from scripts.resgen.logmaps.config_logmapres import train_split, interim_res_path, valid_split
 
 if __name__ == "__main__":
     # 1. Generate data

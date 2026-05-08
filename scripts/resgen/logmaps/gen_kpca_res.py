@@ -1,14 +1,11 @@
-'''Script to run PCA on logistic map data-set
+'''Script to run Kernel PCA on logistic map data-set
 1. Generate data
-2. Run PCA
+2. Run Kernel PCA
 3. Plot results
 4. Save results
 
 '''
 import numpy as np
-import sys
-sys.path.append('./')
-sys.path.append('../../../')
 from sklearn.decomposition import KernelPCA
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -17,7 +14,7 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
-from config_logmapres import train_split, interim_res_path, valid_split
+from scripts.resgen.logmaps.config_logmapres import train_split, interim_res_path, valid_split
 # import matplotlib.pyplot as plt
 
 from tqdm import tqdm
@@ -31,7 +28,7 @@ if __name__ == "__main__":
     print('Generated {} realizations of logistic map data-set with parameters: {}'.format(N, params))
     print("Training-Data length will be: {}".format(int(logmapgen_params['n'] * train_split)))
 
-    # 2. Run PCA
+    # 2. Run Kernel PCA
     d_embed = 3
     maxcs = []
     for i in tqdm(range(N)):
@@ -49,7 +46,7 @@ if __name__ == "__main__":
         maxcs.append(get_maxes(*comp_ccorr(z_test, zpred[:, 0]))[1])
 
     # Save results
-    df = save_results(fname=interim_res_path / 'kpca_res_{}.csv'.format(int(logmapgen_params['n'] * train_split)),
+    df = save_results(fname=interim_res_path / 'kpca_res.csv',
                       r=maxcs,
                       N=N,
                       method='KPCA',

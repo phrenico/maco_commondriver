@@ -15,7 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
-import sys
 
 from sklearn.cluster import KMeans
 from sklearn.mixture import GaussianMixture
@@ -23,11 +22,9 @@ from sklearn.preprocessing import minmax_scale, scale
 
 from matplotlib.lines import Line2D
 
-sys.path.append('../')
-sys.path.append('./')
 from scripts.figgen.config_figgen import fig_path
 
-res_path = Path('./results/final/example_logmap')
+res_path = fig_path.parent / 'results/final/example_logmap'
 
 def move_figure(f, x, y):
     """Move figure's upper left corner to pixel (x, y)"""
