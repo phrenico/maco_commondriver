@@ -32,8 +32,6 @@ and the ASOM paper:
 │   └── experiments/       # experiment and result-generation workflows
 ├── paper_artifacts/     # curated paper figures and final result tables (tracked)
 ├── data/                # placeholder for generated datasets (e.g. Lorenz trajectories)
-├── results/             # generated intermediate and final result tables (gitignored)
-├── figures/             # generated figures (gitignored)
 └── tests/               # smoke and regression tests
 ```
 
