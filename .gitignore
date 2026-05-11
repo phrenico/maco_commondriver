@@ -1,7 +1,5 @@
 # Generated data and outputs (not tracked; see paper_artifacts/ for curated paper outputs)
 data/*
-figures/
-results/
 **/checkpoint.model
 
 # Local environment and IDE files
