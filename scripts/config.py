@@ -4,7 +4,7 @@ from typing import Final
 
 project_path: Final[Path] = Path(__file__).resolve().parents[1]
 data_root: Final[Path] = project_path / 'data'
-artifacts_root: Final[Path] = project_path / 'paper_artifacts_smoketest'
+artifacts_root: Final[Path] = project_path / 'paper_artifacts'
 results_root: Final[Path] = artifacts_root / 'results'
 interim_results_root: Final[Path] = results_root / 'interim'
 final_results_root: Final[Path] = results_root / 'final'
@@ -31,12 +31,12 @@ example_logmap_final_res_path: Final[Path] = final_results_root / 'example_logma
 
 # Realization-count defaults. Edit these for quick tests or per-family runs.
 example_logmap_realizations: Final[int] = 1
-N = 1
+N = 50
 logmap_realizations: Final[int] = N
 tentmap_realizations: Final[int] = N
 lorenz_realizations: Final[int] = N
 lorenz_htune_realizations: Final[int] = N
-noise_length_realizations: Final[int] = 1
+noise_length_realizations: Final[int] = 10
 
 for path in (
 	data_root,
