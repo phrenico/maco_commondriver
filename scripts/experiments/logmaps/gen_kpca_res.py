@@ -15,7 +15,6 @@ from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
 from scripts.experiments.logmaps.config_logmapres import train_split, interim_res_path, valid_split
-# import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
@@ -52,8 +51,3 @@ if __name__ == "__main__":
                       method='KPCA',
                       dataset='logmap',
                       times= N * ['NaN'])  # times can be None if not measured
-
-    # # 3. Plot results
-    # plt.figure()
-    # plt.hist(maxcs)
-    # plt.show()

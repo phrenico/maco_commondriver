@@ -3,9 +3,12 @@ import numpy as np
 from scripts.config import project_path
 
 
-interim_res_path = project_path / 'results/interim/noise_length'
-iterim_res_path = interim_res_path
-final_res_path = project_path / 'results/final/noise_length'
+interim_res_path = project_path / 'paper_artifacts/results/interim/noise_length'
+final_res_path = project_path / 'paper_artifacts/results/final/noise_length'
+
+# create directories if they don't exist
+interim_res_path.mkdir(parents=True, exist_ok=True)
+final_res_path.mkdir(parents=True, exist_ok=True)
 
 ### ----------------- ###
 # length-dependence params

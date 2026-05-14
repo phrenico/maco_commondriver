@@ -2,8 +2,6 @@
 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
-
 import sksfa
 
 from tqdm import tqdm
@@ -18,18 +16,7 @@ from cdriver.datagen.tent_map import gen_tentmapdata
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
 from scripts.experiments.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 
-import matplotlib
-matplotlib.use('TkAgg')
-
 if __name__ == "__main__":
-    plt.ion()
-    plt.figure(figsize=(10, 10))
-    plt.show()
-    mngr = plt.get_current_fig_manager()
-    mngr.window.wm_geometry("+%d+%d" % (0, 0))
-    plt.xlim(-1, tentmapgen_params['N'] + 1)
-    plt.ylim(0, 1)
-
     N = tentmapgen_params['N']  # number of realizations
     dataset, params = gen_tentmapdata(tentmapgen_params)
 
@@ -61,10 +48,6 @@ if __name__ == "__main__":
         tau, c = comp_ccorr(zpred, z_test)
         maxcs.append(get_maxes(tau, c)[1])
 
-        plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-        plt.draw()
-        plt.pause(0.05)
-
     # Save results
     df = save_results(fname=interim_res_path / 'sfa_res.csv',
                       r=maxcs,
@@ -72,8 +55,4 @@ if __name__ == "__main__":
                       method='SFA',
                       dataset='tentmap')
 
-    # # 3. Plot results
-    plt.figure()
-    plt.hist(maxcs)
-    plt.show()
-    plt.close()
+

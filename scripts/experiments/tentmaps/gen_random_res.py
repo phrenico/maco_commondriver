@@ -11,18 +11,6 @@ from scripts.datagen_scripts.datagen_config import tentmapgen_params
 from scripts.experiments.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 
 from tqdm import tqdm
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('TkAgg')
-
-plt.ion()
-plt.figure(figsize=(10, 10))
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (0, 0))
-plt.show()
-
-plt.xlim(-1, tentmapgen_params['N'] + 1)
-plt.ylim(0, 1)
 
 N = tentmapgen_params['N']  # number of realizations
 dataset, params = gen_tentmapdata(tentmapgen_params)
@@ -44,21 +32,9 @@ for n_iter in tqdm(range(N)):
 
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
-    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-    plt.draw()
-    plt.pause(0.05)
-
 df = save_results(fname=interim_res_path / './random_res.csv',
                   r=maxcs,
                   N=N,
                   method='Random',
                   dataset='tentmap')
 
-# plt.ioff()
-plt.figure()
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (1000, 0))
-plt.hist(maxcs)
-plt.xlim(0, 1)
-plt.show()
-plt.close()

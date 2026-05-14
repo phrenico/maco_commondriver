@@ -1,7 +1,11 @@
 """Run AniSOM on the logmap data and comparison"""
+import os
+
+os.environ['MPLBACKEND'] = 'Agg'
+os.environ.setdefault('MPLCONFIGDIR', '/tmp')
+
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
 
 from cdriver.network.anisom import AniSOM
 from cdriver.preprocessing.splitters import train_valid_test_split
@@ -62,8 +66,3 @@ if __name__ == "__main__":
                       method='ASOM',
                       dataset='logmap',
                       times=N * ['NaN'])
-
-    # 3. Plot results
-    plt.figure()
-    plt.hist(maxcs)
-    plt.show()

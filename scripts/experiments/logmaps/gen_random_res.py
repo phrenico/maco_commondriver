@@ -2,7 +2,6 @@
 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from cdriver.preprocessing.splitters import train_valid_test_split
@@ -42,8 +41,3 @@ if __name__ == "__main__":
                       N=N,
                       method='Random',
                       dataset='logmap')
-
-    # # 3. Plot results
-    # plt.figure()
-    # plt.hist(maxcs)
-    # plt.show()

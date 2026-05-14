@@ -1,5 +1,4 @@
 import numpy as np
-from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA, FastICA
 from sklearn.preprocessing import scale
 
@@ -15,9 +14,6 @@ from scripts.experiments.tentmaps.config_tentmapres import train_split, interim_
 import torch
 from tqdm import tqdm
 
-import matplotlib
-matplotlib.use('TkAgg')
-
 
 def myfun(x, *args, **kwargs):
     return torch.linalg.eigh(x)
@@ -25,14 +21,6 @@ def myfun(x, *args, **kwargs):
 
 torch.symeig = myfun
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-plt.ion()
-plt.figure(figsize=(10, 10))
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (0, 0))
-plt.show()
-plt.xlim(-1, tentmapgen_params['N'] + 1)
-plt.ylim(0, 1)
 
 N = tentmapgen_params['N']  # number of realizations
 dataset, params = gen_tentmapdata(tentmapgen_params)
@@ -70,21 +58,10 @@ for n_iter in tqdm(range(N)):
     z_pred = (zp1[:, 0] + zp2[:, 0]) / 2
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
-    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-    plt.draw()
-    plt.pause(0.05)
-
 df = save_results(fname=interim_res_path / './dcca_res.csv',
                   r=maxcs,
                   N=N,
                   method='DCCA',
                   dataset='tentmap')
 
-# plt.ioff()
-plt.figure()
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (1000, 0))
-plt.hist(maxcs)
-plt.xlim(0, 1)
-plt.show()
-plt.close()
+

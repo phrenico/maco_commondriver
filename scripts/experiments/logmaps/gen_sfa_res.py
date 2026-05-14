@@ -2,7 +2,6 @@
 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
 
 import sksfa
 from sklearn.preprocessing import PolynomialFeatures
@@ -57,8 +56,3 @@ if __name__ == "__main__":
                       N=N,
                       method='SFA',
                       dataset='logmap')
-
-    # # 3. Plot results
-    # plt.figure()
-    # plt.hist(maxcs)
-    # plt.show()

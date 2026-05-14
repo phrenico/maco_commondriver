@@ -1,6 +1,5 @@
 '''Run Shrec experiments'''
 import numpy as np
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from shrec.models import RecurrenceManifold
@@ -44,7 +43,3 @@ df = save_results(fname=interim_res_path / 'shrec_res.csv',
                   N=N,
                   method='ShRec',
                   dataset='logmap')
-
-# # 3. Plot results
-# plt.hist(maxcs)
-# plt.show()

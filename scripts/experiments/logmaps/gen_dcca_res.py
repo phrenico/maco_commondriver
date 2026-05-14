@@ -1,4 +1,9 @@
 """It's not running, use Google Colab in stead"""
+import os
+
+os.environ['MPLBACKEND'] = 'Agg'
+os.environ.setdefault('MPLCONFIGDIR', '/tmp')
+
 import torch
 # set default device to cpu
 # cpu

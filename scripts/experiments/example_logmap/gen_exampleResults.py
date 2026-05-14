@@ -21,7 +21,7 @@ from scripts.experiments.maco_utils import build_series_loaders, train_and_selec
 
 
 def main():
-    respath = project_path / 'results/final/example_logmap'
+    respath = project_path / 'paper_artifacts/results/final/example_logmap'
     os.makedirs(respath, exist_ok=True)
 
     # Parameters
@@ -81,7 +81,7 @@ def main():
     r_predict = []
     for model in tqdm(models):
         preds = model.valid_loop(test_loader)
-        print(preds[1].shape, preds[2].shape, test_loader[1].squeeze().shape)
+        # print(preds[1].shape, preds[2].shape, test_loader[1].squeeze().shape)
         r_predict += [np.corrcoef(preds[1], test_loader[0].squeeze()[1:])[0, 1] ]
         r_reconst += [np.corrcoef(preds[2], z_test.squeeze()[:-1])[0, 1]]
 
@@ -94,8 +94,8 @@ def main():
                 'Y_1_test': test_loader[1].squeeze()[:-1],
                 'Y_2_test': test_loader[1].squeeze()[1:],
                 }
-    for label, value in res_dict.items():
-        print(label, value.shape)
+    # for label, value in res_dict.items():
+    #     print(label, value.shape)
 
     df = pd.DataFrame(res_dict)
 
@@ -107,7 +107,7 @@ def main():
         pickle.dump(models, f)
     pd.DataFrame({'r_predict':r_predict,
                   'r_reconst':r_reconst}).to_csv(respath / 'r_values.csv')
-    print(np.corrcoef(z_test[:-1], z_pred))
+    # print(np.corrcoef(z_test[:-1], z_pred))
 
 if __name__ == "__main__":
     main()

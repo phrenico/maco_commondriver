@@ -45,6 +45,44 @@ python -m pip install -e .
 
 This installs the core package and the MaCo-based workflows. Some comparison baselines still run in separate conda environments, and those environment names are encoded in `scripts/experiments/experiment_registry.py`.
 
+## Reproducible Environment Setup
+
+Environment specs for the experiment runner are stored in `envs/` and mirror the env names used in `scripts/experiments/experiment_registry.py`:
+
+- `envs/maco_rev1.yml`
+- `envs/dca.yml`
+- `envs/dcca_env.yml`
+- `envs/shrec.yml`
+- `envs/sfa.yml`
+
+Create each environment:
+
+```bash
+conda env create -f envs/maco_rev1.yml
+conda env create -f envs/dca.yml
+conda env create -f envs/dcca_env.yml
+conda env create -f envs/shrec.yml
+conda env create -f envs/sfa.yml
+```
+
+Install this repository into each environment so `cdriver` and `scripts.*` modules are importable:
+
+```bash
+conda run -n maco_rev1 python -m pip install -e .
+conda run -n dca python -m pip install -e .
+conda run -n dcca_env python -m pip install -e .
+conda run -n shrec python -m pip install -e .
+conda run -n sfa python -m pip install -e .
+```
+
+Verify environment setup (strict: no skipping for missing envs):
+
+```bash
+pytest
+```
+
+The environment verification tests check that each required conda env exists and that method-specific imports succeed inside the corresponding env.
+
 ## Data Generation
 
 The logistic-map and tent-map workflows generate their synthetic datasets inside the experiment scripts.

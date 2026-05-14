@@ -4,9 +4,6 @@ import torch
 
 import os
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
-from matplotlib import pyplot as plt
 from scripts.experiments.lorenz.config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.savers.saver import save_results
@@ -20,15 +17,6 @@ def myfun(x, *args, **kwargs):
 torch.symeig = myfun
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-plt.ion()
-plt.figure(figsize=(10, 10))
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (0, 0))
-plt.show()
-plt.xlim(-1, 100)
-plt.ylim(0, 1)
 
 maxcs = []
 for n_iter in tqdm(range(N)):
@@ -61,23 +49,8 @@ for n_iter in tqdm(range(N)):
     z_pred = (zp1[:, 0] + zp2[:, 0]) / 2
     maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
-    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-    plt.draw()
-    plt.pause(0.05)
-
 df = save_results(fname=interim_res_path / './dcca_res.csv',
                   r=maxcs,
                   N=N,
                   method='DCCA',
                   dataset='lorenz')
-
-# plt.ioff()
-plt.figure()
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (1000, 0))
-plt.hist(maxcs)
-plt.xlim(0, 1)
-plt.show()
-
-plt.pause(2)
-plt.close()

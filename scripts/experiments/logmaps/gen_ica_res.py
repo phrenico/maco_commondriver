@@ -1,13 +1,10 @@
 '''Script to run ICA on logistic map data-set
 1. Generate data
 2. Run ICA
-3. Plot results
-4. Save results
+3. Save results
 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
-import os
 from sklearn.decomposition import FastICA
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
@@ -52,8 +49,3 @@ if __name__=="__main__":
                       N=N,
                       method='ICA',
                       dataset='logmap')
-
-    # #3. Plot results
-    # plt.figure()
-    # plt.hist(maxcs)
-    # plt.show()

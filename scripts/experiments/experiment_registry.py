@@ -127,6 +127,24 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         ),
         combine_step=RunStep('Combine', 'maco_rev1', 'scripts.experiments.lorenz.Z_combine_final_res'),
     ),
+    'lorenz_htune': FamilySpec(
+        key='lorenz_htune',
+        title='Lorenz Hyperparameter Tuning',
+        combined_csv='htune.csv',
+        methods=(
+            MethodResult('PCA', 'pca_htune.csv'),
+            MethodResult('ICA', 'ica_htune.csv'),
+            MethodResult('DCA', 'dca_htune.csv'),
+            MethodResult('SFA', 'sfa_htune.csv'),
+        ),
+        run_steps=(
+            RunStep('PCA', 'maco_rev1', 'scripts.experiments.lorenz_hypertune.genres_pca_htune'),
+            RunStep('ICA', 'maco_rev1', 'scripts.experiments.lorenz_hypertune.genres_ica_htune'),
+            RunStep('DCA', 'dca', 'scripts.experiments.lorenz_hypertune.genres_dca_htune'),
+            RunStep('SFA', 'sfa', 'scripts.experiments.lorenz_hypertune.genres_sfa_htune'),
+        ),
+        combine_step=RunStep('Combine', 'maco_rev1', 'scripts.experiments.lorenz_hypertune.genres_final_htune'),
+    ),
 }
 
 PLOT_FAMILY_ORDER: Final[tuple[str, ...]] = ('logmaps', 'tentmaps', 'lorenz')

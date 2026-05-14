@@ -22,21 +22,32 @@ from sklearn.preprocessing import minmax_scale, scale
 
 from matplotlib.lines import Line2D
 
+# import project_path from config
+from scripts.config import project_path
 from scripts.plots.config_figgen import fig_path
 
-res_path = fig_path.parent / 'paper_artifacts/results/example_logmap'
+
+res_path = project_path / 'paper_artifacts/results/final/example_logmap'
 
 def move_figure(f, x, y):
     """Move figure's upper left corner to pixel (x, y)"""
-    backend = plt.get_backend()
-    if backend == 'TkAgg':
-        f.canvas.manager.window.wm_geometry("+%d+%d" % (x, y))
-    elif backend == 'WXAgg':
-        f.canvas.manager.window.SetPosition((x, y))
-    else:
-        # This works for QT and GTK
-        # You can also use window.setGeometry
-        f.canvas.manager.window.move(x, y)
+    try:
+        manager = f.canvas.manager
+        window = getattr(manager, 'window', None)
+        if window is None:
+            return
+
+        backend = plt.get_backend()
+        if backend == 'TkAgg' and hasattr(window, 'wm_geometry'):
+            window.wm_geometry("+%d+%d" % (x, y))
+        elif backend == 'WXAgg' and hasattr(window, 'SetPosition'):
+            window.SetPosition((x, y))
+        elif hasattr(window, 'move'):
+            # Works on many QT/GTK backends.
+            window.move(x, y)
+    except Exception:
+        # Positioning is optional; never fail plotting because of backend/window differences.
+        pass
 
 
 def plot_example_res():
@@ -59,6 +70,7 @@ def plot_example_res():
                 fontsize=16, fontweight='bold', va='top')
     
 
+    fig_path.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_path / 'example_logmap_res.png')
     move_figure(fig, 0, 0)
     # plt.show()

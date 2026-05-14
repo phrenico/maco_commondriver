@@ -8,11 +8,15 @@ from cdriver.datagen.lorenz import dfds
 
 from datagen_config import lorenzgen_params
 
+# import project base path
+from scripts.config import project_path
+
 
 
 
 if __name__=="__main__":
 
+    save_path = project_path / 'data/lorenz'
     dparams = SimpleNamespace(**lorenzgen_params)
 
     # Data Generation
@@ -46,13 +50,15 @@ if __name__=="__main__":
 
         v = odeint(dfds, v0, t, (param_dict, ))
         
+
+        # save out one long version of the data for visualisation purposes
         if i == 0:
-            np.save('../../data/lorenz/lorenz_{}_long.npz'.format(i), v)
+            np.save(save_path / 'lorenz_{}_long.npz'.format(i), v)
             # exit()
 
-        #save data
+        #save data with down-sampling to save space
         param_dict['ds'] = ds
-        np.savez('../../data/lorenz/lorenz_{}.npz'.format(i), v=v[::ds], t=t[::ds], params=param_dict)
+        np.savez(save_path / 'lorenz_{}.npz'.format(i), v=v[::ds], t=t[::ds], params=param_dict)
 
     # # Plotting
     # fig = plt.figure(figsize=(10, 10))

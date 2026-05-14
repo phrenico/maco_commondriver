@@ -76,9 +76,3 @@ df = save_results(fname=interim_res_path / 'maco_res.csv',
                   N=N,
                   method='MaCo',
                   dataset='logmap')
-
-# # 3. Plot results
-# plt.figure()
-# plt.hist(maxcs)
-# plt.show()
-# print(maxcs)

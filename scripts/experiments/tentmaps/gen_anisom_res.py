@@ -16,25 +16,8 @@ from cdriver.datagen.tent_map import gen_tentmapdata
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
 from scripts.experiments.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 
-import matplotlib.pyplot as plt
-
-
-import matplotlib
-matplotlib.use('TkAgg')
-
-
-
 
 if __name__ == "__main__":
-    # 0. Set up plotting
-    plt.ion()
-    plt.figure(figsize=(10, 10))
-    mngr = plt.get_current_fig_manager()
-    mngr.window.wm_geometry("+%d+%d" % (0, 0))
-    plt.show()
-    plt.xlim(-1, tentmapgen_params['N'])
-    plt.ylim(0, 1)
-
     # 1. Generate data
     N = tentmapgen_params['N']  # number of realizations
     dataset, params = gen_tentmapdata(tentmapgen_params)
@@ -71,10 +54,6 @@ if __name__ == "__main__":
         tau, c = comp_ccorr(pred[:, 1], z_test)
 
         maxcs.append(get_maxes(tau, c)[1])
-        plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-        plt.draw()
-        plt.pause(0.01)
-
 
     # save out results
     df = save_results(fname=interim_res_path / 'anisom_res.csv',
@@ -83,9 +62,3 @@ if __name__ == "__main__":
                       method='ASOM',
                       dataset='tentmap')
 
-    # 3. Plot results
-    # plt.ioff()
-    plt.figure()
-    plt.hist(maxcs)
-    plt.show()
-    plt.close()

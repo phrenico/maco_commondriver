@@ -4,15 +4,16 @@ import seaborn as sns
 from scripts.experiments.experiment_registry import get_family_spec
 
 # Define paths
-fig_path = project_path / 'figures'
+fig_path = project_path / 'paper_artifacts/figures'
 
-noise_length_path = project_path / 'paper_artifacts/results/noise_length'
-logmaps_path = project_path / 'paper_artifacts/results/'
-lorenz_path = project_path / 'paper_artifacts/results/'
-tentmaps_path = project_path / 'paper_artifacts/results/'
+noise_length_path = project_path / 'paper_artifacts/results/final/noise_length'
+logmaps_path = project_path / 'paper_artifacts/results/final'
+lorenz_path = project_path / 'paper_artifacts/results/final'
+tentmaps_path = project_path / 'paper_artifacts/results/final'
 
 # define colors
 logmap_spec = get_family_spec('logmaps')
+palette = None
 
 try:
     df = pd.read_csv(logmaps_path / logmap_spec.combined_csv)

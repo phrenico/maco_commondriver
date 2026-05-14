@@ -2,7 +2,6 @@
 
 '''
 import numpy as np
-import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 # import dca
@@ -55,8 +54,3 @@ df = save_results(fname=interim_res_path / 'dca_res.csv',
                   N=N,
                   method='DCA',
                   dataset='logmap')
-
-# # 3. Plot results
-# plt.figure()
-# plt.hist(maxcs)
-# plt.show()

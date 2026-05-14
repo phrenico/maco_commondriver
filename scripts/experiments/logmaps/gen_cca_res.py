@@ -8,7 +8,6 @@ from cdriver.datagen.logmap import gen_logmapdata
 
 from scripts.datagen_scripts.datagen_config import logmapgen_params
 from scripts.experiments.logmaps.config_logmapres import train_split, interim_res_path, valid_split
-import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 
@@ -50,6 +49,3 @@ df = save_results(fname=interim_res_path / 'cca_res.csv',
                   N=N,
                   method='CCA',
                   dataset='logmap')
-
-# plt.hist(maxcs3)
-# plt.show()

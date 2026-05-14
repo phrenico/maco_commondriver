@@ -23,6 +23,7 @@ dependencies = [
     "matplotlib",
     "numpy",
     "pandas",
+    "seaborn",
     "scikit-learn",
     "scipy",
     "torch",

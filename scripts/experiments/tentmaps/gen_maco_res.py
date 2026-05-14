@@ -15,24 +15,10 @@ from cdriver.datagen.tent_map import gen_tentmapdata
 from scripts.datagen_scripts.datagen_config import tentmapgen_params
 from scripts.experiments.tentmaps.config_tentmapres import train_split, interim_res_path, valid_split
 import torch
-import matplotlib.pyplot as plt
 from scripts.experiments.maco_utils import (build_series_loaders,
                                        get_default_device,
                                        score_latent_reconstruction,
                                        train_and_select_best_model)
-
-import matplotlib
-matplotlib.use('TkAgg')
-
-plt.ion()
-plt.figure(figsize=(10, 10))
-mngr = plt.get_current_fig_manager()
-mngr.window.wm_geometry("+%d+%d" % (0, 0))
-plt.show()
-
-plt.xlim(-1, tentmapgen_params['N'] + 1)
-plt.ylim(0, 1)
-
 
 # 1. Generate random Logistic datasets
 N = tentmapgen_params["N"]
@@ -77,10 +63,6 @@ for n_iter in tqdm(range(N)):
     valid_loss, x_pred, z_pred, hz_pred = best_model.valid_loop(test_loader)
     maxcs.append(score_latent_reconstruction(z_pred, z_test))
 
-    plt.plot(n_iter, maxcs[-1], 'o', color='blue')
-    plt.draw()
-    plt.pause(0.05)
-
 # Save results
 df = save_results(fname=interim_res_path / './maco_res.csv',
                   r=maxcs,
@@ -88,11 +70,3 @@ df = save_results(fname=interim_res_path / './maco_res.csv',
                   method='MaCo',
                   dataset='tentmap')
 
-# 3. Plot results
-# plt.ioff()
-plt.figure()
-plt.hist(maxcs)
-plt.show()
-# print(maxcs)
-plt.pause(1)
-plt.close()
