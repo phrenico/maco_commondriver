@@ -4,11 +4,13 @@ from typing import Final
 
 project_path: Final[Path] = Path(__file__).resolve().parents[1]
 data_root: Final[Path] = project_path / 'data'
-artifacts_root: Final[Path] = project_path / 'paper_artifacts'
+artifacts_root: Final[Path] = project_path / 'paper_artifacts_smoketest'
 results_root: Final[Path] = artifacts_root / 'results'
 interim_results_root: Final[Path] = results_root / 'interim'
 final_results_root: Final[Path] = results_root / 'final'
 figures_root: Final[Path] = artifacts_root / 'figures'
+misc_figure_path: Final[Path] = figures_root
+lorenz_htune_figure_path: Final[Path] = figures_root / 'lorenz_htune'
 
 lorenz_data_path: Final[Path] = data_root / 'lorenz'
 lorenz_data_path_template: Final[str] = str(lorenz_data_path / 'lorenz_{}.npz')
@@ -29,12 +31,12 @@ example_logmap_final_res_path: Final[Path] = final_results_root / 'example_logma
 
 # Realization-count defaults. Edit these for quick tests or per-family runs.
 example_logmap_realizations: Final[int] = 1
-N = 50
+N = 1
 logmap_realizations: Final[int] = N
 tentmap_realizations: Final[int] = N
 lorenz_realizations: Final[int] = N
 lorenz_htune_realizations: Final[int] = N
-noise_length_realizations: Final[int] = 10
+noise_length_realizations: Final[int] = 1
 
 for path in (
 	data_root,
@@ -43,6 +45,8 @@ for path in (
 	interim_results_root,
 	final_results_root,
 	figures_root,
+	misc_figure_path,
+	lorenz_htune_figure_path,
 	logmaps_interim_res_path,
 	tentmaps_interim_res_path,
 	lorenz_interim_res_path,

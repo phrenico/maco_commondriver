@@ -11,7 +11,7 @@ class TestExperimentRegistry(unittest.TestCase):
     def test_expected_families_present(self):
         self.assertEqual(
             set(FAMILY_SPECS),
-            {'logmaps', 'tentmaps', 'lorenz', 'lorenz_htune', 'example_logmap', 'noise_length'},
+            {'logmaps', 'tentmaps', 'lorenz', 'lorenz_htune', 'example_logmap', 'noise_length', 'dummy_experiment'},
         )
 
     def test_combined_csv_names_match_current_outputs(self):
@@ -21,6 +21,7 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(get_family_spec('lorenz_htune').combined_csv, 'htune.csv')
         self.assertEqual(get_family_spec('example_logmap').combined_csv, 'mappercoach_res.csv')
         self.assertEqual(get_family_spec('noise_length').combined_csv, 'noise_length_res.csv')
+        self.assertEqual(get_family_spec('dummy_experiment').combined_csv, 'dummy_experiment_res.csv')
 
     def test_result_files_are_unique_within_family(self):
         for family_spec in FAMILY_SPECS.values():
@@ -51,9 +52,10 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 4)
         self.assertEqual(len(get_execution_steps('example_logmap', stage='methods')), 1)
         self.assertEqual(len(get_execution_steps('noise_length', stage='methods')), 2)
+        self.assertEqual(len(get_execution_steps('dummy_experiment', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('lorenz', stage='combine')), 1)
 
-    def test_all_registry_envs_have_env_specs(self):
+    def test_all_registry_envs_have_uv_projects(self):
         env_dir = Path(__file__).resolve().parents[1] / 'envs'
         self.assertTrue(env_dir.is_dir(), msg='Expected envs/ directory to exist')
 
@@ -62,19 +64,27 @@ class TestExperimentRegistry(unittest.TestCase):
             for family_key in FAMILY_SPECS
             for step in get_execution_steps(family_key, stage='all')
         }
-        available_env_specs = {path.stem for path in env_dir.glob('*.yml')}
+        available_env_specs = {
+            path.name
+            for path in env_dir.iterdir()
+            if path.is_dir() and (path / 'pyproject.toml').is_file()
+        }
 
         missing = expected_envs - available_env_specs
-        self.assertFalse(missing, msg=f'Missing env spec files for: {sorted(missing)}')
+        self.assertFalse(missing, msg=f'Missing uv env projects for: {sorted(missing)}')
 
-    def test_env_specs_have_no_orphans_against_registry(self):
+    def test_uv_env_projects_have_no_orphans_against_registry(self):
         env_dir = Path(__file__).resolve().parents[1] / 'envs'
         expected_envs = {
             step.env_name
             for family_key in FAMILY_SPECS
             for step in get_execution_steps(family_key, stage='all')
         }
-        available_env_specs = {path.stem for path in env_dir.glob('*.yml')}
+        available_env_specs = {
+            path.name
+            for path in env_dir.iterdir()
+            if path.is_dir() and (path / 'pyproject.toml').is_file()
+        }
 
         orphan_specs = available_env_specs - expected_envs
-        self.assertFalse(orphan_specs, msg=f'Orphan env specs not referenced by registry: {sorted(orphan_specs)}')
+        self.assertFalse(orphan_specs, msg=f'Orphan uv env projects not referenced by registry: {sorted(orphan_specs)}')

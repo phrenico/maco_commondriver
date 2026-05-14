@@ -1,0 +1,18 @@
+[project]
+name = "shrec-env"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "cdriver",
+    "numpy>=2.0.2",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.13.1",
+    "shrec",
+    "umap-learn>=0.5.12",
+]
+
+[tool.uv.sources]
+shrec = { git = "https://github.com/williamgilpin/shrec" }
+cdriver = { workspace = true, editable = true }

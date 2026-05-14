@@ -1,4 +1,3 @@
-from jupyterlab.semver import valid
 from mvlearn.embed import DCCA
 import torch
 

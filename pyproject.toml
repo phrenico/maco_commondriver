@@ -46,3 +46,18 @@ namespaces = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+
+[tool.uv.workspace]
+members = [
+    "envs/sfa_env/envs/sfa_env",
+    "envs/sfa_env",
+    ".",
+    "envs/dca_env",
+    ".",
+    "envs/dcca_env",
+    ".",
+    "envs/shrec_env",
+    ".",
+    "envs/maco_env",
+    ".",
+]

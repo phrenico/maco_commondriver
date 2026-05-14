@@ -1,4 +1,3 @@
-from jupyterlab.semver import valid
 from sklearn.cross_decomposition import CCA
 
 import os

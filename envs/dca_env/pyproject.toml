@@ -1,0 +1,18 @@
+[project]
+name = "dca-env"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "cdriver",
+    "dynamicalcomponentsanalysis",
+    "numpy>=2.0.2",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.13.1",
+    "torch>=2.8.0",
+]
+
+[tool.uv.sources]
+dynamicalcomponentsanalysis = { git = "https://github.com/BouchardLab/DynamicalComponentsAnalysis" }
+cdriver = { workspace = true, editable = true }

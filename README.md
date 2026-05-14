@@ -43,45 +43,37 @@ From the repository root:
 python -m pip install -e .
 ```
 
-This installs the core package and the MaCo-based workflows. Some comparison baselines still run in separate conda environments, and those environment names are encoded in `scripts/experiments/experiment_registry.py`.
+This installs the core package and the MaCo-based workflows.
+
+For reproducible experiment runs, the maintained workflow now uses uv project environments in `envs/`.
 
 ## Reproducible Environment Setup
 
-Environment specs for the experiment runner are stored in `envs/` and mirror the env names used in `scripts/experiments/experiment_registry.py`:
+The runner resolves environments from uv project directories under `envs/`.
+Expected environment projects are:
 
-- `envs/maco_rev1.yml`
-- `envs/dca.yml`
-- `envs/dcca_env.yml`
-- `envs/shrec.yml`
-- `envs/sfa.yml`
+- `envs/maco_env`
+- `envs/dca_env`
+- `envs/dcca_env`
+- `envs/shrec_env`
+- `envs/sfa_env`
 
-Create each environment:
+For each environment directory:
 
-```bash
-conda env create -f envs/maco_rev1.yml
-conda env create -f envs/dca.yml
-conda env create -f envs/dcca_env.yml
-conda env create -f envs/shrec.yml
-conda env create -f envs/sfa.yml
-```
+1. Initialize uv project (once): `uv init`
+2. Add method-specific dependencies.
+3. Add editable repo root dependency: `uv add --editable ../../`
 
-Install this repository into each environment so `cdriver` and `scripts.*` modules are importable:
+Example (SFA):
 
 ```bash
-conda run -n maco_rev1 python -m pip install -e .
-conda run -n dca python -m pip install -e .
-conda run -n dcca_env python -m pip install -e .
-conda run -n shrec python -m pip install -e .
-conda run -n sfa python -m pip install -e .
+cd envs/sfa_env
+uv init
+uv add sklearn-sfa numpy scipy scikit-learn
+uv add --editable ../../
 ```
 
-Verify environment setup (strict: no skipping for missing envs):
-
-```bash
-pytest
-```
-
-The environment verification tests check that each required conda env exists and that method-specific imports succeed inside the corresponding env.
+The family runner is strict: if `envs/<env_name>/pyproject.toml` is missing for a registry step, it fails immediately.
 
 ## Data Generation
 
@@ -106,6 +98,8 @@ or equivalently:
 ```bash
 python -m scripts.experiments.run_family <family>
 ```
+
+Each step is executed through `uv run` inside its mapped `envs/<env_name>/` project directory.
 
 Supported families:
 

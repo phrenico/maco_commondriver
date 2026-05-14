@@ -1,6 +1,7 @@
 # Generated data and outputs (not tracked; see paper_artifacts/ for curated paper outputs)
 data/*
 **/checkpoint.model
+paper_artifacts_smoketest/*
 
 # Local environment and IDE files
 .conda/

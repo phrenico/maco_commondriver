@@ -6,8 +6,23 @@ from pathlib import Path
 from scripts.experiments.experiment_registry import FAMILY_SPECS, get_execution_steps, get_family_spec
 
 
+def get_uv_env_dir(step, repo_root):
+    env_dir = repo_root / 'envs' / step.env_name
+    if not env_dir.is_dir():
+        raise FileNotFoundError(
+            f"UV environment directory not found for '{step.env_name}': {env_dir}"
+        )
+
+    pyproject = env_dir / 'pyproject.toml'
+    if not pyproject.is_file():
+        raise FileNotFoundError(
+            f"Missing pyproject.toml for UV environment '{step.env_name}': {pyproject}"
+        )
+    return env_dir
+
+
 def build_command(step):
-    return ['conda', 'run', '-n', step.env_name, step.python_cmd, '-m', step.module]
+    return ['uv', 'run', step.python_cmd, '-m', step.module]
 
 
 def format_command(command):
@@ -15,10 +30,11 @@ def format_command(command):
 
 
 def run_step(step, repo_root, dry_run=False):
+    env_dir = get_uv_env_dir(step, repo_root)
     command = build_command(step)
-    print(f'[{step.label}] {format_command(command)}')
+    print(f'[{step.label}] (cwd={env_dir}) {format_command(command)}')
     if not dry_run:
-        subprocess.run(command, check=True, cwd=repo_root)
+        subprocess.run(command, check=True, cwd=env_dir)
 
 
 def main():

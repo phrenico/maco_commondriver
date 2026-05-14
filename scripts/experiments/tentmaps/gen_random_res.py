@@ -1,6 +1,6 @@
 import numpy as np
 
-from datagen.control import shuffle_phase
+from cdriver.datagen.control import shuffle_phase
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
