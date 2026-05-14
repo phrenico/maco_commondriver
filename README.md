@@ -25,6 +25,12 @@ and the ASOM paper:
 │   ├── preprocessing/     # time-delay embedding and dataset splitting
 │   ├── savers/            # result-table writing helpers
 │   └── visuals/           # visualization helpers
+├── envs/                # uv project directories for reproducible experiment environments
+    ├── maco_env/          # MaCo environment (PyTorch, etc.)
+    ├── dca_env/           # DCA environment
+    ├── dcca_env/          # DCCA environment
+    ├── shrec_env/         # SHREC environment
+    └── sfa_env/           # SFA environment
 ├── scripts/             # Experiment runners, data generation, and figure-generation scripts for the article
 │   ├── config.py          # basic configuration parameters
 │   ├── datagen_scripts/   # explicit data-generation entry points
@@ -45,35 +51,19 @@ python -m pip install -e .
 
 This installs the core package and the MaCo-based workflows.
 
-For reproducible experiment runs, the maintained workflow now uses uv project environments in `envs/`.
+## Reproducible Experiment Environments
 
-## Reproducible Environment Setup
+Experiment workflows use pre-configured uv project environments in `envs/`:
 
-The runner resolves environments from uv project directories under `envs/`.
-Expected environment projects are:
+- `envs/maco_env` — MaCo (PyTorch-based)
+- `envs/dca_env` — Dynamical Component Analysis
+- `envs/dcca_env` — Deep Canonical Correlation Analysis
+- `envs/shrec_env` — ShRec method
+- `envs/sfa_env` — Slow Feature Analysis
 
-- `envs/maco_env`
-- `envs/dca_env`
-- `envs/dcca_env`
-- `envs/shrec_env`
-- `envs/sfa_env`
+Each environment has a `pyproject.toml` with its dependencies and an editable reference to the repository root. **No additional setup is needed**; the toml files are pre-configured and ready to use.
 
-For each environment directory:
-
-1. Initialize uv project (once): `uv init`
-2. Add method-specific dependencies.
-3. Add editable repo root dependency: `uv add --editable ../../`
-
-Example (SFA):
-
-```bash
-cd envs/sfa_env
-uv init
-uv add sklearn-sfa numpy scipy scikit-learn
-uv add --editable ../../
-```
-
-The family runner is strict: if `envs/<env_name>/pyproject.toml` is missing for a registry step, it fails immediately.
+The family runner enforces strict UV-only execution: if `envs/<env_name>/pyproject.toml` is missing for a registry step, it fails immediately with a clear error.
 
 ## Data Generation
 
@@ -87,7 +77,34 @@ python scripts/datagen_scripts/lorenz_datgen.py
 
 ## Main Comparison Workflows
 
-The canonical family runner is:
+### Run All Experiments
+
+To run all 7 registered families and generate comparison plots in one go:
+
+```bash
+python -m scripts.run_all
+```
+
+This orchestrates:
+1. `logmaps` — Logistic map comparison suite
+2. `tentmaps` — Tent map comparison suite
+3. `lorenz` — Lorenz system comparison suite
+4. `lorenz_htune` — Lorenz hyperparameter tuning
+5. `example_logmap` — Worked logistic-map MaCo example
+6. `noise_length` — MaCo noise and length dependence analysis
+7. `dummy_experiment` — Test family for quick validation
+
+Each family runs its methods through its mapped UV environment, then comparison plots are generated and written to `paper_artifacts/figures/`.
+
+For a dry-run preview:
+
+```bash
+python -m scripts.run_all --dry-run
+```
+
+### Run Individual Families
+
+To run a single family:
 
 ```bash
 cdriver-run-family <family>
@@ -101,73 +118,71 @@ python -m scripts.experiments.run_family <family>
 
 Each step is executed through `uv run` inside its mapped `envs/<env_name>/` project directory.
 
-Supported families:
-
-- `logmaps`
-- `tentmaps`
-- `lorenz`
-
 Examples:
 
 ```bash
 cdriver-run-family logmaps
 cdriver-run-family tentmaps
 cdriver-run-family lorenz
+cdriver-run-family lorenz_htune
+cdriver-run-family example_logmap
+cdriver-run-family noise_length
 ```
 
-For compatibility, the family shell wrappers still exist:
+### Method Inventory
+
+- **Logmaps**: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
+- **Tentmaps**: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
+- **Lorenz**: PCA, ICA, CCA, DCA, DCCA, SFA, ShRec, random control, MaCo
+- **Lorenz Hypertune**: Hyperparameter tuning for the Lorenz dataset (ICA, PCA, DCA, SFA)
+- **Noise / Length Analysis**: MaCo robustness to noise and data length
+- **Example Logmap**: Step-by-step MaCo walkthrough
+
+For compatibility, legacy bash wrappers also exist but are not maintained:
 
 - `bash scripts/experiments/logmaps/Z_run_all.sh`
 - `bash scripts/experiments/tentmaps/Z_run_all.sh`
 - `bash scripts/experiments/lorenz/Z_run_all.sh`
 
-Current method inventory:
+## Additional Module-Level Workflows
 
-- Logmaps: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
-- Tentmaps: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
-- Lorenz: PCA, ICA, CCA, DCA, DCCA, SFA, ShRec, random control, MaCo
-
-## Additional Experiment Workflows
-
-The `scripts/experiments/` tree currently contains these maintained sub-workflows:
-
-- `example_logmap/`: worked logistic-map MaCo example
-- `logmaps/`: full logistic-map comparison suite
-- `tentmaps/`: full tent-map comparison suite
-- `lorenz/`: full Lorenz comparison suite
-- `lorenz/lorenz_hypertune/`: Lorenz hyperparameter tuning
-- `noise_length/`: MaCo noise dependence and data-length dependence analyses
-
-Representative commands:
+Beyond the main family runner, individual modules can be invoked directly for ad-hoc exploration:
 
 ```bash
-python scripts/experiments/example_logmap/gen_exampleResults.py
-python scripts/experiments/noise_length/maco_noise.py
-python scripts/experiments/noise_length/maco_length.py
+# Noise/length analysis (not part of main families)
+python -m scripts.experiments.noise_length.maco_noise
+python -m scripts.experiments.noise_length.maco_length
+
+# Lorenz hyperparameter tuning
+python -m scripts.experiments.lorenz.lorenz_hypertune.run_hypertune
 ```
+
+These bypass the family orchestrator and run directly in their respective UV environments via their module paths.
 
 ## Figure Generation
 
-Figure scripts consume the final CSVs under `paper_artifacts/results/`.
+Comparison plots are generated automatically as the final step of `python -m scripts.run_all`.
 
-Representative entry points:
+Manual figure generation:
 
 ```bash
+# Comparison plots (requires final CSVs in paper_artifacts/results/)
 python -m scripts.plots.plot_comparisons
-python scripts/plots/noise_length/plot_noise_length.py
+
+# Noise and length analysis plots
+python -m scripts.plots.noise_length.plot_noise_length
 ```
 
-Dataset-specific plotting scripts also live under:
+Dataset-specific plot scripts:
 
-- `scripts/plots/logmaps/`
-- `scripts/plots/tentmaps/`
-- `scripts/plots/lorenz/`
-- `scripts/plots/example_logmap/`
-- `scripts/plots/noise_length/`
+- `scripts/plots/logmaps/` — Logistic map plots
+- `scripts/plots/tentmaps/` — Tent map plots
+- `scripts/plots/lorenz/` — Lorenz system plots
+- `scripts/plots/example_logmap/` — Example walkthrough plots
+- `scripts/plots/noise_length/` — Robustness analysis plots
 
 ## Notes
 
 - `scripts/config.py` resolves the repository root dynamically; commands should be run from a normal checkout without editing machine-specific paths.
 - `data/`, `results/`, and `figures/` are reproducible output locations (gitignored); pre-computed paper outputs are in `paper_artifacts/`.
 - The maintained execution path is centered on `cdriver-run-family` (console script), backed by `scripts/experiments/run_family.py` and `scripts/experiments/experiment_registry.py`.
-
