@@ -145,6 +145,32 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         ),
         combine_step=RunStep('Combine', 'maco_rev1', 'scripts.experiments.lorenz_hypertune.genres_final_htune'),
     ),
+    'example_logmap': FamilySpec(
+        key='example_logmap',
+        title='Example Logistic Map',
+        combined_csv='mappercoach_res.csv',
+        methods=(
+            MethodResult('MaCo', 'mappercoach_res.csv'),
+        ),
+        run_steps=(
+            RunStep('MaCo', 'maco_rev1', 'scripts.experiments.example_logmap.gen_exampleResults'),
+        ),
+        combine_step=RunStep('Combine', 'maco_rev1', 'scripts.experiments.example_logmap.Z_combine_final_res'),
+    ),
+    'noise_length': FamilySpec(
+        key='noise_length',
+        title='Noise and Length Sensitivity',
+        combined_csv='noise_length_res.csv',
+        methods=(
+            MethodResult('Length Sweep', 'length_maco_res.csv'),
+            MethodResult('Noise Sweep', 'noise_maco_res.csv'),
+        ),
+        run_steps=(
+            RunStep('Length Sweep', 'maco_rev1', 'scripts.experiments.noise_length.maco_length'),
+            RunStep('Noise Sweep', 'maco_rev1', 'scripts.experiments.noise_length.maco_noise'),
+        ),
+        combine_step=RunStep('Combine', 'maco_rev1', 'scripts.experiments.noise_length.Z_combine_final_res'),
+    ),
 }
 
 PLOT_FAMILY_ORDER: Final[tuple[str, ...]] = ('logmaps', 'tentmaps', 'lorenz')

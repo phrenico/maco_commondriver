@@ -1,10 +1,10 @@
 """ configuration for results on ht logmap dataset"""
-from scripts.config import project_path
+from scripts.config import figures_root, logmaps_final_res_path, logmaps_interim_res_path
 
 # Logmap output path
-interim_res_path = project_path  / 'paper_artifacts/results/interim/logmaps'
-final_res_path = project_path / 'paper_artifacts/results/final'
-figure_path = project_path / 'paper_artifacts/figures'
+interim_res_path = logmaps_interim_res_path
+final_res_path = logmaps_final_res_path
+figure_path = figures_root
 
 # create directories if they don't exist
 interim_res_path.mkdir(parents=True, exist_ok=True)

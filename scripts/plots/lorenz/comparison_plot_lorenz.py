@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from scripts.config import misc_figure_path
 from scripts.plots.config_figgen import fig_path, lorenz_path, palette
 from scripts.experiments.experiment_registry import get_family_spec
 
@@ -44,6 +45,6 @@ ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick
 
 
 plt.tight_layout()
-plt.savefig(fig_path/ 'misc' / 'comparisons_lorenz.png', dpi=300)
+plt.savefig(misc_figure_path / 'comparisons_lorenz.png', dpi=300)
 
 # plt.show()

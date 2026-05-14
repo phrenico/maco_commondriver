@@ -22,12 +22,11 @@ from sklearn.preprocessing import minmax_scale, scale
 
 from matplotlib.lines import Line2D
 
-# import project_path from config
-from scripts.config import project_path
+from scripts.config import example_logmap_final_res_path
 from scripts.plots.config_figgen import fig_path
 
 
-res_path = project_path / 'paper_artifacts/results/final/example_logmap'
+res_path = example_logmap_final_res_path
 
 def move_figure(f, x, y):
     """Move figure's upper left corner to pixel (x, y)"""
@@ -72,7 +71,7 @@ def plot_example_res():
 
     fig_path.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_path / 'example_logmap_res.png')
-    move_figure(fig, 0, 0)
+    # move_figure(fig, 0, 0)
     # plt.show()
 
 def plot_learning_prediction(ax_learn, ax_predictions, ax_valid_loss):

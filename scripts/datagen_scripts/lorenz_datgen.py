@@ -9,14 +9,14 @@ from cdriver.datagen.lorenz import dfds
 from datagen_config import lorenzgen_params
 
 # import project base path
-from scripts.config import project_path
+from scripts.config import lorenz_data_path
 
 
 
 
 if __name__=="__main__":
 
-    save_path = project_path / 'data/lorenz'
+    save_path = lorenz_data_path
     dparams = SimpleNamespace(**lorenzgen_params)
 
     # Data Generation

@@ -1,15 +1,15 @@
-from scripts.config import project_path
+from scripts.config import figures_root, final_results_root, noise_length_final_res_path
 import pandas as pd
 import seaborn as sns
 from scripts.experiments.experiment_registry import get_family_spec
 
 # Define paths
-fig_path = project_path / 'paper_artifacts/figures'
+fig_path = figures_root
 
-noise_length_path = project_path / 'paper_artifacts/results/final/noise_length'
-logmaps_path = project_path / 'paper_artifacts/results/final'
-lorenz_path = project_path / 'paper_artifacts/results/final'
-tentmaps_path = project_path / 'paper_artifacts/results/final'
+noise_length_path = noise_length_final_res_path
+logmaps_path = final_results_root
+lorenz_path = final_results_root
+tentmaps_path = final_results_root
 
 # define colors
 logmap_spec = get_family_spec('logmaps')

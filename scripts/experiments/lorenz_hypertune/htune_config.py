@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from tqdm.auto import tqdm
-from scripts.config import project_path
+from scripts.config import figures_root, lorenz_data_path_template, lorenz_htune_final_res_path, lorenz_htune_figure_path, lorenz_htune_interim_res_path, lorenz_htune_realizations
 
 # from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, train_valid_test_split
 from cdriver.preprocessing.splitters import train_test_split, train_valid_test_split
@@ -16,10 +16,10 @@ color_DCA = 'teal'
 
 color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA)
 
-interim_save_path = project_path / 'paper_artifacts/results/interim/lorenz_htune'
-final_save_path = project_path / 'paper_artifacts/results/final/lorenz_htune'
-interim_savefig_path = project_path / 'paper_artifacts/figures/lorenz_htune'
-final_savefig_path = project_path / 'paper_artifacts/figures'
+interim_save_path = lorenz_htune_interim_res_path
+final_save_path = lorenz_htune_final_res_path
+interim_savefig_path = lorenz_htune_figure_path
+final_savefig_path = figures_root
 
 
 # create directories if they don't exist
@@ -37,14 +37,14 @@ def get_data(fname):
 
 
 def compute4all(n_components, method):
-    N = 50
+    N = lorenz_htune_realizations
     train_split = 0.5
     valid_split = 0.25
     maxcs = []
     amaxcs = []
 
     for n_iter in tqdm(range(N), desc='Iterations'):
-        data_path = project_path / 'data/lorenz' / 'lorenz_{}.npz'.format(n_iter)
+        data_path = lorenz_data_path_template.format(n_iter)
         X, z = get_data(data_path)
 
         (X_train, Y_train, z_train,

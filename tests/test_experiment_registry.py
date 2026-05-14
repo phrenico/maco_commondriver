@@ -9,13 +9,18 @@ from scripts.experiments.experiment_registry import (FAMILY_SPECS,
 
 class TestExperimentRegistry(unittest.TestCase):
     def test_expected_families_present(self):
-        self.assertEqual(set(FAMILY_SPECS), {'logmaps', 'tentmaps', 'lorenz', 'lorenz_htune'})
+        self.assertEqual(
+            set(FAMILY_SPECS),
+            {'logmaps', 'tentmaps', 'lorenz', 'lorenz_htune', 'example_logmap', 'noise_length'},
+        )
 
     def test_combined_csv_names_match_current_outputs(self):
         self.assertEqual(get_family_spec('logmaps').combined_csv, 'logmaps_res.csv')
         self.assertEqual(get_family_spec('tentmaps').combined_csv, 'tentmaps_res.csv')
         self.assertEqual(get_family_spec('lorenz').combined_csv, 'lorenz_res.csv')
         self.assertEqual(get_family_spec('lorenz_htune').combined_csv, 'htune.csv')
+        self.assertEqual(get_family_spec('example_logmap').combined_csv, 'mappercoach_res.csv')
+        self.assertEqual(get_family_spec('noise_length').combined_csv, 'noise_length_res.csv')
 
     def test_result_files_are_unique_within_family(self):
         for family_spec in FAMILY_SPECS.values():
@@ -44,6 +49,8 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(len(get_execution_steps('tentmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('lorenz', stage='methods')), 9)
         self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 4)
+        self.assertEqual(len(get_execution_steps('example_logmap', stage='methods')), 1)
+        self.assertEqual(len(get_execution_steps('noise_length', stage='methods')), 2)
         self.assertEqual(len(get_execution_steps('lorenz', stage='combine')), 1)
 
     def test_all_registry_envs_have_env_specs(self):

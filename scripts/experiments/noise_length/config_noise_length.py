@@ -1,10 +1,10 @@
 import numpy as np
 
-from scripts.config import project_path
+from scripts.config import noise_length_final_res_path, noise_length_interim_res_path, noise_length_realizations
 
 
-interim_res_path = project_path / 'paper_artifacts/results/interim/noise_length'
-final_res_path = project_path / 'paper_artifacts/results/final/noise_length'
+interim_res_path = noise_length_interim_res_path
+final_res_path = noise_length_final_res_path
 
 # create directories if they don't exist
 interim_res_path.mkdir(parents=True, exist_ok=True)
@@ -17,7 +17,7 @@ final_res_path.mkdir(parents=True, exist_ok=True)
 Ls = list(range(100, 1_000, 200)) + list(range(1_000, 3_001, 1_000))
 length_params = dict(
     nvars=3,
-    N=10,  # number of realizations
+    N=noise_length_realizations,  # number of realizations
     Ls=Ls,
     n=max(Ls),  # Length of time series
     rint=(3.8, 4.),  # interval to chose from the value of r parameter
@@ -42,7 +42,7 @@ length_params = dict(
 Ls = 10. ** np.arange(-3, .5, 0.25)
 noise_params = dict(
     nvars=3,
-    N=10,  # number of realizations
+    N=noise_length_realizations,  # number of realizations
     Ls=Ls,  # noise levels
     n=1_000,  # Length of time series
     rint=(3.8, 4.),  # interval to chose from the value of r parameter

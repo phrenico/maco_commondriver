@@ -15,13 +15,13 @@ import pandas as pd
 from pathlib import Path
 import pickle
 
-from scripts.config import project_path
+from scripts.config import example_logmap_final_res_path
 from scripts.datagen_scripts.datagen_config import logmapexamplegen_params
 from scripts.experiments.maco_utils import build_series_loaders, train_and_select_best_model
 
 
 def main():
-    respath = project_path / 'paper_artifacts/results/final/example_logmap'
+    respath = example_logmap_final_res_path
     os.makedirs(respath, exist_ok=True)
 
     # Parameters

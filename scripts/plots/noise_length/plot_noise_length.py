@@ -50,15 +50,17 @@ def plot_noise_length(df_noise, df_length, save_path):
     plt.savefig(save_path/ 'noise_length_res.png')
     return fig
     
-
-
-def main():
-
+def plot_all_nl():
     len_df = pd.read_csv(noise_length_path / './length_maco_res.csv')
     noise_df = pd.read_csv(noise_length_path / './noise_maco_res.csv')
 
-
     fig = plot_noise_length(noise_df, len_df, fig_path)
+    return fig
+
+
+def main():
+    fig = plot_all_nl()
+    # move_figure(fig, 0, 0)
     # plt.show()
 
   
