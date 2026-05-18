@@ -26,11 +26,11 @@ and the ASOM paper:
 │   ├── savers/            # result-table writing helpers
 │   └── visuals/           # visualization helpers
 ├── envs/                # uv project directories for reproducible experiment environments
-    ├── maco_env/          # MaCo environment (PyTorch, etc.)
-    ├── dca_env/           # DCA environment
-    ├── dcca_env/          # DCCA environment
-    ├── shrec_env/         # SHREC environment
-    └── sfa_env/           # SFA environment
+│   ├── maco_env/          # MaCo environment (PyTorch, etc.)
+│   ├── dca_env/           # DCA environment
+│   ├── dcca_env/          # DCCA environment
+│   ├── shrec_env/         # SHREC environment
+│   └── sfa_env/           # SFA environment
 ├── scripts/             # Experiment runners, data generation, and figure-generation scripts for the article
 │   ├── config.py          # basic configuration parameters
 │   ├── datagen_scripts/   # explicit data-generation entry points

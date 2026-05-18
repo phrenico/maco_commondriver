@@ -1,25 +1,32 @@
-'''Run experiments with random predictions
+'''Run experiments with random predictions on logistic map data-set'''
+import argparse
+from pathlib import Path
 
-'''
 import numpy as np
-
 from tqdm import tqdm
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
+from scripts.experiments.config_loader import get_config, resolve_paths
 
-
-from scripts.datagen_scripts.datagen_config import logmapgen_params
-from scripts.experiments.logmaps.config_logmapres import train_split, interim_res_path, valid_split
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
 if __name__ == "__main__":
-    # 1. Generate data
-    N = logmapgen_params['N']  # number of realizations
-    dataset, params = gen_logmapdata(logmapgen_params)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    args = parser.parse_args()
+    cfg = resolve_paths(get_config('logmaps', args.config), _REPO_ROOT)
 
-    d_embed = 3
+    # 1. Generate data
+    N = cfg['datagen']['N']
+    dataset, params = gen_logmapdata(cfg['datagen'])
+
+    d_embed = cfg['preprocessing']['d_embed']
+    train_split = cfg['preprocessing']['train_split']
+    valid_split = cfg['preprocessing']['valid_split']
+
     maxcs = []
     for i in tqdm(range(N)):
         data = dataset[i]
@@ -36,7 +43,7 @@ if __name__ == "__main__":
         maxcs.append(get_maxes(tau, c)[1])
 
     # Save results
-    df = save_results(fname=interim_res_path / 'random_res.csv',
+    df = save_results(fname=cfg['paths']['interim_res_path'] / 'random_res.csv',
                       r=maxcs,
                       N=N,
                       method='Random',

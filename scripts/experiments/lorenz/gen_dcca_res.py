@@ -1,55 +1,73 @@
-from mvlearn.embed import DCCA
-import torch
+import argparse
+from pathlib import Path
 
 import os
+import torch
 import numpy as np
-from scripts.experiments.lorenz.config_lorenzres import interim_res_path, N, train_split, data_path_template, valid_split
+from mvlearn.embed import DCCA
 from cdriver.preprocessing.splitters import train_valid_test_split
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+from scripts.experiments.config_loader import get_config, resolve_paths
 from tqdm import tqdm
-os.makedirs(interim_res_path, exist_ok=True)
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
 
 def myfun(x, *args, **kwargs):
-  return torch.linalg.eigh(x)
+    return torch.linalg.eigh(x)
 
 torch.symeig = myfun
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-maxcs = []
-for n_iter in tqdm(range(N)):
-    data_path = data_path_template.format(n_iter)
-    data = np.load(data_path)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    args = parser.parse_args()
+    cfg = resolve_paths(get_config('lorenz', args.config), _REPO_ROOT)
 
-    X = data['v'][:, 3:6]
-    Y = data['v'][:, 6:]
-    z = data['v'][:, 1]
+    N = cfg['data']['N']
+    data_path_template = str(_REPO_ROOT / cfg['data']['data_path_template'])
+    train_split = cfg['preprocessing']['train_split']
+    valid_split = cfg['preprocessing']['valid_split']
+    d_embed = cfg['methods']['dcca']['d_embed']
+    layers = cfg['methods']['dcca']['layers']
+    interim_res_path = cfg['paths']['interim_res_path']
+    os.makedirs(interim_res_path, exist_ok=True)
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    d_embed = 3
-    features1 = d_embed  # Feature sizes
-    features2 = d_embed
-    layers1 = [20, 20, 1]  # nodes in each hidden layer and the output size
-    layers2 = layers1.copy()
+    maxcs = []
+    for n_iter in tqdm(range(N)):
+        data_path = data_path_template.format(n_iter)
+        data = np.load(data_path)
 
-    X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
-                                                                                                          train_split,
-                                                                                                          valid_split)  
+        X = data['v'][:, 3:6]
+        Y = data['v'][:, 6:]
+        z = data['v'][:, 1]
 
-    dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,
-                        layer_sizes1=layers1, layer_sizes2=layers2, epoch_num=100,
-                        use_all_singular_values=True, device=device)
-    dcca.fit([X_train, Y_train])
-    Xs_transformed = dcca.transform([X_test, Y_test])
+        features1 = d_embed
+        features2 = d_embed
+        layers1 = list(layers)
+        layers2 = list(layers)
 
-    zp1, zp2 = Xs_transformed
+        X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z,
+                                                                                                              train_split,
+                                                                                                              valid_split)
 
-    z_pred = (zp1[:, 0] + zp2[:, 0]) / 2
-    maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
+        dcca = DCCA(input_size1=features1, input_size2=features2, n_components=1,
+                    layer_sizes1=layers1, layer_sizes2=layers2, epoch_num=100,
+                    use_all_singular_values=True, device=device)
+        dcca.fit([X_train, Y_train])
+        Xs_transformed = dcca.transform([X_test, Y_test])
 
-df = save_results(fname=interim_res_path / './dcca_res.csv',
-                  r=maxcs,
-                  N=N,
-                  method='DCCA',
-                  dataset='lorenz')
+        zp1, zp2 = Xs_transformed
+
+        z_pred = (zp1[:, 0] + zp2[:, 0]) / 2
+        maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
+
+    df = save_results(fname=interim_res_path / 'dcca_res.csv',
+                      r=maxcs,
+                      N=N,
+                      method='DCCA',
+                      dataset='lorenz')

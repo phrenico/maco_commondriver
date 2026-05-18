@@ -1,17 +1,27 @@
-from sklearn.decomposition import PCA, FastICA
+import argparse
+from pathlib import Path
+
+from sklearn.decomposition import FastICA
 from tqdm import tqdm
 import pandas as pd
 from scripts.experiments.lorenz_hypertune.htune_config import create_htune_df, compute4all, interim_save_path
+from scripts.experiments.config_loader import get_config, resolve_paths
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    args = parser.parse_args()
+    cfg = resolve_paths(get_config('lorenz_htune', args.config), _REPO_ROOT)
 
-ns_components = range(1, 7)
-dfs = []
-for n_components in tqdm(ns_components):
-    maxcs, amaxcs = compute4all(n_components, FastICA)
-    df = create_htune_df(maxcs, amaxcs, n_components, len(maxcs), 'ICA', 'lorenz')
-    dfs.append(df)
+    ns_components = cfg['sweep']['ns_components']
+    dfs = []
+    for n_components in tqdm(ns_components):
+        maxcs, amaxcs = compute4all(n_components, FastICA)
+        df = create_htune_df(maxcs, amaxcs, n_components, len(maxcs), 'ICA', 'lorenz')
+        dfs.append(df)
 
-df = pd.concat(dfs, ignore_index=False)
-df.to_csv(interim_save_path / 'ica_htune.csv')
+    df = pd.concat(dfs, ignore_index=False)
+    df.to_csv(interim_save_path / 'ica_htune.csv')
 

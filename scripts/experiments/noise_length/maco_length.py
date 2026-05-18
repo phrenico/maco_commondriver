@@ -17,18 +17,34 @@ from cdriver.network.maco import MaCo
 
 import torch
 
-from scripts.experiments.noise_length.config_noise_length import length_params, final_res_path
+from scripts.experiments.config_loader import get_config, resolve_paths
 from scripts.experiments.maco_utils import (build_series_loaders,
                                        create_sweep_df,
                                        get_default_device,
                                        score_latent_reconstruction,
                                        train_and_select_best_model)
 from types import SimpleNamespace
+from pathlib import Path
 
-p = SimpleNamespace(**length_params)  # read in parameters from the config file
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    _args = parser.parse_args()
+    cfg = resolve_paths(get_config('noise_length', _args.config), _REPO_ROOT)
+else:
+    cfg = resolve_paths(get_config('noise_length', None), _REPO_ROOT)
+
+_maco = dict(cfg['maco'])
+_maco['nh'] = _maco.pop('n_hidden')
+length_params = {**cfg['datagen'], **cfg['length_sweep'], **_maco, **cfg['preprocessing']}
+p = SimpleNamespace(**length_params)
+final_res_path = cfg['paths']['final_res_path']
 try:
-    os.makedirs(final_res_path, exist_ok=True)  # create the results directory if it does not exist
-except:
+    os.makedirs(final_res_path, exist_ok=True)
+except Exception:
     print("Some problem with path creation occured")
 
 # 1. Generate random Logistic datasets

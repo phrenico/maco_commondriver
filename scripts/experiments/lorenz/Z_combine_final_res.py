@@ -1,17 +1,29 @@
+import argparse
+from pathlib import Path
+
 from scripts.experiments.combine_utils import combine_result_files
 from scripts.experiments.experiment_registry import get_family_spec
-from scripts.experiments.lorenz.config_lorenzres import interim_res_path, final_res_path
+from scripts.experiments.config_loader import get_config, resolve_paths
 
-print('Starting to combine results from ', interim_res_path)
-print('Loading results from ', interim_res_path)
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
-print("Combining Lorenz's results")
-family_spec = get_family_spec('lorenz')
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    args = parser.parse_args()
+    cfg = resolve_paths(get_config('lorenz', args.config), _REPO_ROOT)
 
-df = combine_result_files(interim_res_path,
-                          final_res_path / family_spec.combined_csv,
-                          family_spec.result_files)
+    family_spec = get_family_spec('lorenz')
+    interim_res_path = cfg['paths']['interim_res_path']
+    final_res_path = cfg['paths']['final_res_path']
 
-print("Saving combined results to ", final_res_path / family_spec.combined_csv)
+    print('Starting to combine results from ', interim_res_path)
+    print('Loading results from ', interim_res_path)
 
-print('Saved combined results')
+    print("Combining Lorenz's results")
+    df = combine_result_files(interim_res_path,
+                              final_res_path / family_spec.combined_csv,
+                              family_spec.result_files)
+
+    print("Saving combined results to ", final_res_path / family_spec.combined_csv)
+    print('Saved combined results')

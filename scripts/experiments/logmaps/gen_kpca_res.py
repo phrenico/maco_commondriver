@@ -1,10 +1,11 @@
 '''Script to run Kernel PCA on logistic map data-set
 1. Generate data
 2. Run Kernel PCA
-3. Plot results
-4. Save results
-
+3. Save results
 '''
+import argparse
+from pathlib import Path
+
 import numpy as np
 from sklearn.decomposition import KernelPCA
 from cdriver.preprocessing.splitters import train_valid_test_split
@@ -12,23 +13,30 @@ from cdriver.preprocessing.tde import time_delay_embedding
 from cdriver.savers.saver import save_results
 from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 from cdriver.datagen.logmap import gen_logmapdata
-
-from scripts.datagen_scripts.datagen_config import logmapgen_params
-from scripts.experiments.logmaps.config_logmapres import train_split, interim_res_path, valid_split
-
+from scripts.experiments.config_loader import get_config, resolve_paths
 from tqdm import tqdm
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default=None)
+    args = parser.parse_args()
+    cfg = resolve_paths(get_config('logmaps', args.config), _REPO_ROOT)
 
     # 1. Generate data
-    N = logmapgen_params['N']  # number of realizations
-    dataset, params = gen_logmapdata(logmapgen_params)
+    N = cfg['datagen']['N']
+    dataset, params = gen_logmapdata(cfg['datagen'])
 
-    print('Generated {} realizations of logistic map data-set with parameters: {}'.format(N, params))
-    print("Training-Data length will be: {}".format(int(logmapgen_params['n'] * train_split)))
+    print('Generated {} realizations of logistic map data-set'.format(N))
 
     # 2. Run Kernel PCA
-    d_embed = 3
+    d_embed = cfg['preprocessing']['d_embed']
+    train_split = cfg['preprocessing']['train_split']
+    valid_split = cfg['preprocessing']['valid_split']
+    n_components = cfg['methods']['kpca']['n_components']
+    kernel = cfg['methods']['kpca']['kernel']
+
     maxcs = []
     for i in tqdm(range(N)):
         X = time_delay_embedding(dataset[i][:, 1], delay=1, dimension=d_embed)
@@ -39,15 +47,15 @@ if __name__ == "__main__":
 
         D = np.concatenate([X_train, Y_train], axis=1)
 
-        model = KernelPCA(n_components=1, kernel='rbf').fit(D)
+        model = KernelPCA(n_components=n_components, kernel=kernel).fit(D)
         zpred = model.transform(np.concatenate([X_test, Y_test], axis=1))
 
         maxcs.append(get_maxes(*comp_ccorr(z_test, zpred[:, 0]))[1])
 
     # Save results
-    df = save_results(fname=interim_res_path / 'kpca_res.csv',
+    df = save_results(fname=cfg['paths']['interim_res_path'] / 'kpca_res.csv',
                       r=maxcs,
                       N=N,
                       method='KPCA',
                       dataset='logmap',
-                      times= N * ['NaN'])  # times can be None if not measured
+                      times=N * ['NaN'])
