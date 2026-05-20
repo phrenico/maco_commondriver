@@ -22,7 +22,7 @@ from sklearn.preprocessing import minmax_scale, scale
 
 from matplotlib.lines import Line2D
 
-from scripts.config import example_logmap_final_res_path
+from scripts.config_runall import example_logmap_final_res_path
 from scripts.plots.config_figgen import fig_path
 
 

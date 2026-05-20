@@ -1,4 +1,4 @@
-from scripts.config import figures_root, final_results_root, noise_length_final_res_path
+from scripts.config_runall import figures_root, final_results_root, noise_length_final_res_path
 import pandas as pd
 import seaborn as sns
 from scripts.experiments.experiment_registry import get_family_spec

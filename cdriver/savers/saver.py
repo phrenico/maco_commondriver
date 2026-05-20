@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 
@@ -7,6 +9,9 @@ def save_results(fname, r, N, method, dataset, times=None):
     """
     if times is None:
         times = N * [np.nan]
+
+    fname = Path(fname)
+    fname.parent.mkdir(parents=True, exist_ok=True)
 
     df = pd.DataFrame({
         'data_id': range(N),

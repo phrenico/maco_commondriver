@@ -2,12 +2,6 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from tqdm.auto import tqdm
-from scripts.config import figures_root, lorenz_data_path_template, lorenz_htune_final_res_path, lorenz_htune_figure_path, lorenz_htune_interim_res_path, lorenz_htune_realizations
-
-# from data_generators import time_delay_embedding, comp_ccorr, get_maxes, train_test_split, train_valid_test_split
-from cdriver.preprocessing.splitters import train_test_split, train_valid_test_split
-from cdriver.evaluate.evalz import comp_ccorr, get_maxes
-# from cdriver.preprocessing.tde import time_delay_embedding
 
 color_ICA = 'tab:orange'
 color_PCA = 'tab:blue'
@@ -16,17 +10,19 @@ color_DCA = 'teal'
 
 color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA)
 
-interim_save_path = lorenz_htune_interim_res_path
-final_save_path = lorenz_htune_final_res_path
-interim_savefig_path = lorenz_htune_figure_path
-final_savefig_path = figures_root
+def get_htune_paths(cfg):
+    paths = {
+        'interim_res_path': cfg['paths']['interim_res_path'],
+        'final_res_path': cfg['paths']['final_res_path'],
+        'figure_path': cfg['paths']['figure_path'],
+    }
+    for path in paths.values():
+        path.mkdir(parents=True, exist_ok=True)
+    return paths
 
 
-# create directories if they don't exist
-interim_save_path.mkdir(parents=True, exist_ok=True)
-final_save_path.mkdir(parents=True, exist_ok=True)
-interim_savefig_path.mkdir(parents=True, exist_ok=True)
-final_savefig_path.mkdir(parents=True, exist_ok=True)
+def get_data_path_template(cfg, repo_root):
+    return str(Path(repo_root) / cfg['data']['data_path_template'])
 
 
 def get_data(fname):
@@ -36,15 +32,19 @@ def get_data(fname):
     return X, z
 
 
-def compute4all(n_components, method):
-    N = lorenz_htune_realizations
-    train_split = 0.5
-    valid_split = 0.25
+def compute4all(cfg, repo_root, n_components, method):
+    from cdriver.evaluate.evalz import comp_ccorr, get_maxes
+    from cdriver.preprocessing.splitters import train_valid_test_split
+
+    N = cfg['data']['N']
+    train_split = cfg['preprocessing']['train_split']
+    valid_split = cfg['preprocessing']['valid_split']
+    data_path_template = get_data_path_template(cfg, repo_root)
     maxcs = []
     amaxcs = []
 
     for n_iter in tqdm(range(N), desc='Iterations'):
-        data_path = lorenz_data_path_template.format(n_iter)
+        data_path = data_path_template.format(n_iter)
         X, z = get_data(data_path)
 
         (X_train, Y_train, z_train,
@@ -112,5 +112,7 @@ def plot_htune(df, method, fig_axes=None, yaxlabel=True, save=False, path=Path('
     ax2.grid(True)
     fig.tight_layout()
     if save:
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
         plt.savefig(path / '{}_htune.png'.format(method))
     return fig

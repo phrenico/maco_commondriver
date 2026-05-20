@@ -1,7 +1,7 @@
 """ Data Generation parameter configurations"""
 import numpy as np
 
-from scripts.config import example_logmap_realizations, logmap_realizations, lorenz_realizations, tentmap_realizations
+from scripts.config_runall import example_logmap_realizations, logmap_realizations, lorenz_realizations, tentmap_realizations
 
 # Example Logistic map dataset configuration
 logmapexamplegen_params = dict(N=example_logmap_realizations,  # number of realizations

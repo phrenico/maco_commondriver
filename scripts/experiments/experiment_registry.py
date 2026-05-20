@@ -171,38 +171,6 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         ),
         combine_step=RunStep('Combine', 'maco_env', 'scripts.experiments.noise_length.Z_combine_final_res'),
     ),
-    'dummy_experiment': FamilySpec(
-        key='dummy_experiment',
-        title='Dummy Import Mirror (Logmaps)',
-        combined_csv='dummy_experiment_res.csv',
-        methods=(
-            MethodResult('PCA', 'pca_res.csv'),
-            MethodResult('kPCA', 'kpca_res.csv'),
-            MethodResult('ICA', 'ica_res.csv'),
-            MethodResult('CCA', 'cca_res.csv'),
-            MethodResult('DCCA', 'dcca_res.csv'),
-            MethodResult('ShRec', 'shrec_res.csv'),
-            MethodResult('SFA', 'sfa_res.csv'),
-            MethodResult('DCA', 'dca_res.csv'),
-            MethodResult('random', 'random_res.csv'),
-            MethodResult('MaCo', 'maco_res.csv'),
-            MethodResult('AniSOM', 'anisom_res.csv'),
-        ),
-        run_steps=(
-            RunStep('ICA', 'maco_env', 'scripts.experiments.dummy_experiment.gen_ica_res'),
-            RunStep('PCA', 'maco_env', 'scripts.experiments.dummy_experiment.gen_pca_res'),
-            RunStep('KPCA', 'maco_env', 'scripts.experiments.dummy_experiment.gen_kpca_res'),
-            RunStep('CCA', 'maco_env', 'scripts.experiments.dummy_experiment.gen_cca_res'),
-            RunStep('DCA', 'dca_env', 'scripts.experiments.dummy_experiment.gen_dca_res'),
-            RunStep('DCCA', 'dcca_env', 'scripts.experiments.dummy_experiment.gen_dcca_res'),
-            RunStep('Sh-Rec', 'maco_env', 'scripts.experiments.dummy_experiment.gen_shrec_res'),
-            RunStep('Random', 'maco_env', 'scripts.experiments.dummy_experiment.gen_random_res'),
-            RunStep('SFA', 'sfa_env', 'scripts.experiments.dummy_experiment.gen_sfa_res'),
-            RunStep('MaCo', 'maco_env', 'scripts.experiments.dummy_experiment.gen_maco_res'),
-            RunStep('AniSOM', 'maco_env', 'scripts.experiments.dummy_experiment.gen_anisom_res'),
-        ),
-        combine_step=RunStep('Combine', 'maco_env', 'scripts.experiments.dummy_experiment.Z_combine_final_res'),
-    ),
 }
 
 PLOT_FAMILY_ORDER: Final[tuple[str, ...]] = ('logmaps', 'tentmaps', 'lorenz')

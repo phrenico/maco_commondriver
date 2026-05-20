@@ -2,8 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-from scripts.experiments.lorenz_hypertune.htune_config import final_savefig_path
-from scripts.experiments.lorenz_hypertune.htune_config import plot_htune
+from scripts.experiments.lorenz_hypertune.htune_config import get_htune_paths, plot_htune
 from scripts.experiments.config_loader import get_config, resolve_paths
 import matplotlib.pyplot as plt
 
@@ -15,8 +14,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     cfg = resolve_paths(get_config('lorenz_htune', args.config), _REPO_ROOT)
 
-    interim_save_path = cfg['paths']['interim_res_path']
-    final_save_path = cfg['paths']['final_res_path']
+    paths = get_htune_paths(cfg)
+    interim_save_path = paths['interim_res_path']
+    final_save_path = paths['final_res_path']
 
     pca_df = pd.read_csv(interim_save_path / 'pca_htune.csv', index_col=0)
     ica_df = pd.read_csv(interim_save_path / 'ica_htune.csv', index_col=0)
@@ -49,4 +49,4 @@ if __name__ == '__main__':
     ax[0, 2].text(4, 1, **star_kwargs)
     ax[0, 3].text(2, 1, **star_kwargs)
 
-    fig.savefig(final_savefig_path / 'htune.png')
+    fig.savefig(paths['figure_path'] / 'htune.png')

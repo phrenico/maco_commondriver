@@ -1,7 +1,7 @@
 [project]
 name = "dca-env"
 version = "0.1.0"
-description = "Add your description here"
+description = "UV environment for Dynamical Components Analysis experiment steps"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

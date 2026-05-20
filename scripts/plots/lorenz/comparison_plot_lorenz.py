@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scripts.config import misc_figure_path
+from scripts.config_runall import misc_figure_path
 from scripts.plots.config_figgen import fig_path, lorenz_path, palette
 from scripts.experiments.experiment_registry import get_family_spec
 

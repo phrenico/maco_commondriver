@@ -18,16 +18,16 @@ def run_command(command, repo_root, dry_run=False):
 
 
 def run_all_experiments(repo_root, dry_run=False, config_path=None):
-        family_keys = tuple(FAMILY_SPECS)
-        total_families = len(family_keys)
+	family_keys = tuple(FAMILY_SPECS)
+	total_families = len(family_keys)
 
-        for index, family_key in enumerate(family_keys, start=1):
-                print(f'[{index}/{total_families}] Running family: {family_key}')
-                command = [sys.executable, '-m', 'scripts.experiments.run_family', family_key]
-                if dry_run:
-                        command.append('--dry-run')
-                if config_path is not None:
-                        command += ['--config', config_path]
+	for index, family_key in enumerate(family_keys, start=1):
+		print(f'[{index}/{total_families}] Running family: {family_key}')
+		command = [sys.executable, '-m', 'scripts.experiments.run_family', family_key]
+		if dry_run:
+			command.append('--dry-run')
+		if config_path is not None:
+			command += ['--config', config_path]
 		run_command(command, repo_root, dry_run=dry_run)
 
 
@@ -42,21 +42,22 @@ def main():
 		description='Run all registered experiment families and generate comparison plots.'
 	)
 	parser.add_argument('--dry-run', action='store_true')
-        parser.add_argument('--config', default=None,
-                            help='Path to external config file (resolved to absolute path).')
-        args = parser.parse_args()
+	parser.add_argument('--config', default=None,
+						help='Path to external config file (resolved to absolute path).')
+	args = parser.parse_args()
 
-        repo_root = Path(__file__).resolve().parents[1]
+	repo_root = Path(__file__).resolve().parents[1]
 
-        # Resolve to absolute path immediately so subprocesses can use it
-        config_path = None
-        if args.config is not None:
-                config_path = str(Path(args.config).resolve())
+	# Resolve to absolute path immediately so subprocesses can use it.
+	config_path = None
+	if args.config is not None:
+		config_path = str(Path(args.config).resolve())
+
 	print('Starting full pipeline run...')
 	print(f'Dry run: {args.dry_run}')
 
-        run_all_experiments(repo_root, dry_run=args.dry_run, config_path=config_path)
-	else:
+	run_all_experiments(repo_root, dry_run=args.dry_run, config_path=config_path)
+	if not args.dry_run:
 		run_comparison_plot(repo_root, dry_run=False)
 
 	print('Pipeline completed successfully.')

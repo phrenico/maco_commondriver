@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from scripts.config_runall import figures_root as figure_path, tentmaps_final_res_path as final_res_path
 from scripts.experiments.experiment_registry import get_family_spec
-from scripts.experiments.tentmaps.config_tentmapres import final_res_path, figure_path
 
 family_spec = get_family_spec('tentmaps')
 

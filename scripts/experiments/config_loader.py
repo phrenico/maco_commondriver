@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import importlib.util
 import types
-import warnings
 from pathlib import Path
 
 
@@ -42,7 +41,8 @@ def get_config(family_key: str, external_config_path: str | None = None) -> dict
     Look-up order:
     1. If *external_config_path* is given, load that file and look for
        ``CONFIG_<FAMILY_KEY>`` (upper-cased).  If found, return it.
-    2. Fall back to the built-in ``scripts.experiments.config`` module.
+       If the file does not exist or does not define the attribute, raise immediately.
+    2. Otherwise fall back to the built-in ``scripts.experiments.config`` module.
 
     Parameters
     ----------
@@ -59,35 +59,29 @@ def get_config(family_key: str, external_config_path: str | None = None) -> dict
 
     Raises
     ------
+    FileNotFoundError
+        If *external_config_path* is given but the file does not exist.
     AttributeError
-        If neither the external file nor the built-in module defines the
-        requested ``CONFIG_<FAMILY_KEY>``.
+        If *external_config_path* is given but does not define ``CONFIG_<FAMILY_KEY>``,
+        or if no *external_config_path* is given and the built-in module does not
+        define it either.
     """
     attr = f'CONFIG_{family_key.upper()}'
 
     if external_config_path is not None:
-        try:
-            ext_mod = _load_module(external_config_path)
-        except FileNotFoundError:
-            warnings.warn(
-                f'External config file not found: {external_config_path}. '
-                f'Falling back to built-in config.',
-                stacklevel=2,
-            )
-        else:
-            if hasattr(ext_mod, attr):
-                return getattr(ext_mod, attr)
-            warnings.warn(
+        ext_mod = _load_module(external_config_path)  # raises FileNotFoundError if missing
+        if not hasattr(ext_mod, attr):
+            raise AttributeError(
                 f'{attr} not found in {external_config_path}. '
-                f'Falling back to built-in config.',
-                stacklevel=2,
+                f'Add a {attr} dict to that file or drop --config.'
             )
+        return getattr(ext_mod, attr)
 
-    # Built-in default
-    from scripts.experiments import config as _default_config  # noqa: PLC0415
+    # Built-in default (now canonical: scripts.config_runall)
+    import scripts.config_runall as _default_config  # noqa: PLC0415
     if not hasattr(_default_config, attr):
         raise AttributeError(
-            f'No {attr} defined in scripts.experiments.config. '
+            f'No {attr} defined in scripts.config_runall. '
             f'Available configs: '
             + ', '.join(k for k in dir(_default_config) if k.startswith('CONFIG_'))
         )

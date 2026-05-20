@@ -1,7 +1,7 @@
 [project]
 name = "dcca-env"
 version = "0.1.0"
-description = "Add your description here"
+description = "UV environment for Deep Canonical Correlation Analysis experiment steps"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

@@ -9,7 +9,7 @@ from cdriver.datagen.lorenz import dfds
 from datagen_config import lorenzgen_params
 
 # import project base path
-from scripts.config import lorenz_data_path
+from scripts.config_runall import lorenz_data_path
 
 
 

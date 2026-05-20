@@ -2,9 +2,8 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scripts.config import misc_figure_path
+from scripts.config_runall import logmaps_final_res_path as final_res_path, misc_figure_path
 from scripts.experiments.experiment_registry import get_family_spec
-from scripts.experiments.logmaps.config_logmapres import final_res_path, figure_path
 
 family_spec = get_family_spec('logmaps')
 

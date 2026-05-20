@@ -32,7 +32,8 @@ and the ASOM paper:
 │   ├── shrec_env/         # SHREC environment
 │   └── sfa_env/           # SFA environment
 ├── scripts/             # Experiment runners, data generation, and figure-generation scripts for the article
-│   ├── config.py          # basic configuration parameters
+│   ├── config_runall.py   # canonical configuration for all experiments, datagen, and plots
+│   ├── config_templates/ # standalone external-config templates and tutorial
 │   ├── datagen_scripts/   # explicit data-generation entry points
 │   ├── plots/             # figure-generation scripts driven by final CSVs
 │   └── experiments/       # experiment and result-generation workflows
@@ -43,13 +44,15 @@ and the ASOM paper:
 
 ## Installation
 
-From the repository root:
+The core package is installed as an editable dependency inside each experiment environment.
+No separate top-level install step is needed — the `uv` project files in `envs/` handle everything.
+
+If you need the package available in your active Python environment (e.g. for running tests or
+importing `cdriver` directly), install it manually:
 
 ```bash
-python -m pip install -e .
+pip install -e .
 ```
-
-This installs the core package and the MaCo-based workflows.
 
 ## Reproducible Experiment Environments
 
@@ -61,9 +64,12 @@ Experiment workflows use pre-configured uv project environments in `envs/`:
 - `envs/shrec_env` — ShRec method
 - `envs/sfa_env` — Slow Feature Analysis
 
-Each environment has a `pyproject.toml` with its dependencies and an editable reference to the repository root. **No additional setup is needed**; the toml files are pre-configured and ready to use.
+Each environment has a `pyproject.toml` with its dependencies and an editable reference to the
+repository root. **No additional setup is needed**; the toml files are pre-configured. `uv` will
+create and populate the environments on first run automatically.
 
-The family runner enforces strict UV-only execution: if `envs/<env_name>/pyproject.toml` is missing for a registry step, it fails immediately with a clear error.
+The family runner enforces strict uv-only execution: if `envs/<env_name>/pyproject.toml` is missing
+for a registry step, it fails immediately with a clear error.
 
 ## Data Generation
 
@@ -79,55 +85,74 @@ python scripts/datagen_scripts/lorenz_datgen.py
 
 ### Run All Experiments
 
-To run all 7 registered families and generate comparison plots in one go:
+To run all registered families and generate comparison plots in one go:
 
 ```bash
 python -m scripts.run_all
 ```
 
-This orchestrates:
+This orchestrates (in order):
 1. `logmaps` — Logistic map comparison suite
 2. `tentmaps` — Tent map comparison suite
 3. `lorenz` — Lorenz system comparison suite
-4. `lorenz_htune` — Lorenz hyperparameter tuning
+4. `lorenz_htune` — Lorenz hyperparameter tuning (ICA, PCA, DCA, SFA)
 5. `example_logmap` — Worked logistic-map MaCo example
 6. `noise_length` — MaCo noise and length dependence analysis
-7. `dummy_experiment` — Test family for quick validation
 
 Each family runs its methods through its mapped UV environment, then comparison plots are generated and written to `paper_artifacts/figures/`.
 
-For a dry-run preview:
+For a dry-run preview (prints all subprocess commands without executing them):
 
 ```bash
 python -m scripts.run_all --dry-run
 ```
 
-### Run Individual Families
+To forward a custom config to every family:
 
-To run a single family:
+```bash
+python -m scripts.run_all --dry-run --config path/to/custom_config.py
+```
+
+### Run Individual Families
 
 ```bash
 cdriver-run-family <family>
 ```
 
-or equivalently:
+Available families: `logmaps`, `tentmaps`, `lorenz`, `lorenz_htune`, `example_logmap`,
+`noise_length`.
+
+Each step runs via `uv run` inside its mapped `envs/<env_name>/` directory.
+
+To override config parameters, create a Python file defining the matching `CONFIG_<FAMILY>` dict
+(e.g. `CONFIG_LOGMAPS = {...}`, `CONFIG_LORENZ = {...}`) and pass it via `--config`. If the file is missing or the dict is
+absent, the runner **fails immediately** — there is no silent fallback:
 
 ```bash
-python -m scripts.experiments.run_family <family>
+cdriver-run-family logmaps --config path/to/custom_config.py
+cdriver-run-family lorenz_htune --config path/to/custom_config.py
 ```
 
-Each step is executed through `uv run` inside its mapped `envs/<env_name>/` project directory.
+### Standalone Config Templates
 
-Examples:
+Ready-to-copy standalone templates are available in `scripts/config_templates/`.
+Each file is self-contained and defines one `CONFIG_<FAMILY>` dict directly (no import from `scripts/config_runall.py` required).
 
-```bash
-cdriver-run-family logmaps
-cdriver-run-family tentmaps
-cdriver-run-family lorenz
-cdriver-run-family lorenz_htune
-cdriver-run-family example_logmap
-cdriver-run-family noise_length
-```
+Available templates:
+
+- `scripts/config_templates/config_logmaps_template.py`
+- `scripts/config_templates/config_tentmaps_template.py`
+- `scripts/config_templates/config_lorenz_template.py`
+- `scripts/config_templates/config_lorenz_htune_template.py`
+- `scripts/config_templates/config_example_logmap_template.py`
+- `scripts/config_templates/config_noise_length_template.py`
+
+Step-by-step usage tutorial:
+
+- `scripts/config_templates/config_tutorial.md`
+
+Relative output paths inside a config dict are resolved from the repository root; result
+directories are created automatically when CSV outputs are written.
 
 ### Method Inventory
 
@@ -137,27 +162,6 @@ cdriver-run-family noise_length
 - **Lorenz Hypertune**: Hyperparameter tuning for the Lorenz dataset (ICA, PCA, DCA, SFA)
 - **Noise / Length Analysis**: MaCo robustness to noise and data length
 - **Example Logmap**: Step-by-step MaCo walkthrough
-
-For compatibility, legacy bash wrappers also exist but are not maintained:
-
-- `bash scripts/experiments/logmaps/Z_run_all.sh`
-- `bash scripts/experiments/tentmaps/Z_run_all.sh`
-- `bash scripts/experiments/lorenz/Z_run_all.sh`
-
-## Additional Module-Level Workflows
-
-Beyond the main family runner, individual modules can be invoked directly for ad-hoc exploration:
-
-```bash
-# Noise/length analysis (not part of main families)
-python -m scripts.experiments.noise_length.maco_noise
-python -m scripts.experiments.noise_length.maco_length
-
-# Lorenz hyperparameter tuning
-python -m scripts.experiments.lorenz.lorenz_hypertune.run_hypertune
-```
-
-These bypass the family orchestrator and run directly in their respective UV environments via their module paths.
 
 ## Figure Generation
 
@@ -181,8 +185,29 @@ Dataset-specific plot scripts:
 - `scripts/plots/example_logmap/` — Example walkthrough plots
 - `scripts/plots/noise_length/` — Robustness analysis plots
 
+## Testing
+
+Run the lightweight test suite from the repository root:
+
+```bash
+pytest -q
+```
+
+If your user site has incompatible third-party pytest plugins installed, isolate the repo tests with:
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+```
+
 ## Notes
 
-- `scripts/config.py` resolves the repository root dynamically; commands should be run from a normal checkout without editing machine-specific paths.
+`scripts/config_runall.py` is the canonical default config module used by all experiment runners, datagen, and plotting scripts.
+# Migration Note
+
+As of May 2026, the configuration system has been unified:
+- All configuration is now in `scripts/config_runall.py`.
+- Legacy files `scripts/config.py` and `scripts/experiments/config.py` have been removed.
+- All experiment, datagen, and plot scripts import from `scripts/config_runall.py`.
+- External config overrides (`--config`) must still define `CONFIG_<FAMILY>` dicts as before.
 - `data/`, `results/`, and `figures/` are reproducible output locations (gitignored); pre-computed paper outputs are in `paper_artifacts/`.
 - The maintained execution path is centered on `cdriver-run-family` (console script), backed by `scripts/experiments/run_family.py` and `scripts/experiments/experiment_registry.py`.
