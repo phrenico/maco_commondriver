@@ -27,7 +27,6 @@ dependencies = [
     "scikit-learn",
     "scipy",
     "torch",
-    "torchvision",
     "tqdm",
 ]
 
@@ -49,15 +48,10 @@ python_files = ["test_*.py"]
 
 [tool.uv.workspace]
 members = [
-    "envs/sfa_env/envs/sfa_env",
-    "envs/sfa_env",
-    ".",
-    "envs/dca_env",
-    ".",
-    "envs/dcca_env",
-    ".",
-    "envs/shrec_env",
     ".",
     "envs/maco_env",
-    ".",
+    "envs/dca_env",
+    "envs/dcca_env",
+    "envs/shrec_env",
+    "envs/sfa_env",
 ]

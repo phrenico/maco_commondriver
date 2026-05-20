@@ -1,4 +1,7 @@
-'''Script to run DCCA on tent map data-set'''
+'''Script to run DCCA on tent map data-set.
+
+NOTE: Intentionally NOT migrated to method_runner — see logmaps/gen_dcca_res.py.
+'''
 import argparse
 from pathlib import Path
 

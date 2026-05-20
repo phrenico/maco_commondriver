@@ -72,11 +72,14 @@ def gen_logmapdata(param_dict: dict) -> tuple[list[np.ndarray], list[dict]]:
     rint = dparams.rint  # interval to chose from the value of r parameter
     A0 = dparams.A0
     A = dparams.A
+    base_seed = getattr(dparams, 'seed', None)
+    if base_seed is None:
+        base_seed = 0
 
     dataset, params = zip(*[LogmapExpRunner(nvars=3,
                                             baseA=A0,
                                             r_interval=rint).gen_experiment(n=n,
                                                                             A=A,
-                                                                            seed=i) for i in
+                                                                            seed=base_seed + i) for i in
                             tqdm(range(N), desc='Generating dataset')])
     return dataset, params

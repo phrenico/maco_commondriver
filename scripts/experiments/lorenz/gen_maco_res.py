@@ -20,30 +20,18 @@ from tqdm import tqdm
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
-def typer(x, dtype=torch.float32):
-    """Set the type of a tensor."""
-    return x.type(dtype)
+def make_preprocess(device):
+    """Create a preprocess function bound to a specific device."""
+    def preprocess(X, Y):
+        common_transform = transforms.Compose([torch.tensor,
+                                               torch.Tensor.float,
+                                               partial(torch.squeeze, axis=0)])
 
-
-def myscaler(x, axis):
-    return (x - x.mean(axis=axis, keepdim=True)) / x.std(axis=axis, keepdim=True)
-
-
-def preprocess(X, Y):
-    """Preprocess data."""
-    global device
-
-    common_transform = transforms.Compose([torch.tensor,
-                                           torch.Tensor.float,
-                                        #    scale,
-                                           partial(torch.squeeze, axis=0)])
-
-    X_target = common_transform(X[1:, :1])
-    X_basic = common_transform(X[:-1])
-    # Y_basic = common_transform(Y[:-1])
-    Y_basic = common_transform(Y[1:])
-
-    return X_basic, X_target, Y_basic
+        X_target = common_transform(X[1:, :1])
+        X_basic = common_transform(X[:-1])
+        Y_basic = common_transform(Y[1:])
+        return X_basic, X_target, Y_basic
+    return preprocess
 
 
 if __name__ == '__main__':
@@ -98,7 +86,7 @@ if __name__ == '__main__':
                                      ch_kwargs=coach_kwargs,
                                      preprocess_kwargs=preprocess_kwargs,
                                      device=device)
-        configure_model = lambda model: setattr(model, 'preprocess', preprocess)
+        configure_model = lambda model: setattr(model, 'preprocess', make_preprocess(device))
         models, train_losses, valid_loss, best_model = train_and_select_best_model(model_factory,
                                                                                    train_loader,
                                                                                    valid_loader,

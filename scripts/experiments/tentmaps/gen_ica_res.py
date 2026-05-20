@@ -1,51 +1,16 @@
-'''Script to run ICA on tent map data-set'''
+'''Apply ICA to tentmap data — thin wrapper around method_runner.'''
 import argparse
-from pathlib import Path
 
-import numpy as np
+from scripts.experiments.method_runner import run_baseline_method
 from sklearn.decomposition import FastICA
-from tqdm import tqdm
 
-from cdriver.preprocessing.splitters import train_valid_test_split
-from cdriver.preprocessing.tde import time_delay_embedding
-from cdriver.savers.saver import save_results
-from cdriver.evaluate.evalz import comp_ccorr, get_maxes
-from cdriver.datagen.tent_map import gen_tentmapdata
-from scripts.experiments.config_loader import get_config, resolve_paths
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+def model_factory(method_cfg):
+    return FastICA(n_components=method_cfg['n_components'])
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default=None)
     args = parser.parse_args()
-    cfg = resolve_paths(get_config('tentmaps', args.config), _REPO_ROOT)
-
-    N = cfg['datagen']['N']
-    dataset, params = gen_tentmapdata(cfg['datagen'])
-
-    d_embed = cfg['methods']['ica'].get('d_embed', cfg['preprocessing']['d_embed'])
-    train_split = cfg['preprocessing']['train_split']
-    valid_split = cfg['preprocessing']['valid_split']
-    n_components = cfg['methods']['ica']['n_components']
-
-    maxcs = []
-    for n_iter in range(N):
-        data = dataset[n_iter]
-
-        z = data[:-(d_embed - 1), 0]
-        X = time_delay_embedding(data[:, 1], dimension=d_embed)
-        Y = time_delay_embedding(data[:, 2], dimension=d_embed)
-
-        X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = train_valid_test_split(X, Y, z, train_split, valid_split)
-        D_train = np.concatenate([X_train, Y_train], axis=1)
-        D_test = np.concatenate([X_test, Y_test], axis=1)
-
-        ica = FastICA(n_components=n_components).fit(D_train)
-        zpred = ica.transform(D_test)
-
-        m = max([get_maxes(*comp_ccorr(z_test, zpred[:, j]))[1] for j in range(n_components)])
-        maxcs.append(m)
-
-    df = save_results(fname=cfg['paths']['interim_res_path'] / 'ica_res.csv',
-                      r=maxcs, N=N, method='ICA', dataset='tentmap')
+    run_baseline_method('tentmaps', 'ICA', model_factory, config_path=args.config)

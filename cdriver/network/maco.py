@@ -68,7 +68,7 @@ class MaCo(torch.nn.Module):
         input_crop = (d_embed_y - d_embed_x) * tau
 
         # Define transforms
-        common_transform = transforms.Compose([transforms.Normalize((0.5), (.3)),
+        common_transform = transforms.Compose([transforms.Lambda(lambda t: (t - 0.5) / 0.3),
                                                torch.Tensor.float,
                                                partial(torch.squeeze, axis=0)])
 

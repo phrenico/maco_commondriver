@@ -1,4 +1,8 @@
-"""Run AniSOM on the logmap data and comparison"""
+"""Run AniSOM on the logmap data and comparison.
+
+NOTE: Intentionally NOT migrated to method_runner — AniSOM has a custom PyTorch training
+loop (ani.fit() → ani.predict()) that doesn't fit the sklearn-style runner pattern.
+"""
 import os
 
 os.environ['MPLBACKEND'] = 'Agg'

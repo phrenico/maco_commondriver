@@ -1,3 +1,5 @@
+# NOTE: Intentionally NOT migrated to method_runner — DCCA uses mvlearn with list-input
+# fit/transform and a torch.symeig monkey-patch. See logmaps/gen_dcca_res.py.
 import argparse
 from pathlib import Path
 

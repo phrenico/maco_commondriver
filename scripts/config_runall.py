@@ -23,6 +23,12 @@ lorenz_htune_figure_path: Final[Path] = figures_root / 'lorenz_htune'
 lorenz_data_path: Final[Path] = data_root / 'lorenz'
 lorenz_data_path_template: Final[str] = str(lorenz_data_path / 'lorenz_{}.npz')
 
+# Per-family final result paths (used by plot scripts)
+logmaps_final_res_path: Final[Path] = final_results_root
+tentmaps_final_res_path: Final[Path] = final_results_root
+noise_length_final_res_path: Final[Path] = final_results_root / 'noise_length'
+example_logmap_final_res_path: Final[Path] = final_results_root / 'example_logmap'
+
 # === Directory creation (preserve legacy behavior) ===
 for path in (
     data_root,
@@ -48,6 +54,7 @@ noise_length_realizations: Final[int] = 10
 # === CONFIG_<FAMILY> dicts (migrated and unified) ===
 CONFIG_LOGMAPS = {
     'datagen': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
         'N': logmap_realizations,
         'n': 6_000,
         'rint': (3.8, 4.0),
@@ -90,6 +97,7 @@ CONFIG_LOGMAPS = {
 
 CONFIG_TENTMAPS = {
     'datagen': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
         'N': tentmap_realizations,
         'n': 6_000,
         'aint': (2.0, 10.0),
@@ -131,6 +139,7 @@ CONFIG_TENTMAPS = {
 
 CONFIG_LORENZ = {
     'data': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
         'N': lorenz_realizations,
         'data_path_template': lorenz_data_path_template,
     },
@@ -167,6 +176,7 @@ CONFIG_LORENZ = {
 
 CONFIG_EXAMPLE_LOGMAP = {
     'datagen': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
         'N': example_logmap_realizations,
         'n': 10_000,
         'rint': (3.8, 4.0),
@@ -197,6 +207,7 @@ CONFIG_EXAMPLE_LOGMAP = {
 
 CONFIG_NOISE_LENGTH = {
     'datagen': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
         'nvars': 3,
         'N':     noise_length_realizations,
         'rint':  (3.8, 4.0),

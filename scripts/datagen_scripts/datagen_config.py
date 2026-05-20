@@ -38,7 +38,8 @@ tentmapgen_params = dict(N=tentmap_realizations,
 
 # Lorenz dataset configuration
 dt = 1e-3
-lorenzgen_params = dict(rseed=np.random.seed(312),
+np.random.seed(312)
+lorenzgen_params = dict(rseed=312,
                         N=lorenz_realizations,  # nof realizations
                         dt=dt,  # time step
                         t=np.arange(0, 2000, dt),  # time axis

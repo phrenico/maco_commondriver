@@ -14,5 +14,5 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-shrec = { git = "https://github.com/williamgilpin/shrec" }
+shrec = { git = "https://github.com/williamgilpin/shrec", rev = "main" }
 cdriver = { workspace = true, editable = true }

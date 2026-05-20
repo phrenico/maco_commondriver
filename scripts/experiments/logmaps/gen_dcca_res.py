@@ -1,4 +1,9 @@
-"""Run DCCA on logistic map data-set"""
+"""Run DCCA on logistic map data-set.
+
+NOTE: Intentionally NOT migrated to method_runner — DCCA uses mvlearn with list-input
+fit/transform, a torch.symeig monkey-patch, and per-realization model instantiation
+that doesn't fit the generic sklearn-style runner.
+"""
 import os
 
 os.environ['MPLBACKEND'] = 'Agg'

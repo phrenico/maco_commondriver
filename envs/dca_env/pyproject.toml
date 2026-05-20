@@ -14,5 +14,5 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-dynamicalcomponentsanalysis = { git = "https://github.com/BouchardLab/DynamicalComponentsAnalysis" }
+dynamicalcomponentsanalysis = { git = "https://github.com/BouchardLab/DynamicalComponentsAnalysis", rev = "main" }
 cdriver = { workspace = true, editable = true }

@@ -1,4 +1,7 @@
-"""Run AniSOM on the tent map data and comparison"""
+"""Run AniSOM on the tent map data and comparison.
+
+NOTE: Intentionally NOT migrated to method_runner — see logmaps/gen_anisom_res.py.
+"""
 import argparse
 from pathlib import Path
 
