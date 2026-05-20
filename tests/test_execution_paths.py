@@ -3,11 +3,14 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
 from cdriver.savers.saver import save_results
+from scripts.config_runall import figures_root
 from scripts.experiments.combine_utils import combine_result_files
+from scripts.experiments.example_logmap import Z_combine_final_res as example_logmap_combine
 from scripts.experiments.lorenz_hypertune.htune_config import get_data_path_template, get_htune_paths
 
 
@@ -94,3 +97,50 @@ class TestExecutionPaths(unittest.TestCase):
                 get_data_path_template(cfg, repo_root),
                 str(repo_root / 'data/lorenz/lorenz_{}.npz'),
             )
+
+    def test_example_logmap_combine_uses_configured_plot_paths(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            final_res_path = tmp_path / 'results'
+            figure_path = tmp_path / 'figures'
+            final_res_path.mkdir()
+
+            for filename in example_logmap_combine.REQUIRED_FILES:
+                (final_res_path / filename).touch()
+
+            config_path = tmp_path / 'config_example.py'
+            config_path.write_text(
+                "CONFIG_EXAMPLE_LOGMAP = {\n"
+                f"    'paths': {{'final_res_path': {str(final_res_path)!r}, 'figure_path': {str(figure_path)!r}}},\n"
+                "}\n",
+                encoding='utf-8',
+            )
+
+            with patch.object(sys, 'argv', ['prog', '--config', str(config_path)]):
+                with patch('scripts.experiments.example_logmap.Z_combine_final_res.plot_example_logmap_res') as plot_mock:
+                    example_logmap_combine.main()
+
+            plot_mock.assert_called_once_with(res_path=final_res_path, figure_path=figure_path)
+
+    def test_example_logmap_combine_falls_back_to_default_figure_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            final_res_path = tmp_path / 'results'
+            final_res_path.mkdir()
+
+            for filename in example_logmap_combine.REQUIRED_FILES:
+                (final_res_path / filename).touch()
+
+            config_path = tmp_path / 'config_example.py'
+            config_path.write_text(
+                "CONFIG_EXAMPLE_LOGMAP = {\n"
+                f"    'paths': {{'final_res_path': {str(final_res_path)!r}}},\n"
+                "}\n",
+                encoding='utf-8',
+            )
+
+            with patch.object(sys, 'argv', ['prog', '--config', str(config_path)]):
+                with patch('scripts.experiments.example_logmap.Z_combine_final_res.plot_example_logmap_res') as plot_mock:
+                    example_logmap_combine.main()
+
+            plot_mock.assert_called_once_with(res_path=final_res_path, figure_path=figures_root)

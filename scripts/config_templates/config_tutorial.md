@@ -64,6 +64,9 @@ cdriver-run-family logmaps --dry-run --config my_logmaps_config.py
 
 Results will be written to the paths you set in your config (e.g. `paper_artifacts/results/interim/logmaps_demo`).
 
+For `example_logmap`, you can also set `paths.figure_path` to control where the plot image
+`example_logmap_res.png` is saved during the combine stage.
+
 ## 5. Notes
 
 - Keep each template standalone: do not rely on imports from another config file.

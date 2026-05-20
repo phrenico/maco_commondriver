@@ -190,6 +190,7 @@ CONFIG_EXAMPLE_LOGMAP = {
     },
     'paths': {
         'final_res_path': str(final_results_root / 'example_logmap'),
+        'figure_path': str(figures_root),
     },
     'maco': {
         'n_epochs':   2_000,

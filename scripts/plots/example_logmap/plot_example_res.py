@@ -22,11 +22,17 @@ from sklearn.preprocessing import minmax_scale, scale
 
 from matplotlib.lines import Line2D
 
-from scripts.config_runall import example_logmap_final_res_path
-from scripts.plots.config_figgen import fig_path
 
+def _get_default_paths():
+    from scripts.config_runall import CONFIG_EXAMPLE_LOGMAP
 
-res_path = example_logmap_final_res_path
+    paths = CONFIG_EXAMPLE_LOGMAP.get('paths', {})
+    if 'final_res_path' not in paths:
+        raise KeyError("CONFIG_EXAMPLE_LOGMAP['paths']['final_res_path'] is required")
+
+    res_path = Path(paths['final_res_path'])
+    figure_path = Path(paths.get('figure_path', 'paper_artifacts/figures'))
+    return res_path, figure_path
 
 def move_figure(f, x, y):
     """Move figure's upper left corner to pixel (x, y)"""
@@ -49,17 +55,23 @@ def move_figure(f, x, y):
         pass
 
 
-def plot_example_res():
+def plot_example_res(res_path, figure_path):
+    res_path = Path(res_path)
+    figure_path = Path(figure_path)
+
     fig, axs = plt.subplots(2, 3, figsize=(12, 8))    
 
     plot_learning_prediction(ax_learn=axs[0, 0],
                              ax_valid_loss=axs[0, 1],
-                             ax_predictions=axs[0, 2])
+                             ax_predictions=axs[0, 2],
+                             res_path=res_path)
     
-    plot_coefreconstruct(ax_reconstruct=axs[1, 2])
+    plot_coefreconstruct(ax_reconstruct=axs[1, 2],
+                         res_path=res_path)
 
     plot_ts_reconstruct(ax_ts=axs[1, 0],
-                        ax_rec=axs[1, 1])
+                        ax_rec=axs[1, 1],
+                        res_path=res_path)
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
@@ -69,13 +81,12 @@ def plot_example_res():
                 fontsize=16, fontweight='bold', va='top')
     
 
-    fig_path.mkdir(parents=True, exist_ok=True)
-    fig.savefig(fig_path / 'example_logmap_res.png')
+    figure_path.mkdir(parents=True, exist_ok=True)
+    fig.savefig(figure_path / 'example_logmap_res.png')
     # move_figure(fig, 0, 0)
     # plt.show()
 
-def plot_learning_prediction(ax_learn, ax_predictions, ax_valid_loss):
-    global res_path
+def plot_learning_prediction(ax_learn, ax_predictions, ax_valid_loss, res_path):
     df = pd.read_csv(res_path / 'mappercoach_res.csv')
     learnings = np.load(res_path / 'learning_curves.npy')
     valid_loss = np.load(res_path / 'valid_loss.npy')
@@ -143,7 +154,7 @@ def plot_learning_prediction(ax_learn, ax_predictions, ax_valid_loss):
     ax3.set_ylabel('validation loss')
 
 
-def plot_ts_reconstruct(ax_ts, ax_rec):
+def plot_ts_reconstruct(ax_ts, ax_rec, res_path):
     # Load data
     df = pd.read_csv(res_path / 'mappercoach_res.csv')
     cc_pred= df['cc_pred'].values
@@ -183,7 +194,7 @@ def plot_ts_reconstruct(ax_ts, ax_rec):
     axs2[1].set_ylim([-1.9, 1.5])
 
 
-def plot_coefreconstruct(ax_reconstruct):
+def plot_coefreconstruct(ax_reconstruct, res_path):
 
     rdf = pd.read_csv(res_path / 'r_values.csv', index_col=0)
     rs = rdf.values
@@ -231,12 +242,15 @@ def plot_coefreconstruct(ax_reconstruct):
     # ax.indicate_inset_zoom(axin, edgecolor="black")
 
 
-def main():
+def main(res_path=None, figure_path=None):
+    if res_path is None or figure_path is None:
+        default_res_path, default_figure_path = _get_default_paths()
+        if res_path is None:
+            res_path = default_res_path
+        if figure_path is None:
+            figure_path = default_figure_path
 
-    plot_example_res()
-
-
-    pass
+    plot_example_res(res_path=res_path, figure_path=figure_path)
 
 if __name__ == '__main__':
     main()

@@ -2,6 +2,7 @@
 data/*
 **/checkpoint.model
 paper_artifacts_smoketest/*
+tests/example_logmap/results/*
 
 # Local environment and IDE files
 .conda/

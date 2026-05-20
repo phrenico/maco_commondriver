@@ -178,6 +178,9 @@ Step-by-step usage tutorial:
 Relative output paths inside a config dict are resolved from the repository root; result
 directories are created automatically when CSV outputs are written.
 
+For `example_logmap`, define both `paths.final_res_path` (where result artifacts are read/written)
+and `paths.figure_path` (where `example_logmap_res.png` is saved during the combine stage).
+
 ### Method Inventory
 
 - **Logmaps**: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
