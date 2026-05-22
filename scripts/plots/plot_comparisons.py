@@ -68,9 +68,10 @@ def plot_sub(ax, df, palette, ax_kwargs=None):
 
     ax.set_ylabel('Coef. of Determination', size=fs)
     ax.set_xlabel('Method', size=fs)
+    ax.set_xticks(ax.get_xticks())
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90, horizontalalignment='center', fontsize=tick_size)
+    ax.set_yticks(ax.get_yticks())
     ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick_size)
-
 
 def plot_comparisons(df_logmap, df_tentmap, df_lorenz, figure_path):
     logmap_spec, tentmap_spec, lorenz_spec = get_plot_family_specs()
@@ -86,9 +87,9 @@ def plot_comparisons(df_logmap, df_tentmap, df_lorenz, figure_path):
     axs[0].set_xlabel('')
     axs[2].set_xlabel('')
     handles, labels = axs[0].get_legend_handles_labels()
-    axs[0].legend().remove()
-    axs[1].legend().remove()
-    axs[2].legend().remove()
+    for ax in axs:
+        if ax.get_legend() is not None:
+            ax.get_legend().remove()
 
     labels_new = [name for name in palette.keys() if name in labels]
     labels_new.reverse()
@@ -113,7 +114,7 @@ def plot_comparisons(df_logmap, df_tentmap, df_lorenz, figure_path):
 def main(args=None, config_path=None):
     if config_path is None:
         parser = argparse.ArgumentParser()
-        parser.add_argument('--config', default=None)
+        parser.add_argument('--config', default='scripts/config_runall.py')
         parsed = parser.parse_args(args)
         config_path = parsed.config
 

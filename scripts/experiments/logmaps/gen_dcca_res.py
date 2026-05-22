@@ -36,7 +36,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     args = parser.parse_args()
     cfg = resolve_paths(get_config('logmaps', args.config), _REPO_ROOT)
 

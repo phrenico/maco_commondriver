@@ -61,7 +61,9 @@ def plot_lorenz_comparison(final_res_path, figure_path):
 
     ax.set_ylabel('Coef. of Determination', size=fs)
     ax.set_xlabel('Method', size=fs)
+    ax.set_xticks(ax.get_xticks())
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right', fontsize=ticksize)
+    ax.set_yticks(ax.get_yticks())
     ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=ticksize)
 
     figure_path.mkdir(parents=True, exist_ok=True)
@@ -74,7 +76,7 @@ def main(args=None, config_path=None, final_res_path=None, figure_path=None):
     if final_res_path is None or figure_path is None:
         if config_path is None:
             parser = argparse.ArgumentParser()
-            parser.add_argument('--config', default=None)
+            parser.add_argument('--config', default='scripts/config_runall.py')
             parsed = parser.parse_args(args)
             config_path = parsed.config
 

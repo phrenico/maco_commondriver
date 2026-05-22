@@ -45,6 +45,7 @@ namespaces = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+pythonpath = ["."]
 
 [tool.uv.workspace]
 members = [

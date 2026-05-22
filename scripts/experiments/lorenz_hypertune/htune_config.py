@@ -87,7 +87,7 @@ def plot_htune(df, method, fig_axes=None, yaxlabel=True, save=False, path=Path('
     sns.swarmplot(x='n_components', y='coefs', data=df, color=".25", size=5, ax=ax1)
     # sns.swarmplot(x='n_components', y='wcomp', data=df, color=".25", size=3, ax=ax2)
     sns.violinplot(x='n_components', y='wcomp', data=df, color=color_dict[method],
-                   bw=0.1, ax=ax2, linewidth=0)
+                   bw_method=0.1, ax=ax2, linewidth=0)
 
     fs = 20
     ticksize = 16

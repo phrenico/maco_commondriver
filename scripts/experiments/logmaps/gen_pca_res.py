@@ -11,6 +11,6 @@ def model_factory(method_cfg):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     args = parser.parse_args()
     run_baseline_method('logmaps', 'PCA', model_factory, config_path=args.config)

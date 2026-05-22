@@ -12,19 +12,19 @@ def split_sets(x, y, z, trainset_size, testset_size, validset_size):
     """Split aligned arrays by percentage."""
     n = x.shape[0]
     n_trainset = int(trainset_size * n / 100)
-    n_testset = int(testset_size * n / 100)
+    n_validset = int(validset_size * n / 100)
 
     x_trainset = x[:n_trainset]
-    x_testset = x[n_trainset:n_trainset + n_testset]
-    x_validset = x[n_trainset + n_testset:]
+    x_validset = x[n_trainset:n_trainset + n_validset]
+    x_testset = x[n_trainset + n_validset:]
 
     y_trainset = y[:n_trainset]
-    y_testset = y[n_trainset:n_trainset + n_testset]
-    y_validset = y[n_trainset + n_testset:]
+    y_validset = y[n_trainset:n_trainset + n_validset]
+    y_testset = y[n_trainset + n_validset:]
 
     z_trainset = z[:n_trainset]
-    z_testset = z[n_trainset:n_trainset + n_testset]
-    z_validset = z[n_trainset + n_testset:]
+    z_validset = z[n_trainset:n_trainset + n_validset]
+    z_testset = z[n_trainset + n_validset:]
     return ((x_trainset, y_trainset, z_trainset),
             (x_testset, y_testset, z_testset),
             (x_validset, y_validset, z_validset))

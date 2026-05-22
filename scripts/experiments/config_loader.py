@@ -9,7 +9,7 @@ Usage in an experiment script:
 
     if __name__ == '__main__':
         parser = argparse.ArgumentParser()
-        parser.add_argument('--config', default=None,
+        parser.add_argument('--config', default='scripts/config_runall.py',
                             help='Path to external config file.  The file must '
                                  'define CONFIG_<FAMILY_KEY> (e.g. CONFIG_LOGMAPS).')
         args = parser.parse_args()
@@ -39,18 +39,18 @@ def get_config(family_key: str, external_config_path: str | None = None) -> dict
     """Return the config dict for *family_key*.
 
     Look-up order:
-    1. If *external_config_path* is given, load that file and look for
-       ``CONFIG_<FAMILY_KEY>`` (upper-cased).  If found, return it.
-       If the file does not exist or does not define the attribute, raise immediately.
-    2. Otherwise fall back to the built-in ``scripts.experiments.config`` module.
+    1. Loads the specified *external_config_path* file and looks for
+       ``CONFIG_<FAMILY_KEY>`` (upper-cased). If found, returns it.
+       If the file does not exist, does not define the attribute, or if the
+       path is None, raises an error immediately.
 
     Parameters
     ----------
     family_key:
         Experiment family name, e.g. ``'logmaps'``, ``'lorenz'``.
     external_config_path:
-        Absolute or relative path to a ``.py`` file that may define
-        ``CONFIG_<FAMILY_KEY>``.  Pass ``None`` to use the built-in defaults.
+        Absolute or relative path to a ``.py`` file that defines
+        ``CONFIG_<FAMILY_KEY>``. Must not be None.
 
     Returns
     -------
@@ -59,33 +59,28 @@ def get_config(family_key: str, external_config_path: str | None = None) -> dict
 
     Raises
     ------
+    ValueError
+        If *external_config_path* is None.
     FileNotFoundError
-        If *external_config_path* is given but the file does not exist.
+        If *external_config_path* does not exist.
     AttributeError
-        If *external_config_path* is given but does not define ``CONFIG_<FAMILY_KEY>``,
-        or if no *external_config_path* is given and the built-in module does not
-        define it either.
+        If does not define ``CONFIG_<FAMILY_KEY>``.
     """
     attr = f'CONFIG_{family_key.upper()}'
 
-    if external_config_path is not None:
-        ext_mod = _load_module(external_config_path)  # raises FileNotFoundError if missing
-        if not hasattr(ext_mod, attr):
-            raise AttributeError(
-                f'{attr} not found in {external_config_path}. '
-                f'Add a {attr} dict to that file or drop --config.'
-            )
-        return getattr(ext_mod, attr)
-
-    # Built-in default (now canonical: scripts.config_runall)
-    import scripts.config_runall as _default_config  # noqa: PLC0415
-    if not hasattr(_default_config, attr):
-        raise AttributeError(
-            f'No {attr} defined in scripts.config_runall. '
-            f'Available configs: '
-            + ', '.join(k for k in dir(_default_config) if k.startswith('CONFIG_'))
+    if external_config_path is None:
+        raise ValueError(
+            f'An explicit external config file path must be provided. '
+            f'Missing --config for family {family_key}.'
         )
-    return getattr(_default_config, attr)
+
+    ext_mod = _load_module(external_config_path)  # raises FileNotFoundError if missing
+    if not hasattr(ext_mod, attr):
+        raise AttributeError(
+            f'{attr} not found in {external_config_path}. '
+            f'Add a {attr} dict to that file or check the config path.'
+        )
+    return getattr(ext_mod, attr)
 
 
 def resolve_paths(config: dict, repo_root: str | Path) -> dict:

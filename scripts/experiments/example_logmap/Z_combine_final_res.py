@@ -19,7 +19,7 @@ REQUIRED_FILES = (
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     args = parser.parse_args()
     cfg = resolve_paths(get_config('example_logmap', args.config), _REPO_ROOT)
 

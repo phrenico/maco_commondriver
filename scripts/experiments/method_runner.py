@@ -52,7 +52,7 @@ def _load_lorenz(cfg: dict, n_iter: int) -> tuple:
 def _load_logmap(cfg: dict, n_iter: int, dataset: list, d_embed: int | None = None):
     """Load one logmap realization with TDE."""
     if d_embed is None:
-        d_embed = cfg['preprocessing'].get('d_embed', 3)
+        d_embed = cfg['preprocessing']['d_embed']
     data = dataset[n_iter].astype(float)
     X = time_delay_embedding(data[:, 1], delay=1, dimension=d_embed)
     Y = time_delay_embedding(data[:, 2], delay=1, dimension=d_embed)
@@ -64,7 +64,7 @@ def _load_logmap(cfg: dict, n_iter: int, dataset: list, d_embed: int | None = No
 
 def _load_tentmap(cfg: dict, n_iter: int, dataset: list):
     """Load one tentmap realization with TDE."""
-    d_embed = cfg['preprocessing'].get('d_embed', 2)
+    d_embed = cfg['preprocessing']['d_embed']
     return _load_logmap(cfg, n_iter, dataset, d_embed=d_embed)
 
 
@@ -304,7 +304,6 @@ def run_shrec_method(family_key: str, config_path: str | None = None):
 
     if family_key == 'lorenz':
         data_loader = _load_lorenz
-        use_test = True
     elif family_key == 'logmaps':
         from cdriver.datagen.logmap import gen_logmapdata
         dataset, _ = gen_logmapdata(cfg['datagen'])
@@ -315,7 +314,6 @@ def run_shrec_method(family_key: str, config_path: str | None = None):
             split = cfg['preprocessing']['train_split']
             vsplit = cfg['preprocessing']['valid_split']
             return train_valid_test_split(X, X, y, split, vsplit)
-        use_test = False
     elif family_key == 'tentmaps':
         from cdriver.datagen.tent_map import gen_tentmapdata
         dataset, _ = gen_tentmapdata(cfg['datagen'])
@@ -326,7 +324,6 @@ def run_shrec_method(family_key: str, config_path: str | None = None):
             split = cfg['preprocessing']['train_split']
             vsplit = cfg['preprocessing']['valid_split']
             return train_valid_test_split(X, X, y, split, vsplit)
-        use_test = False
     else:
         raise ValueError(f'Unknown family: {family_key}')
 
@@ -335,13 +332,10 @@ def run_shrec_method(family_key: str, config_path: str | None = None):
         X_train, Y_train, z_train, X_valid, Y_valid, z_valid, X_test, Y_test, z_test = data_loader(cfg, n_iter)
 
         model = RecurrenceManifold(d_embed=d_embed)
-        if use_test:
-            z_pred = model.fit_predict(X_test)
-            maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
-        else:
-            y_recon = model.fit_predict(X_train)
-            tau, c = comp_ccorr(z_train, y_recon)
-            maxcs.append(get_maxes(tau, c)[1])
+        X_comb = np.concatenate([X_train, X_test], axis=0)
+        z_pred_comb = model.fit_predict(X_comb)
+        z_pred = z_pred_comb[-len(X_test):]
+        maxcs.append(get_maxes(*comp_ccorr(z_test, z_pred))[1])
 
     save_results(fname=interim_res_path / 'shrec_res.csv', r=maxcs, N=N, method='ShRec', dataset=family_key)
 
@@ -374,7 +368,7 @@ def main():
     parser = argparse.ArgumentParser(description='Run a baseline method on an experiment family.')
     parser.add_argument('--family', required=True, choices=sorted(_FAMILY_KEY_MAP))
     parser.add_argument('--method', required=True, choices=sorted(_SKLEARN_MODELS))
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     args = parser.parse_args()
 
     family_key = _FAMILY_KEY_MAP[args.family]

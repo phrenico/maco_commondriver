@@ -15,7 +15,7 @@ REQUIRED_FILES = (
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     args = parser.parse_args()
     cfg = resolve_paths(get_config('noise_length', args.config), _REPO_ROOT)
     paths_cfg = cfg.get('paths', {})

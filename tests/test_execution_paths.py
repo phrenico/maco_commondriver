@@ -55,19 +55,21 @@ class TestExecutionPaths(unittest.TestCase):
         self.assertIn('scripts.experiments.run_family logmaps', output)
         self.assertIn('scripts.plots.plot_comparisons', output)
 
-    def test_run_all_dry_run_requires_config(self):
+    def test_run_all_dry_run_uses_default_config(self):
         repo_root = Path(__file__).resolve().parents[1]
-
         completed = subprocess.run(
             [sys.executable, '-m', 'scripts.run_all', '--dry-run'],
             cwd=repo_root,
-            check=False,
+            check=True,
             capture_output=True,
             text=True,
         )
 
-        self.assertNotEqual(completed.returncode, 0)
-        self.assertIn('run_all requires --config', completed.stderr)
+        output = completed.stdout
+        resolved_config = str((repo_root / 'scripts' / 'config_runall.py').resolve())
+        self.assertIn('Starting full pipeline run...', output)
+        self.assertIn('Pipeline completed successfully.', output)
+        self.assertIn(f'--config {resolved_config}', output)
 
     def test_save_results_creates_parent_directory(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -180,9 +182,13 @@ class TestExecutionPaths(unittest.TestCase):
             finally:
                 plt.close('all')
 
-    def test_shared_comparison_plot_requires_config(self):
-        with self.assertRaisesRegex(ValueError, 'requires --config'):
-            comparison_plots.main(args=[])
+    def test_shared_comparison_plot_uses_default_config_if_args_empty(self):
+        with patch('scripts.plots.plot_comparisons._get_comparison_plot_paths') as mock_get_paths:
+            mock_get_paths.side_effect = Exception('Paths loaded successfully')
+            with self.assertRaisesRegex(Exception, 'Paths loaded successfully'):
+                comparison_plots.main(args=[])
+            
+            mock_get_paths.assert_called_once_with('scripts/config_runall.py')
 
     def test_shared_comparison_plot_requires_config_block(self):
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -68,16 +68,14 @@ def main():
 		description='Run all registered experiment families and generate comparison plots.'
 	)
 	parser.add_argument('--dry-run', action='store_true')
-	parser.add_argument('--config', default=None,
+	parser.add_argument('--config', default='scripts/config_runall.py',
 						help='Path to external config file (resolved to absolute path).')
 	args = parser.parse_args()
 
 	repo_root = Path(__file__).resolve().parents[1]
 
 	# Resolve to absolute path immediately so subprocesses can use it.
-	config_path = None
-	if args.config is not None:
-		config_path = str(Path(args.config).resolve())
+	config_path = str(Path(args.config).resolve())
 
 	print('Starting full pipeline run...')
 	print(f'Dry run: {args.dry_run}')

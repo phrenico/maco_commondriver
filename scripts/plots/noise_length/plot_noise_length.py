@@ -93,7 +93,7 @@ def main(args=None, config_path=None, res_path=None, figure_path=None):
     if res_path is None or figure_path is None:
         if config_path is None:
             parser = argparse.ArgumentParser()
-            parser.add_argument('--config', default=None)
+            parser.add_argument('--config', default='scripts/config_runall.py')
             parsed = parser.parse_args(args)
             config_path = parsed.config
 

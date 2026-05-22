@@ -31,7 +31,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', default=None)
+    parser.add_argument('--config', default='scripts/config_runall.py')
     _args = parser.parse_args()
     cfg = resolve_paths(get_config('noise_length', _args.config), _REPO_ROOT)
 else:
