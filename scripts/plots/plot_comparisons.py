@@ -1,10 +1,59 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scripts.plots.config_figgen import palette, swarm_color, swarm_size, fs, tick_size, logmaps_path, lorenz_path, tentmaps_path, fig_path
-from scripts.experiments.experiment_registry import get_family_spec
-import pandas as pd
+import argparse
+from pathlib import Path
 
-def plot_sub(ax, df, ax_kwargs={}):
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+from scripts.experiments.config_loader import get_config, resolve_paths
+from scripts.experiments.experiment_registry import get_plot_family_specs
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REQUIRED_PATH_KEYS = (
+    'logmaps_final_res_path',
+    'tentmaps_final_res_path',
+    'lorenz_final_res_path',
+    'figure_path',
+)
+
+swarm_color = '.25'
+swarm_size = 4
+fs = 20
+tick_size = 16
+
+
+def _get_comparison_plot_paths(config_path):
+    if config_path is None:
+        raise ValueError(
+            'Shared comparison plot generation requires --config with '
+            'CONFIG_COMPARISON_PLOTS.'
+        )
+
+    cfg = resolve_paths(get_config('comparison_plots', config_path), _REPO_ROOT)
+    paths = cfg.get('paths', {})
+
+    missing_keys = [key for key in _REQUIRED_PATH_KEYS if key not in paths]
+    if missing_keys:
+        missing_str = ', '.join(missing_keys)
+        raise KeyError(
+            'CONFIG_COMPARISON_PLOTS.paths is missing required keys: '
+            f'{missing_str}'
+        )
+
+    return {key: Path(paths[key]) for key in _REQUIRED_PATH_KEYS}
+
+
+def _build_palette(df_logmap):
+    medians = df_logmap[['method', 'r']].groupby('method').median().sort_values(by='r', ascending=True)
+    methods = medians.index
+    palette_cols = sns.color_palette('husl', len(methods))
+    return dict(zip(methods, palette_cols))
+
+
+def plot_sub(ax, df, palette, ax_kwargs=None):
+    if ax_kwargs is None:
+        ax_kwargs = {}
+
     method_order = df[['method', 'r']].groupby('method').median().sort_values(by='r',
                                                                       ascending=True).index
 
@@ -17,22 +66,22 @@ def plot_sub(ax, df, ax_kwargs={}):
     ax.set_ylim(-0.05, 1.05)
     ax.grid(True)
 
-
     ax.set_ylabel('Coef. of Determination', size=fs)
     ax.set_xlabel('Method', size=fs)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=90, horizontalalignment='center', fontsize=tick_size)
     ax.set_yticklabels([r'{:.1f}'.format(i) for i in ax.get_yticks()], fontsize=tick_size)
 
-def plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=None):
-    logmap_spec = get_family_spec('logmaps')
-    tentmap_spec = get_family_spec('tentmaps')
-    lorenz_spec = get_family_spec('lorenz')
+
+def plot_comparisons(df_logmap, df_tentmap, df_lorenz, figure_path):
+    logmap_spec, tentmap_spec, lorenz_spec = get_plot_family_specs()
+    palette = _build_palette(df_logmap)
+    figure_path = Path(figure_path)
 
     fig, axs = plt.subplots(1, 3, figsize=(12, 6), sharey=True)
 
-    plot_sub(axs[0], df_logmap, ax_kwargs={'title': logmap_spec.title})
-    plot_sub(axs[1], df_tentmap, ax_kwargs={'title': tentmap_spec.title})
-    plot_sub(axs[2], df_lorenz, ax_kwargs={'title': lorenz_spec.title})
+    plot_sub(axs[0], df_logmap, palette=palette, ax_kwargs={'title': logmap_spec.title})
+    plot_sub(axs[1], df_tentmap, palette=palette, ax_kwargs={'title': tentmap_spec.title})
+    plot_sub(axs[2], df_lorenz, palette=palette, ax_kwargs={'title': lorenz_spec.title})
 
     axs[0].set_xlabel('')
     axs[2].set_xlabel('')
@@ -40,43 +89,43 @@ def plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=None):
     axs[0].legend().remove()
     axs[1].legend().remove()
     axs[2].legend().remove()
-    
 
-    # reorder the labels and handles according to the order of the methods in palette
-    labels_new = [i for i in palette.keys() if i in labels]
+    labels_new = [name for name in palette.keys() if name in labels]
     labels_new.reverse()
-    handles_new = [handles[labels.index(i)] for i in labels_new]
+    handles_new = [handles[labels.index(name)] for name in labels_new]
 
     axs[2].legend(handles_new, labels_new, loc='center left',
-                  bbox_to_anchor=(1, 0.5) )
+                  bbox_to_anchor=(1, 0.5))
     fig.tight_layout(rect=[0, 0.03, 1, 0.95], w_pad=0.5, pad=0.5)
-    
-    # print A B C on the subplots
+
     axs[0].text(-0.15, 1.1, 'A', transform=axs[0].transAxes,
                 fontsize=16, fontweight='bold', va='top')
     axs[1].text(-0.05, 1.1, 'B', transform=axs[1].transAxes,
                 fontsize=16, fontweight='bold', va='top')
     axs[2].text(-0.05, 1.1, 'C', transform=axs[2].transAxes,
                 fontsize=16, fontweight='bold', va='top')
-    
 
-    if save_path:
-        plt.savefig(save_path / 'comparisons_res.png')
+    figure_path.mkdir(parents=True, exist_ok=True)
+    plt.savefig(figure_path / 'comparisons_res.png')
     return fig
 
 
-def main():
-    logmap_spec = get_family_spec('logmaps')
-    tentmap_spec = get_family_spec('tentmaps')
-    lorenz_spec = get_family_spec('lorenz')
+def main(args=None, config_path=None):
+    if config_path is None:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--config', default=None)
+        parsed = parser.parse_args(args)
+        config_path = parsed.config
 
-    #load data
-    df_logmap = pd.read_csv(logmaps_path / logmap_spec.combined_csv)
-    df_tentmap = pd.read_csv(tentmaps_path / tentmap_spec.combined_csv)
-    df_lorenz = pd.read_csv(lorenz_path / lorenz_spec.combined_csv)
+    paths = _get_comparison_plot_paths(config_path)
+    logmap_spec, tentmap_spec, lorenz_spec = get_plot_family_specs()
 
-    fig = plot_comparisons(df_logmap, df_tentmap, df_lorenz, save_path=fig_path)
-    # plt.show()
+    df_logmap = pd.read_csv(paths['logmaps_final_res_path'] / logmap_spec.combined_csv)
+    df_tentmap = pd.read_csv(paths['tentmaps_final_res_path'] / tentmap_spec.combined_csv)
+    df_lorenz = pd.read_csv(paths['lorenz_final_res_path'] / lorenz_spec.combined_csv)
+
+    return plot_comparisons(df_logmap, df_tentmap, df_lorenz, figure_path=paths['figure_path'])
+
 
 if __name__ == '__main__':
     main()

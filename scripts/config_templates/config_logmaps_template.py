@@ -1,13 +1,15 @@
 
 # Standalone template config for a single LOGMAPS experiment run
 
+import numpy as np
+
 CONFIG_LOGMAPS = {
 	'datagen': {
 		'N': 1,
 		'n': 1000,
 		'rint': (3.8, 4.0),
-		'A0': [[0, 0, 0], [1, 0, 0], [1, 0, 0]],
-		'A':  [[1.0, 0.0, 0.0], [0.3, 1.0, 0.0], [0.4, 0.0, 1.0]],
+		'A0': np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]], dtype=float),
+		'A':  np.array([[1.0, 0.0, 0.0], [0.3, 1.0, 0.0], [0.4, 0.0, 1.0]], dtype=float),
 	},
 	'preprocessing': {
 		'train_split': 1.0 / 3,
@@ -17,6 +19,7 @@ CONFIG_LOGMAPS = {
 	'paths': {
 		'interim_res_path': 'paper_artifacts/results/interim/logmaps_demo',
 		'final_res_path':   'paper_artifacts/results/final/logmaps_demo',
+		'figure_path':      'paper_artifacts/figures/logmaps_demo',
 	},
 	'maco': {
 		'n_epochs':   300,

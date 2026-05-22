@@ -4,7 +4,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts.experiments.config_loader import get_config, resolve_paths
 from scripts.experiments.experiment_registry import FAMILY_SPECS
+
+_REQUIRED_COMPARISON_PATH_KEYS = (
+	'logmaps_final_res_path',
+	'tentmaps_final_res_path',
+	'lorenz_final_res_path',
+	'figure_path',
+)
 
 
 def format_command(command):
@@ -31,8 +39,26 @@ def run_all_experiments(repo_root, dry_run=False, config_path=None):
 		run_command(command, repo_root, dry_run=dry_run)
 
 
-def run_comparison_plot(repo_root, dry_run=False):
-	command = [sys.executable, '-m', 'scripts.plots.plot_comparisons']
+def validate_comparison_plot_config(config_path, repo_root):
+	if config_path is None:
+		raise ValueError(
+			'run_all requires --config because shared comparison plot generation '
+			'is config-mandatory.'
+		)
+
+	cfg = resolve_paths(get_config('comparison_plots', config_path), repo_root)
+	paths = cfg.get('paths', {})
+	missing_keys = [key for key in _REQUIRED_COMPARISON_PATH_KEYS if key not in paths]
+	if missing_keys:
+		missing_str = ', '.join(missing_keys)
+		raise KeyError(
+			'CONFIG_COMPARISON_PLOTS.paths is missing required keys: '
+			f'{missing_str}'
+		)
+
+
+def run_comparison_plot(repo_root, dry_run=False, config_path=None):
+	command = [sys.executable, '-m', 'scripts.plots.plot_comparisons', '--config', config_path]
 	print('Running comparison plot...')
 	run_command(command, repo_root, dry_run=dry_run)
 
@@ -56,9 +82,10 @@ def main():
 	print('Starting full pipeline run...')
 	print(f'Dry run: {args.dry_run}')
 
+	validate_comparison_plot_config(config_path, repo_root)
+
 	run_all_experiments(repo_root, dry_run=args.dry_run, config_path=config_path)
-	if not args.dry_run:
-		run_comparison_plot(repo_root, dry_run=False)
+	run_comparison_plot(repo_root, dry_run=args.dry_run, config_path=config_path)
 
 	print('Pipeline completed successfully.')
 

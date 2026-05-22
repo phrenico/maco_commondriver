@@ -69,6 +69,7 @@ CONFIG_LOGMAPS = {
     'paths': {
         'interim_res_path': str(interim_results_root / 'logmaps'),
         'final_res_path':   str(final_results_root),
+        'figure_path':      str(figures_root),
     },
     'maco': {
         'n_epochs':   300,
@@ -111,6 +112,7 @@ CONFIG_TENTMAPS = {
     'paths': {
         'interim_res_path': str(interim_results_root / 'tentmaps'),
         'final_res_path':   str(final_results_root),
+        'figure_path':      str(figures_root / 'misc'),
     },
     'maco': {
         'n_epochs':   300,
@@ -150,6 +152,7 @@ CONFIG_LORENZ = {
     'paths': {
         'interim_res_path': str(interim_results_root / 'lorenz'),
         'final_res_path':   str(final_results_root),
+        'figure_path':      str(figures_root),
     },
     'maco': {
         'n_epochs':   200,
@@ -229,6 +232,7 @@ CONFIG_NOISE_LENGTH = {
     },
     'paths': {
         'final_res_path': str(final_results_root / 'noise_length'),
+        'figure_path':    str(figures_root),
     },
     'maco': {
         'n_epochs':   100,
@@ -257,4 +261,13 @@ CONFIG_LORENZ_HTUNE = {
         'figure_path':      str(figures_root / 'lorenz_htune'),
     },
     'data': CONFIG_LORENZ['data'],
+}
+
+CONFIG_COMPARISON_PLOTS = {
+    'paths': {
+        'logmaps_final_res_path': str(final_results_root),
+        'tentmaps_final_res_path': str(final_results_root),
+        'lorenz_final_res_path': str(final_results_root),
+        'figure_path': str(figures_root),
+    },
 }

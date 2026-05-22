@@ -1,12 +1,14 @@
 
 # Standalone template config for a single TENTMAPS experiment run
 
+import numpy as np
+
 CONFIG_TENTMAPS = {
 	'datagen': {
 		'N': 1,
 		'n': 1000,
 		'aint': (2.0, 10.0),
-		'A0': [[0, 0, 0], [1, 0, 0], [1, 0, 0]],
+		'A0': np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]], dtype=float),
 	},
 	'preprocessing': {
 		'train_split': 1.0 / 3,
@@ -16,6 +18,7 @@ CONFIG_TENTMAPS = {
 	'paths': {
 		'interim_res_path': 'paper_artifacts/results/interim/tentmaps_demo',
 		'final_res_path':   'paper_artifacts/results/final/tentmaps_demo',
+		'figure_path':      'paper_artifacts/figures/tentmaps_demo',
 	},
 	'maco': {
 		'n_epochs':   300,

@@ -13,6 +13,7 @@ CONFIG_LORENZ = {
 	'paths': {
 		'interim_res_path': 'paper_artifacts/results/interim/lorenz_demo',
 		'final_res_path':   'paper_artifacts/results/final/lorenz_demo',
+		'figure_path':      'paper_artifacts/figures/lorenz_demo',
 	},
 	'maco': {
 		'n_epochs':   200,

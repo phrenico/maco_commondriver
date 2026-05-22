@@ -1,12 +1,40 @@
+import argparse
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scripts.config_runall import figures_root as figure_path, tentmaps_final_res_path as final_res_path
+
+from scripts.config_runall import figures_root
+from scripts.experiments.config_loader import get_config, resolve_paths
 from scripts.experiments.experiment_registry import get_family_spec
 
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 
-def main():
+
+def _get_default_paths(config_path=None):
+    if config_path is not None:
+        cfg = resolve_paths(get_config('tentmaps', config_path), _REPO_ROOT)
+        paths = cfg.get('paths', {})
+        final_res_path = paths['final_res_path']
+        figure_path = paths.get('figure_path', figures_root)
+        return final_res_path, figure_path
+
+    from scripts.config_runall import CONFIG_TENTMAPS
+
+    paths = CONFIG_TENTMAPS.get('paths', {})
+    if 'final_res_path' not in paths:
+        raise KeyError("CONFIG_TENTMAPS['paths']['final_res_path'] is required")
+
+    final_res_path = Path(paths['final_res_path'])
+    figure_path = Path(paths.get('figure_path', figures_root))
+    return final_res_path, figure_path
+
+
+def plot_tentmap_comparison(final_res_path, figure_path):
+    final_res_path = Path(final_res_path)
+    figure_path = Path(figure_path)
+
     family_spec = get_family_spec('tentmaps')
 
     # Create dataframe
@@ -37,8 +65,26 @@ def main():
 
     plt.tight_layout()
     figure_path.mkdir(parents=True, exist_ok=True)
-    (figure_path / 'misc').mkdir(parents=True, exist_ok=True)
-    plt.savefig(figure_path / 'misc' / 'comparison_tentmap.png', dpi=300)
+    plt.savefig(figure_path / 'comparison_tentmap.png', dpi=300)
+    return fig
+
+
+def main(args=None, config_path=None, final_res_path=None, figure_path=None):
+    if final_res_path is None or figure_path is None:
+        if config_path is None:
+            parser = argparse.ArgumentParser()
+            parser.add_argument('--config', default=None)
+            parsed = parser.parse_args(args)
+            config_path = parsed.config
+
+        default_final_res_path, default_figure_path = _get_default_paths(config_path=config_path)
+        if final_res_path is None:
+            final_res_path = default_final_res_path
+        if figure_path is None:
+            figure_path = default_figure_path
+
+    return plot_tentmap_comparison(final_res_path=final_res_path,
+                                   figure_path=figure_path)
 
 
 if __name__ == '__main__':

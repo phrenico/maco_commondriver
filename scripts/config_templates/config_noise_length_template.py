@@ -1,12 +1,14 @@
 
 # Standalone template config for a single NOISE_LENGTH experiment run
 
+import numpy as np
+
 CONFIG_NOISE_LENGTH = {
 	'datagen': {
 		'nvars': 3,
 		'N':     1,
 		'rint':  (3.8, 4.0),
-		'A0': [[0, 0, 0], [1, 0, 0], [1, 0, 0]],
+		'A0': np.array([[0, 0, 0], [1, 0, 0], [1, 0, 0]], dtype=float),
 	},
 	'length_sweep': {
 		'Ls': list(range(100, 1000, 200)) + list(range(1000, 3001, 1000)),
@@ -23,6 +25,7 @@ CONFIG_NOISE_LENGTH = {
 	},
 	'paths': {
 		'final_res_path': 'paper_artifacts/results/final/noise_length_demo',
+		'figure_path':    'paper_artifacts/figures/noise_length_demo',
 	},
 	'maco': {
 		'n_epochs':   100,
