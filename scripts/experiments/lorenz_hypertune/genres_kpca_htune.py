@@ -10,6 +10,5 @@ for n_components in tqdm(n_components_range):
     maxcs, amaxcs = compute4all(n_components, KernelPCA)
     df = create_htune_df(maxcs, amaxcs, n_components, len(maxcs), 'kPCA', 'lorenz')
     dfs.append(df)
-
 df = pd.concat(dfs, ignore_index=False)
 df.to_csv(interim_save_path / 'kpca_htune.csv')
