@@ -133,12 +133,14 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         combined_csv='htune.csv',
         methods=(
             MethodResult('PCA', 'pca_htune.csv'),
+            MethodResult('kPCA', 'kpca_htune.csv'),
             MethodResult('ICA', 'ica_htune.csv'),
             MethodResult('DCA', 'dca_htune.csv'),
             MethodResult('SFA', 'sfa_htune.csv'),
         ),
         run_steps=(
             RunStep('PCA', 'maco_env', 'scripts.experiments.lorenz_hypertune.genres_pca_htune'),
+            RunStep('KPCA', 'maco_env', 'scripts.experiments.lorenz_hypertune.genres_kpca_htune'),
             RunStep('ICA', 'maco_env', 'scripts.experiments.lorenz_hypertune.genres_ica_htune'),
             RunStep('DCA', 'dca_env', 'scripts.experiments.lorenz_hypertune.genres_dca_htune'),
             RunStep('SFA', 'sfa_env', 'scripts.experiments.lorenz_hypertune.genres_sfa_htune'),

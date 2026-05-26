@@ -3,8 +3,9 @@
 ZERO='[----]'
 ONE='[#---]'
 TWO='[##--]'
-THREE='[###-]'
-FOUR='[####]'
+THREE='[###--]'
+FOUR='[####-]'
+FIVE='[#####]'
 
 # run hyperparameter tuning for lorenz
 function pbar {
@@ -19,26 +20,31 @@ python genres_pca_htune.py
 conda deactivate
 
 pbar $ONE
+echo "Running kPCA hyperparameter tuning"
+conda activate maco_rev1
+python genres_kpca_htune.py
+conda deactivate
+
+pbar $TWO
 echo "Running ICA hyperparameter tuning"
 conda activate maco_rev1
 python genres_ica_htune.py
 conda deactivate
 
-pbar $TWO
+pbar $THREE
 echo "Running DCA hyperparameter tuning"
 conda activate dca
 python genres_dca_htune.py
 conda deactivate
 
-pbar $THREE
+pbar $FOUR
 echo "Running SFA hyperparameter tuning"
 conda activate sfa
 python genres_sfa_htune.py
 conda deactivate
 
-pbar $FOUR
+pbar $FIVE
 echo "Create unified figure"
 conda activate maco_rev1
 python genres_final_htune.py
 conda deactivate
-

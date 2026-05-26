@@ -49,11 +49,15 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(len(get_execution_steps('logmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('tentmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('lorenz', stage='methods')), 9)
-        self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 4)
+        self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 5)
         self.assertEqual(len(get_execution_steps('example_logmap', stage='methods')), 1)
         self.assertEqual(len(get_execution_steps('noise_length', stage='methods')), 2)
         self.assertEqual(len(get_execution_steps('dummy_experiment', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('lorenz', stage='combine')), 1)
+
+    def test_lorenz_htune_includes_kpca(self):
+        lorenz_htune_files = get_family_spec('lorenz_htune').result_files
+        self.assertIn('kpca_htune.csv', lorenz_htune_files)
 
     def test_all_registry_envs_have_uv_projects(self):
         env_dir = Path(__file__).resolve().parents[1] / 'envs'

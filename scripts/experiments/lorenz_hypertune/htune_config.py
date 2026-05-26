@@ -11,10 +11,11 @@ from cdriver.evaluate.evalz import comp_ccorr, get_maxes
 
 color_ICA = 'tab:orange'
 color_PCA = 'tab:blue'
+color_kPCA = 'tab:purple'
 color_sfa = 'tab:green'
 color_DCA = 'teal'
 
-color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA)
+color_dict = dict(ICA=color_ICA, PCA=color_PCA, kPCA=color_kPCA, SFA=color_sfa, DCA=color_DCA)
 
 interim_save_path = lorenz_htune_interim_res_path
 final_save_path = lorenz_htune_final_res_path
@@ -54,6 +55,8 @@ def compute4all(n_components, method):
 
         if method.__name__ == "DynamicalComponentsAnalysis":
             model = method(d=n_components, T=5, n_init=10)
+        elif method.__name__ == "KernelPCA":
+            model = method(n_components=n_components, kernel='rbf')
         else:
             model = method(n_components=n_components, random_state=0)
         model.fit(X_train)
