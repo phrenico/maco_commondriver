@@ -105,6 +105,7 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         combined_csv='lorenz_res.csv',
         methods=(
             MethodResult('PCA', 'pca_res.csv'),
+            MethodResult('kPCA', 'kpca_res.csv'),
             MethodResult('ICA', 'ica_res.csv'),
             MethodResult('CCA', 'cca_res.csv'),
             MethodResult('DCCA', 'dcca_res.csv'),
@@ -117,6 +118,7 @@ FAMILY_SPECS: Final[dict[str, FamilySpec]] = {
         run_steps=(
             RunStep('ICA', 'maco_env', 'scripts.experiments.lorenz.gen_ica_res'),
             RunStep('PCA', 'maco_env', 'scripts.experiments.lorenz.gen_pca_res'),
+            RunStep('KPCA', 'maco_env', 'scripts.experiments.lorenz.gen_kpca_res'),
             RunStep('CCA', 'maco_env', 'scripts.experiments.lorenz.gen_cca_res'),
             RunStep('DCA', 'dca_env', 'scripts.experiments.lorenz.gen_dca_res'),
             RunStep('DCCA', 'dcca_env', 'scripts.experiments.lorenz.gen_dcca_res'),

@@ -167,6 +167,7 @@ CONFIG_LORENZ = {
     },
     'methods': {
         'pca':    {'n_components': 5},
+        'kpca':   {'n_components': 5, 'kernel': 'rbf'},
         'ica':    {'n_components': 5},
         'cca':    {'n_components': 1, 'max_iter': 500},
         'dcca':   {'d_embed': 3, 'features': [3, 3], 'layers': [20, 20, 1]},

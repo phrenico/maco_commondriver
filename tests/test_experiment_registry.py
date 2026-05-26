@@ -30,14 +30,14 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(tuple(spec.key for spec in get_plot_family_specs()),
                          ('logmaps', 'tentmaps', 'lorenz'))
 
-    def test_kpca_remains_limited_to_logmaps_and_tentmaps(self):
+    def test_kpca_is_available_for_all_primary_families(self):
         logmap_files = get_family_spec('logmaps').result_files
         tentmap_files = get_family_spec('tentmaps').result_files
         lorenz_files = get_family_spec('lorenz').result_files
 
         self.assertIn('kpca_res.csv', logmap_files)
         self.assertIn('kpca_res.csv', tentmap_files)
-        self.assertNotIn('kpca_res.csv', lorenz_files)
+        self.assertIn('kpca_res.csv', lorenz_files)
 
     def test_execution_steps_include_combine_stage(self):
         logmap_steps = get_execution_steps('logmaps')
@@ -47,7 +47,7 @@ class TestExperimentRegistry(unittest.TestCase):
     def test_execution_stage_selection(self):
         self.assertEqual(len(get_execution_steps('logmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('tentmaps', stage='methods')), 11)
-        self.assertEqual(len(get_execution_steps('lorenz', stage='methods')), 9)
+        self.assertEqual(len(get_execution_steps('lorenz', stage='methods')), 10)
         self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 4)
         self.assertEqual(len(get_execution_steps('example_logmap', stage='methods')), 1)
         self.assertEqual(len(get_execution_steps('noise_length', stage='methods')), 2)
