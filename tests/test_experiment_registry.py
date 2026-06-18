@@ -48,7 +48,7 @@ class TestExperimentRegistry(unittest.TestCase):
         self.assertEqual(len(get_execution_steps('logmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('tentmaps', stage='methods')), 11)
         self.assertEqual(len(get_execution_steps('lorenz', stage='methods')), 10)
-        self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 4)
+        self.assertEqual(len(get_execution_steps('lorenz_htune', stage='methods')), 5)
         self.assertEqual(len(get_execution_steps('example_logmap', stage='methods')), 1)
         self.assertEqual(len(get_execution_steps('noise_length', stage='methods')), 2)
         self.assertEqual(len(get_execution_steps('lorenz', stage='combine')), 1)

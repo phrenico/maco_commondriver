@@ -195,7 +195,7 @@ operations are declared with `np.array(...)` rather than plain Python lists.
 - **Logmaps**: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
 - **Tentmaps**: PCA, kPCA, ICA, CCA, DCA, DCCA, SFA, ShRec, AniSOM, random control, MaCo
 - **Lorenz**: PCA, ICA, CCA, DCA, DCCA, SFA, ShRec, random control, MaCo
-- **Lorenz Hypertune**: Hyperparameter tuning for the Lorenz dataset (ICA, PCA, DCA, SFA)
+- **Lorenz Hypertune**: Hyperparameter tuning for the Lorenz dataset (ICA, PCA, kPCA, DCA, SFA)
 - **Noise / Length Analysis**: MaCo robustness to noise and data length
 - **Example Logmap**: Step-by-step MaCo walkthrough
 

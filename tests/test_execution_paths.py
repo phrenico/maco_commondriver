@@ -416,6 +416,7 @@ class TestExecutionPaths(unittest.TestCase):
             for filename, method in (
                 ('pca_htune.csv', 'PCA'),
                 ('ica_htune.csv', 'ICA'),
+                ('kpca_htune.csv', 'kPCA'),
                 ('dca_htune.csv', 'DCA'),
                 ('sfa_htune.csv', 'SFA'),
             ):

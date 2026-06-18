@@ -7,8 +7,9 @@ color_ICA = 'tab:orange'
 color_PCA = 'tab:blue'
 color_sfa = 'tab:green'
 color_DCA = 'teal'
+color_kPCA = 'tab:purple'
 
-color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA)
+color_dict = dict(ICA=color_ICA, PCA=color_PCA, SFA=color_sfa, DCA=color_DCA, kPCA=color_kPCA)
 
 def get_htune_paths(cfg):
     paths = {

@@ -259,9 +259,13 @@ CONFIG_LORENZ_HTUNE = {
     'paths': {
         'interim_res_path': str(interim_results_root / 'lorenz_htune'),
         'final_res_path':   str(final_results_root / 'lorenz_htune'),
-        'figure_path':      str(figures_root / 'lorenz_htune'),
+        'figure_path':      str(figures_root),
     },
-    'data': CONFIG_LORENZ['data'],
+    'data': {
+        'seed': None,  # int or None; if None, realization index i is used as seed
+        'N': 25,
+        'data_path_template': lorenz_data_path_template,
+    },
 }
 
 CONFIG_COMPARISON_PLOTS = {
