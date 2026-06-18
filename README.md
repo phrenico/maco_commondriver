@@ -229,7 +229,6 @@ Dataset-specific plot scripts:
 
 ## Testing
 
-The test suite has 64 tests across 12 files covering:
 - Core algorithms: MaCo forward pass, training, loss computation
 - Data generators: LogMap, TentMap, Lorenz ODE (seeded reproducibility, boundary conditions, chaos)
 - Evaluation metrics: cross-correlation, max-lag detection, linear regression
@@ -240,14 +239,9 @@ The test suite has 64 tests across 12 files covering:
 Run the test suite from the repository root:
 
 ```bash
-pytest -q
+uv run --frozen pytest -q tests/
 ```
 
-If your user site has incompatible third-party pytest plugins installed, isolate the repo tests with:
-
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/
-```
 
 CI runs on every push and PR via GitHub Actions (`.github/workflows/test.yml`) across Python 3.10 and 3.12.
 
@@ -268,5 +262,5 @@ locations.
 
 ### Reproducibility
 
-`data/`, `paper_artifacts/results/`, and `paper_artifacts/figures/` are reproducible output
-locations (gitignored). Pre-computed paper outputs are tracked in `paper_artifacts/`.
+`data/` is reproducible output
+location for the generated data(gitignored). Curated paper outputs are under the `paper_artifacts/` folder.
