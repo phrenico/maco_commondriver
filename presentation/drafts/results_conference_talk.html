@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reconstructing Hidden Common Driver Dynamics</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #5a6872;
+      --paper: #f7f4ee;
+      --panel: #ffffff;
+      --line: #d6d0c6;
+      --teal: #0f7c80;
+      --magenta: #b43b78;
+      --orange: #d46b2c;
+      --blue: #315f9e;
+      --shadow: 0 18px 48px rgba(23, 32, 38, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transform: translateX(calc(var(--slide-index, 0) * -100vw));
+      transition: transform 260ms ease;
+    }
+
+    .slide {
+      flex: 0 0 100vw;
+      height: 100vh;
+      padding: clamp(28px, 4vw, 58px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(18px, 2.4vw, 32px);
+      overflow: hidden;
+    }
+
+    .slide > header,
+    .slide > main,
+    .slide > footer {
+      width: min(1180px, 100%);
+      margin-inline: auto;
+    }
+
+    .slide > header {
+      display: grid;
+      gap: 10px;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: clamp(0.78rem, 1.2vw, 0.95rem);
+      font-weight: 760;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      max-width: 980px;
+      font-size: clamp(2.6rem, 7vw, 5.9rem);
+      line-height: 0.95;
+      font-weight: 830;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4.8vw, 4.5rem);
+      line-height: 0.98;
+      font-weight: 815;
+    }
+
+    h3 {
+      font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+      line-height: 1.15;
+      font-weight: 760;
+    }
+
+    p,
+    li,
+    td,
+    th {
+      font-size: clamp(1rem, 1.45vw, 1.28rem);
+      line-height: 1.42;
+    }
+
+    .lead {
+      max-width: 900px;
+      color: var(--muted);
+      font-size: clamp(1.15rem, 2vw, 1.65rem);
+      line-height: 1.32;
+    }
+
+    .kicker {
+      color: var(--muted);
+      font-size: clamp(0.92rem, 1.3vw, 1.08rem);
+    }
+
+    .title-main {
+      align-self: center;
+      display: grid;
+      gap: clamp(22px, 4vw, 46px);
+    }
+
+    .question {
+      max-width: 860px;
+      border-left: 8px solid var(--magenta);
+      padding: 12px 0 12px 22px;
+      background: linear-gradient(90deg, rgba(180, 59, 120, 0.08), transparent 70%);
+      font-size: clamp(1.25rem, 2.4vw, 2rem);
+      font-weight: 720;
+      line-height: 1.25;
+    }
+
+    .citation-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 12px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--ink);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: clamp(20px, 3vw, 40px);
+      align-items: center;
+    }
+
+    .wide-col {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: clamp(20px, 3vw, 40px);
+      align-items: center;
+    }
+
+    .stack {
+      display: grid;
+      gap: clamp(14px, 2vw, 24px);
+    }
+
+    .bullets {
+      display: grid;
+      gap: 13px;
+      margin: 0;
+      padding-left: 1.2em;
+      color: var(--ink);
+    }
+
+    .bullets li::marker {
+      color: var(--magenta);
+    }
+
+    .diagram {
+      display: grid;
+      gap: 20px;
+      justify-items: center;
+      padding: clamp(18px, 3vw, 34px);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .causal {
+      width: min(520px, 100%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "z z"
+        "x y";
+      gap: 22px;
+      align-items: center;
+      justify-items: center;
+    }
+
+    .node {
+      width: min(150px, 29vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      font-weight: 830;
+      position: relative;
+    }
+
+    .node small {
+      display: block;
+      font-size: 0.34em;
+      font-weight: 680;
+      margin-top: 3px;
+    }
+
+    .node.z {
+      grid-area: z;
+      background: var(--magenta);
+    }
+
+    .node.x {
+      grid-area: x;
+      background: var(--blue);
+    }
+
+    .node.y {
+      grid-area: y;
+      background: var(--teal);
+    }
+
+    .node.z::before,
+    .node.z::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 90px;
+      background: var(--line);
+      top: 92%;
+      transform-origin: top;
+      z-index: -1;
+    }
+
+    .node.z::before {
+      transform: rotate(34deg);
+    }
+
+    .node.z::after {
+      transform: rotate(-34deg);
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .method {
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .method strong {
+      font-size: clamp(1rem, 1.5vw, 1.28rem);
+    }
+
+    .method span {
+      color: var(--muted);
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      line-height: 1.35;
+    }
+
+    .figure-frame {
+      min-height: 0;
+      display: grid;
+      gap: 10px;
+      align-content: center;
+    }
+
+    .figure-frame img {
+      width: 100%;
+      max-height: min(68vh, 680px);
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .caption {
+      color: var(--muted);
+      font-size: clamp(0.86rem, 1.1vw, 1rem);
+      line-height: 1.35;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .result-table th,
+    .result-table td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .result-table th {
+      color: var(--muted);
+      font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+      text-transform: uppercase;
+    }
+
+    .result-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .metric {
+      font-weight: 800;
+      color: var(--magenta);
+    }
+
+    .takeaways {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .takeaway {
+      min-height: 230px;
+      padding: clamp(18px, 2.6vw, 28px);
+      border-radius: 8px;
+      background: var(--panel);
+      border-top: 8px solid var(--teal);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .takeaway:nth-child(2) {
+      border-top-color: var(--magenta);
+    }
+
+    .takeaway:nth-child(3) {
+      border-top-color: var(--orange);
+    }
+
+    .refs {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .refs li {
+      padding: 15px 18px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .refs a {
+      color: var(--blue);
+      overflow-wrap: anywhere;
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .controls {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 20;
+    }
+
+    .nav-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      font-size: 1.45rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(23, 32, 38, 0.12);
+    }
+
+    .nav-button:focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 3px;
+    }
+
+    .counter {
+      min-width: 68px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 720;
+    }
+
+    .accent-teal {
+      color: var(--teal);
+    }
+
+    .accent-magenta {
+      color: var(--magenta);
+    }
+
+    .accent-orange {
+      color: var(--orange);
+    }
+
+    @media (max-width: 880px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        height: auto;
+        overflow: visible;
+      }
+
+      .track {
+        display: block;
+        transform: none !important;
+      }
+
+      .slide {
+        min-height: 100svh;
+        height: auto;
+      }
+
+      .two-col,
+      .wide-col,
+      .takeaways {
+        grid-template-columns: 1fr;
+      }
+
+      .method-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        display: none;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .slide {
+        padding: 24px 18px;
+      }
+
+      .method-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .citation-line {
+        display: grid;
+      }
+
+      .result-table th,
+      .result-table td {
+        padding: 12px 10px;
+      }
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+        margin: 0;
+      }
+
+      body {
+        overflow: visible;
+        background: #fff;
+      }
+
+      .deck {
+        height: auto;
+        overflow: visible;
+      }
+
+      .track {
+        display: block;
+        transform: none !important;
+      }
+
+      .slide {
+        width: 100vw;
+        height: 100vh;
+        page-break-after: always;
+        break-after: page;
+        background: var(--paper);
+      }
+
+      .controls {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" aria-live="polite">
+    <div class="track" id="track">
+      <section class="slide" data-title="Title">
+        <header>
+          <div class="eyebrow">Conference talk - 15 minutes</div>
+        </header>
+        <main class="title-main">
+          <h1>Reconstructing Hidden Common Driver Dynamics</h1>
+          <p class="question">Can shared latent dynamics be recovered from two observed driven systems?</p>
+          <p class="lead">A results-focused tour through Mapper-Coach, AniSOM/ASOM, and the benchmark experiments in this repository.</p>
+        </main>
+        <footer class="footer-row">
+          <div class="citation-line">
+            <a class="pill" href="https://arxiv.org/abs/2105.02322">Mapper-Coach, arXiv:2105.02322</a>
+            <a class="pill" href="https://arxiv.org/abs/2504.01811">ASOM/AniSOM, arXiv:2504.01811</a>
+          </div>
+          <span>Common Driver Reconstruction</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Problem Setup">
+        <header>
+          <div class="eyebrow">Problem setup</div>
+          <h2>Two observations, one hidden source</h2>
+        </header>
+        <main class="two-col">
+          <div class="stack">
+            <p class="lead">The observed systems contain their own dynamics plus a shared imprint from an unobserved driver.</p>
+            <ul class="bullets">
+              <li>Observed time series: <strong>x</strong> and <strong>y</strong>.</li>
+              <li>Hidden process: <strong>z</strong>, a common driver.</li>
+              <li>Time-delay embedding turns scalar histories into reconstructed state spaces.</li>
+              <li>The reconstruction target is the latent trajectory, up to an admissible transformation.</li>
+            </ul>
+          </div>
+          <div class="diagram" aria-label="Hidden driver z drives observed systems x and y">
+            <div class="causal">
+              <div class="node z">z<small>hidden</small></div>
+              <div class="node x">x<small>observed</small></div>
+              <div class="node y">y<small>observed</small></div>
+            </div>
+            <p class="caption">Both cited papers build on the idea that the forced systems carry recoverable information about the shared latent driver.</p>
+          </div>
+        </main>
+        <footer class="footer-row">
+          <span>Shared latent dynamics leave redundant structure in driven observations.</span>
+          <span>02</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Methods">
+        <header>
+          <div class="eyebrow">Method landscape</div>
+          <h2>Baselines span linear, nonlinear, deep, and manifold methods</h2>
+        </header>
+        <main class="method-grid">
+          <div class="method"><strong>MaCo</strong><span>Mapper-Coach neural bottleneck trained through prediction.</span></div>
+          <div class="method"><strong>ASOM / AniSOM</strong><span>Anisotropic self-organizing map for separating shared and self dynamics.</span></div>
+          <div class="method"><strong>ShRec</strong><span>Shared reconstruction baseline based on recurrence structure.</span></div>
+          <div class="method"><strong>DCCA</strong><span>Deep canonical correlation analysis for nonlinear common features.</span></div>
+          <div class="method"><strong>DCA</strong><span>Dynamical component analysis.</span></div>
+          <div class="method"><strong>CCA</strong><span>Linear correlated-components baseline.</span></div>
+          <div class="method"><strong>PCA / ICA / kPCA</strong><span>Classical feature extraction and source-separation references.</span></div>
+          <div class="method"><strong>SFA / Random</strong><span>Slow-feature method and a sanity-check control.</span></div>
+        </main>
+        <footer class="footer-row">
+          <span>The comparison asks which kind of structure best exposes the hidden driver.</span>
+          <span>03</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Mapper-Coach">
+        <header>
+          <div class="eyebrow">Mapper-Coach intuition</div>
+          <h2>Prediction pressure turns a bottleneck into a latent estimate</h2>
+        </header>
+        <main class="wide-col">
+          <div class="stack">
+            <p class="lead">MaCo learns to predict one driven system using its own past and information extracted from the other driven system.</p>
+            <ul class="bullets">
+              <li>The mapper compresses the reconstructed state of one observation.</li>
+              <li>The coach uses that bottleneck to predict the other observation.</li>
+              <li>When prediction succeeds, the bottleneck aligns with the hidden driver.</li>
+            </ul>
+          </div>
+          <figure class="figure-frame">
+            <img src="../paper_artifacts/figures/example_logmap_res.png" alt="Mapper-Coach example results with learning curves, prediction fit, reconstructed hidden signal, and reconstruction correlation.">
+            <figcaption class="caption">Example logistic-map run: high prediction quality and high latent reconstruction quality appear together.</figcaption>
+          </figure>
+        </main>
+        <footer class="footer-row">
+          <span>In the cited MaCo paper, this was demonstrated on coupled chaotic logistic maps.</span>
+          <span>04</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="AniSOM">
+        <header>
+          <div class="eyebrow">ASOM / AniSOM intuition</div>
+          <h2>Manifold learning can separate shared from private dynamics</h2>
+        </header>
+        <main class="two-col">
+          <div class="stack">
+            <p class="lead">The ASOM paper frames the same hidden-driver question through time-delay embedding, intrinsic dimension, and anisotropic SOM training.</p>
+            <ul class="bullets">
+              <li>The observed attractor is treated as a structured manifold.</li>
+              <li>Anisotropic training emphasizes directions associated with common dynamics.</li>
+              <li>The resulting map provides an unsupervised, geometry-first baseline.</li>
+            </ul>
+          </div>
+          <div class="diagram">
+            <h3>Conceptual split</h3>
+            <table class="result-table">
+              <tbody>
+                <tr><td>Observed manifold</td><td><span class="metric">self + shared</span></td></tr>
+                <tr><td>Mutual structure</td><td><span class="metric">shared driver</span></td></tr>
+                <tr><td>AniSOM output</td><td><span class="metric">driver estimate</span></td></tr>
+              </tbody>
+            </table>
+            <p class="caption">This complements MaCo: one method learns through prediction; the other uses attractor geometry.</p>
+          </div>
+        </main>
+        <footer class="footer-row">
+          <span>ASOM/AniSOM is the strongest non-MaCo method on the map experiments in this repo.</span>
+          <span>05</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Experiment Design">
+        <header>
+          <div class="eyebrow">Experiment design</div>
+          <h2>Three families probe different dynamical regimes</h2>
+        </header>
+        <main class="two-col">
+          <div class="stack">
+            <ul class="bullets">
+              <li><strong>Logistic maps:</strong> discrete chaotic maps with known hidden common input.</li>
+              <li><strong>Tent maps:</strong> another nonlinear discrete-map family with sharper behavior.</li>
+              <li><strong>Lorenz systems:</strong> continuous-flow setting with harder reconstruction geometry.</li>
+              <li><strong>Comparison scale:</strong> 50 realizations per main result table.</li>
+            </ul>
+          </div>
+          <table class="result-table">
+            <thead>
+              <tr><th>Family</th><th>Metric</th><th>Result source</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Logistic maps</td><td>Correlation / coefficient quality</td><td>logmaps_res.csv</td></tr>
+              <tr><td>Tent maps</td><td>Correlation / coefficient quality</td><td>tentmaps_res.csv</td></tr>
+              <tr><td>Lorenz</td><td>Correlation / coefficient quality</td><td>lorenz_res.csv</td></tr>
+            </tbody>
+          </table>
+        </main>
+        <footer class="footer-row">
+          <span>Figures and final CSVs are tracked under paper_artifacts.</span>
+          <span>06</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Main Result">
+        <header>
+          <div class="eyebrow">Main result</div>
+          <h2>MaCo leads on maps; DCCA leads on Lorenz</h2>
+        </header>
+        <main class="figure-frame">
+          <img src="../paper_artifacts/figures/comparisons_res.png" alt="Boxplots comparing reconstruction quality across logistic maps, tent maps, and Lorenz systems.">
+          <figcaption class="caption">Across 50 realizations per family, MaCo is the top method for logistic and tent maps. DCCA is strongest for Lorenz, with MaCo still close to CCA and ahead of most alternatives.</figcaption>
+        </main>
+        <footer class="footer-row">
+          <span>The result pattern matches the story: prediction bottlenecks shine in map settings; continuous flows are more contested.</span>
+          <span>07</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Result Numbers">
+        <header>
+          <div class="eyebrow">Result numbers</div>
+          <h2>Compact benchmark summary</h2>
+        </header>
+        <main class="two-col">
+          <table class="result-table">
+            <thead>
+              <tr><th>Dataset</th><th>Top result</th><th>Strong comparators</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Logistic maps</td><td><span class="metric">MaCo 0.9491</span></td><td>ASOM 0.7571</td></tr>
+              <tr><td>Tent maps</td><td><span class="metric">MaCo 0.8011</span></td><td>ASOM 0.6168</td></tr>
+              <tr><td>Lorenz</td><td><span class="metric">DCCA 0.9063</span></td><td>MaCo 0.8179; CCA 0.8124</td></tr>
+            </tbody>
+          </table>
+          <div class="stack">
+            <p class="lead">The headline is not one method wins everywhere. It is that hidden-driver reconstruction depends strongly on the geometry of the observed system.</p>
+            <ul class="bullets">
+              <li>MaCo has the clearest advantage on discrete chaotic maps.</li>
+              <li>ASOM is consistently the strongest manifold baseline on map families.</li>
+              <li>Lorenz elevates DCCA and narrows the MaCo/CCA gap.</li>
+            </ul>
+          </div>
+        </main>
+        <footer class="footer-row">
+          <span>Means computed from paper_artifacts/results/final/*.csv.</span>
+          <span>08</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Robustness">
+        <header>
+          <div class="eyebrow">Robustness</div>
+          <h2>MaCo is stable with moderate data and low-to-mid noise</h2>
+        </header>
+        <main class="wide-col">
+          <div class="stack">
+            <p class="lead">The robustness figure answers a practical question: when does reconstruction remain useful?</p>
+            <ul class="bullets">
+              <li>Performance is already strong at length 100 and stabilizes around length 300 and beyond.</li>
+              <li>Low-noise reconstructions stay near the high-performance regime.</li>
+              <li>Increasing noise produces a smooth degradation rather than an abrupt failure.</li>
+            </ul>
+          </div>
+          <figure class="figure-frame">
+            <img src="../paper_artifacts/figures/noise_length_res.png" alt="MaCo reconstruction quality as a function of time-series length and noise level.">
+            <figcaption class="caption">Length and noise sensitivity for MaCo on the repository robustness analysis.</figcaption>
+          </figure>
+        </main>
+        <footer class="footer-row">
+          <span>Robustness helps connect the synthetic benchmark to realistic measurement limits.</span>
+          <span>09</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Hyperparameters">
+        <header>
+          <div class="eyebrow">Hyperparameter context</div>
+          <h2>Classical baselines are sensitive to component choices</h2>
+        </header>
+        <main class="figure-frame">
+          <img src="../paper_artifacts/figures/htune.png" alt="Hyperparameter tuning results for PCA, ICA, kPCA, DCA, and SFA on Lorenz.">
+          <figcaption class="caption">Lorenz tuning context for PCA, ICA, kPCA, DCA, and SFA. The selected component and winner choices affect apparent baseline strength.</figcaption>
+        </main>
+        <footer class="footer-row">
+          <span>This is a supporting slide: useful when the audience asks how baseline settings were chosen.</span>
+          <span>10</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="Interpretation">
+        <header>
+          <div class="eyebrow">Interpretation</div>
+          <h2>The experiments connect two complementary ideas</h2>
+        </header>
+        <main class="takeaways">
+          <div class="takeaway">
+            <h3>Prediction can reveal latent structure</h3>
+            <p>The MaCo results support the Mapper-Coach claim: a minimal predictive bottleneck can align with the common hidden driver.</p>
+          </div>
+          <div class="takeaway">
+            <h3>Geometry remains competitive</h3>
+            <p>ASOM/AniSOM offers a strong unsupervised manifold baseline, especially on discrete chaotic maps.</p>
+          </div>
+          <div class="takeaway">
+            <h3>Continuous flows are harder</h3>
+            <p>Lorenz results show that method ranking changes when the dynamics and embeddings become more complex.</p>
+          </div>
+        </main>
+        <footer class="footer-row">
+          <span>Together, the papers motivate both neural and geometric approaches to hidden-driver inference.</span>
+          <span>11</span>
+        </footer>
+      </section>
+
+      <section class="slide" data-title="References">
+        <header>
+          <div class="eyebrow">Takeaways and references</div>
+          <h2>Three messages to leave with</h2>
+        </header>
+        <main class="two-col">
+          <div class="stack">
+            <ul class="bullets">
+              <li>Hidden common drivers are recoverable when their imprint is redundantly encoded in observed dynamics.</li>
+              <li>MaCo is the strongest method on the discrete-map benchmarks in this repo.</li>
+              <li>Lorenz and noise analyses show where reconstruction becomes more demanding.</li>
+            </ul>
+          </div>
+          <ul class="refs">
+            <li>Benko and Somogyvari. <em>Reconstructing shared dynamics with a deep neural network</em>. arXiv:2105.02322. <a href="https://doi.org/10.48550/arXiv.2105.02322">doi.org/10.48550/arXiv.2105.02322</a></li>
+            <li>Benko, Stippinger, Bencze, Bazso, Telcs, and Somogyvari. <em>Inference of hidden common driver dynamics by anisotropic self-organizing neural networks</em>. Neural Networks 194, 108113. <a href="https://doi.org/10.1016/j.neunet.2025.108113">doi.org/10.1016/j.neunet.2025.108113</a></li>
+            <li>Repository artifacts: <code>paper_artifacts/figures/</code> and <code>paper_artifacts/results/final/</code>.</li>
+          </ul>
+        </main>
+        <footer class="footer-row">
+          <span>End</span>
+          <span>12</span>
+        </footer>
+      </section>
+    </div>
+  </div>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button class="nav-button" type="button" id="prev" aria-label="Previous slide" title="Previous slide">&lt;</button>
+    <div class="counter" id="counter">1 / 12</div>
+    <button class="nav-button" type="button" id="next" aria-label="Next slide" title="Next slide">&gt;</button>
+  </nav>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const track = document.getElementById("track");
+    const counter = document.getElementById("counter");
+    const prev = document.getElementById("prev");
+    const next = document.getElementById("next");
+    let index = 0;
+
+    function clampSlide(value) {
+      return Math.max(0, Math.min(slides.length - 1, value));
+    }
+
+    function setSlide(value) {
+      index = clampSlide(value);
+      document.documentElement.style.setProperty("--slide-index", index);
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      prev.disabled = index === 0;
+      next.disabled = index === slides.length - 1;
+      const title = slides[index].dataset.title;
+      if (title) {
+        document.title = `${index + 1}. ${title} - Common Driver Reconstruction`;
+      }
+    }
+
+    prev.addEventListener("click", () => setSlide(index - 1));
+    next.addEventListener("click", () => setSlide(index + 1));
+
+    document.addEventListener("keydown", (event) => {
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+        event.preventDefault();
+        setSlide(index + 1);
+      }
+      if (["ArrowLeft", "PageUp", "Backspace"].includes(event.key)) {
+        event.preventDefault();
+        setSlide(index - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        setSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        setSlide(slides.length - 1);
+      }
+    });
+
+    let touchStartX = null;
+    track.addEventListener("touchstart", (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    }, { passive: true });
+
+    track.addEventListener("touchend", (event) => {
+      if (touchStartX === null) return;
+      const delta = event.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 48) {
+        setSlide(index + (delta < 0 ? 1 : -1));
+      }
+      touchStartX = null;
+    }, { passive: true });
+
+    setSlide(0);
+  </script>
+</body>
+</html>

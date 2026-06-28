@@ -1,0 +1,310 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{xcolor}
+
+\graphicspath{{../paper_artifacts/figures/}}
+
+\definecolor{DeckInk}{HTML}{172026}
+\definecolor{DeckMuted}{HTML}{5A6872}
+\definecolor{DeckTeal}{HTML}{0F7C80}
+\definecolor{DeckMagenta}{HTML}{B43B78}
+\definecolor{DeckOrange}{HTML}{D46B2C}
+\definecolor{DeckPaper}{HTML}{F7F4EE}
+\definecolor{DeckPanel}{HTML}{FFFFFF}
+
+\usetheme{default}
+\usecolortheme{default}
+\setbeamercolor{normal text}{fg=DeckInk,bg=DeckPaper}
+\setbeamercolor{frametitle}{fg=DeckInk,bg=DeckPaper}
+\setbeamercolor{title}{fg=DeckInk}
+\setbeamercolor{subtitle}{fg=DeckMuted}
+\setbeamercolor{structure}{fg=DeckTeal}
+\setbeamercolor{block title}{fg=white,bg=DeckTeal}
+\setbeamercolor{block body}{fg=DeckInk,bg=DeckPanel}
+\setbeamercolor{alerted text}{fg=DeckMagenta}
+\setbeamercolor{author in head/foot}{fg=DeckMuted,bg=DeckPaper}
+\setbeamercolor{date in head/foot}{fg=DeckMuted,bg=DeckPaper}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize item}{\color{DeckMagenta}$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\color{DeckOrange}$\bullet$}
+\setbeamertemplate{footline}{
+  \leavevmode
+  \hbox{
+    \begin{beamercolorbox}[wd=.74\paperwidth,ht=2.6ex,dp=1.1ex,leftskip=1.5em]{author in head/foot}
+      \color{DeckMuted}Common Driver Reconstruction
+    \end{beamercolorbox}
+    \begin{beamercolorbox}[wd=.24\paperwidth,ht=2.6ex,dp=1.1ex,rightskip=1.5em plus1fil]{date in head/foot}
+      \hfill\color{DeckMuted}\insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}
+  }
+}
+
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.2}
+
+\title[Common Driver Reconstruction]{Reconstructing Hidden Common Driver Dynamics}
+\subtitle{Can shared latent dynamics be recovered from two observed driven systems?}
+\author{Results-focused conference talk}
+\date{}
+
+\newcommand{\source}[1]{\vspace{0.3em}{\scriptsize\color{DeckMuted}#1}}
+\newcommand{\metric}[1]{\textcolor{DeckMagenta}{\textbf{#1}}}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \vspace{0.55cm}
+  {\small\bfseries\textcolor{DeckTeal}{CONFERENCE TALK - 15 MINUTES}}
+
+  \vspace{0.75cm}
+  {\Huge\bfseries Reconstructing Hidden Common Driver Dynamics\par}
+
+  \vspace{0.7cm}
+  \begin{beamercolorbox}[wd=0.84\paperwidth,sep=0.8em,left,rounded=true]{block body}
+    {\Large\bfseries Can shared latent dynamics be recovered from two observed driven systems?}
+  \end{beamercolorbox}
+
+  \vspace{0.55cm}
+  {\large\color{DeckMuted}A results-focused tour through Mapper-Coach, AniSOM/ASOM, and the benchmark experiments in this repository.}
+
+  \vfill
+  {\small
+    Mapper-Coach: arXiv:2105.02322 \hspace{1.5em}
+    ASOM/AniSOM: arXiv:2504.01811
+  }
+\end{frame}
+
+\begin{frame}{Problem Setup}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.55\textwidth}
+      \large
+      Two observed systems contain their own dynamics plus a shared imprint from an unobserved driver.
+      \vspace{0.8em}
+      \begin{itemize}
+        \item Observed time series: \textbf{x} and \textbf{y}.
+        \item Hidden process: \textbf{z}, a common driver.
+        \item Time-delay embedding reconstructs state spaces from histories.
+        \item The target is the latent trajectory, up to an admissible transformation.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{block}{Fork structure}
+        \centering
+        \Huge\textcolor{DeckMagenta}{$z$}\\[-0.2em]
+        \Large\textcolor{DeckMuted}{hidden driver}\\[1.2em]
+        \Huge
+        \textcolor{DeckTeal}{$\swarrow$}\hspace{1.8em}\textcolor{DeckTeal}{$\searrow$}\\[0.2em]
+        \textcolor{DeckOrange}{$x$}\hspace{2.2em}\textcolor{DeckTeal}{$y$}\\[-0.2em]
+        \normalsize\textcolor{DeckMuted}{observed systems}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \source{Both cited papers exploit the redundant imprint of a shared latent driver in driven observations.}
+\end{frame}
+
+\begin{frame}{Method Landscape}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item \textbf{MaCo}: Mapper-Coach neural bottleneck trained through prediction.
+        \item \textbf{ASOM/AniSOM}: anisotropic self-organizing map for shared/self dynamics.
+        \item \textbf{ShRec}: recurrence-structure shared reconstruction baseline.
+        \item \textbf{DCCA}: deep canonical correlation analysis.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+        \item \textbf{DCA}: dynamical component analysis.
+        \item \textbf{CCA}: linear correlated-components baseline.
+        \item \textbf{PCA / ICA / kPCA}: classical extraction and source separation.
+        \item \textbf{SFA / Random}: slow-feature method and sanity-check control.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.6em}
+  \begin{block}{Comparison question}
+    Which kind of structure best exposes the hidden driver: predictive bottlenecks, attractor geometry, correlated features, or generic variance/source decomposition?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Mapper-Coach Intuition}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.38\textwidth}
+      MaCo learns to predict one driven system using its own past and information extracted from the other driven system.
+      \vspace{0.8em}
+      \begin{itemize}
+        \item Mapper compresses the reconstructed state of one observation.
+        \item Coach uses that bottleneck to predict the other observation.
+        \item Successful prediction makes the bottleneck align with the hidden driver.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.60\textheight,keepaspectratio]{example_logmap_res.png}
+    \end{column}
+  \end{columns}
+  \source{Example logistic-map run: high prediction quality and high latent reconstruction quality appear together.}
+\end{frame}
+
+\begin{frame}{ASOM / AniSOM Intuition}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.55\textwidth}
+      \large
+      The ASOM paper frames hidden-driver inference through time-delay embedding, intrinsic dimension, mutual dimension, and anisotropic SOM training.
+      \vspace{0.8em}
+      \begin{itemize}
+        \item The observed attractor is treated as a structured manifold.
+        \item Anisotropic training emphasizes directions associated with common dynamics.
+        \item The output gives a geometry-first unsupervised driver estimate.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{block}{Conceptual split}
+        \small
+        Observed manifold: \metric{self + shared}\\
+        Mutual structure: \metric{shared driver}\\
+        AniSOM output: \metric{driver estimate}
+      \end{block}
+      \vspace{0.5em}
+      \small\color{DeckMuted}
+      This complements MaCo: one method learns through prediction, the other through attractor geometry.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Experiment Design}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \begin{itemize}
+        \item \textbf{Logistic maps}: discrete chaotic maps with known hidden common input.
+        \item \textbf{Tent maps}: nonlinear discrete-map family with sharper behavior.
+        \item \textbf{Lorenz systems}: continuous-flow setting with harder reconstruction geometry.
+        \item \textbf{Scale}: 50 realizations per main comparison family.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \small
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        Family & Metric & Source\\
+        \midrule
+        Logistic & Corr. quality & logmaps\\
+        Tent & Corr. quality & tentmaps\\
+        Lorenz & Corr. quality & lorenz\\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+  \end{columns}
+  \source{Figures and final CSVs are tracked under paper\_artifacts.}
+\end{frame}
+
+\begin{frame}{Main Result Across Datasets}
+  \centering
+  \includegraphics[width=\textwidth,height=0.74\textheight,keepaspectratio]{comparisons_res.png}
+  \source{MaCo leads on logistic and tent maps. DCCA leads on Lorenz, with MaCo still competitive.}
+\end{frame}
+
+\begin{frame}{Result Numbers}
+  \begin{center}
+    \begin{tabular}{@{}lll@{}}
+      \toprule
+      Dataset & Top result & Strong comparators\\
+      \midrule
+      Logistic maps & \metric{MaCo 0.9491} & ASOM 0.7571\\
+      Tent maps & \metric{MaCo 0.8011} & ASOM 0.6168\\
+      Lorenz & \metric{DCCA 0.9063} & MaCo 0.8179; CCA 0.8124\\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \vspace{0.8em}
+  The headline is not that one method wins everywhere. Hidden-driver reconstruction depends strongly on the geometry of the observed system.
+  \vspace{0.5em}
+  \begin{itemize}
+    \item MaCo dominates the discrete-map benchmarks.
+    \item ASOM is the strongest map-family manifold baseline.
+    \item Lorenz elevates DCCA and narrows the MaCo/CCA gap.
+  \end{itemize}
+  \source{Means computed from the final CSV result tables.}
+\end{frame}
+
+\begin{frame}{Robustness}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.34\textwidth}
+      \large
+      MaCo remains useful with moderate data and low-to-mid noise.
+      \vspace{0.8em}
+      \begin{itemize}
+        \item Strong performance already at length 100.
+        \item Stabilizes around length 300 and beyond.
+        \item Noise produces smooth degradation rather than abrupt failure.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.62\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=0.72\textheight,keepaspectratio]{noise_length_res.png}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Hyperparameter Context}
+  \centering
+  \includegraphics[width=\textwidth,height=0.74\textheight,keepaspectratio]{htune.png}
+  \source{Lorenz tuning context for PCA, ICA, kPCA, DCA, and SFA. Baseline strength depends on component and winner choices.}
+\end{frame}
+
+\begin{frame}{Interpretation}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.32\textwidth}
+      \begin{block}{Prediction can reveal latent structure}
+        MaCo supports the Mapper-Coach claim: a minimal predictive bottleneck can align with the common hidden driver.
+      \end{block}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{block}{Geometry remains competitive}
+        ASOM/AniSOM offers a strong unsupervised manifold baseline, especially on discrete chaotic maps.
+      \end{block}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{block}{Continuous flows are harder}
+        Lorenz results show that method ranking changes when dynamics and embeddings become more complex.
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vspace{0.8em}
+  \large
+  Together, the papers motivate both neural and geometric approaches to hidden-driver inference.
+\end{frame}
+
+\begin{frame}{Takeaways and References}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.43\textwidth}
+      \begin{itemize}
+        \item Hidden common drivers are recoverable when their imprint is redundantly encoded.
+        \item MaCo is strongest on the discrete-map benchmarks in this repo.
+        \item Lorenz and noise analyses show where reconstruction becomes more demanding.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      \scriptsize
+      Benko and Somogyvari. \emph{Reconstructing shared dynamics with a deep neural network}. arXiv:2105.02322.\\
+      \url{https://doi.org/10.48550/arXiv.2105.02322}
+
+      \vspace{0.7em}
+      Benko, Stippinger, Bencze, Bazso, Telcs, and Somogyvari.
+      \emph{Inference of hidden common driver dynamics by anisotropic self-organizing neural networks}.
+      \emph{Neural Networks} 194, 108113.\\
+      \url{https://doi.org/10.1016/j.neunet.2025.108113}
+
+      \vspace{0.7em}
+      Repository artifacts: \texttt{paper\_artifacts/figures/} and
+      \texttt{paper\_artifacts/results/final/}.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\end{document}
